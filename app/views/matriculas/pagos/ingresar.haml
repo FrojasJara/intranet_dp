@@ -1,0 +1,232 @@
+.page-header
+    %h1 Ingresar Documento de Venta
+
+= render "matriculas/matriculas/admision/partials/assets_css"
+
+= notificaciones
+
+= render partial: 'partials/notificaciones/important_warning', locals: {:mensaje => 'Este módulo es exclusivamente para ingreso de boletas a alumnos que no posean registros en este sistema.'}
+
+= simple_form_for :abono do |f|
+    .bloque
+        %h3 Detalle del pago
+        .control-group
+            = f.input :tipo_abono, collection: TipoAbono.all(fields: [:id, :nombre]).map{|x| [x.nombre, x.id]}, input_html: {class: 'input-xlarge'}, prompt: 'Seleccione'
+        .control-group
+            = f.input :medio_pago, collection: @medios_pago.map{|x| [x.nombre.eql?('Pagaré/Cheque') ? 'Cheque' : x.nombre, x.id]}, prompt: 'Seleccione'
+        .control-group(style="width: 200px;")
+            %label.control-label{for: "monto"} Monto total:
+            .controls.monto.input-prepend{}
+                %span.add-on $
+                %input.input-medium.monto_resumen.monto{id: "monto", name: "abono[monto]", alt: 'dinero', type: 'text'}
+        %a.btn.btn-success.addAbono
+            %i.icon-white.icon-plus-sign
+            Agregar
+        %br
+        %div{id: "detail", style: 'display: none'}
+            %table.table.table-condensed
+        %br
+        %h3 Detalle del Documento de Venta
+        
+        .control-group
+            %label Tipo Documento
+            - for_select(DocumentoVenta, :TIPOS).each_with_index do |dv, index|
+                %label.radio.inline
+                    = f.radio_button :documento_venta, dv[1], (index.eql?(0) ? {checked: 'checked'} : {})
+                    = dv[0]
+
+        .control-group
+            %select{:name => "abono[institucion_id]", :prompt => 'Seleccione institución', class: 'selectInstitucion'}
+                - Institucion.all.each do |institucion|
+                    %option{value: institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+            %input{class: "modalidad", type: "hidden", name: "abono[modalidad]", value: InstitucionSedePlan::PRESENCIAL}
+        .control-group
+            = f.input :numero_documento, input_html: {class: 'input-small'}
+        .control-group
+            = f.input :total_documentado, readonly: true, input_html: {value: '0', class: 'input-small'}
+        .control-group
+            = hidden_field_tag 'documento_encontrado', 0
+            %a#check-documento.btn.btn-warning{href: '#noti'} 
+                %i.icon-search.icon-white
+                Buscar documento
+        #noti.notificacion
+        
+        %br
+        %h3 Información del alumno
+        = f.input :rut, input_html: {class: 'input-small'}
+        
+        = f.input :nombre_completo, input_html: {class: 'input-xlarge'}
+        
+        = f.input :carrera, input_html: {class: 'input-xlarge'}
+
+        %br
+        = f.input :direccion, input_html: {class: 'input-xxlarge'}
+
+        = f.input :giro, input_html: {class: 'input-xlarge'}
+
+        %br
+
+        .control-group
+            %label
+            = f.submit 'Realizar pago', class: 'btn btn-primary', disable_with: 'Guardando...'
+
+:javascript
+    function info(texto)
+    {
+        notify_info("Información", texto);
+    }
+    function actualizar_total_documentado()
+    {
+     
+        total = 0;
+        $.each($("[name='abonos[][monto]']"), function(index, val){
+            total += parseInt( $(val).val() );
+        });
+
+        $("[name$='[total_documentado]']").val(total);
+    }
+    function actualizar_monto(data_id, monto, funcion_post)
+    {
+   
+        if (funcion_post != undefined) {
+            if( !(monto > 0) )          { info("El valor no puede ser menor o igual a 0"); return false; }
+            funcion_post();
+        } else
+        {
+            // $("[name='abono[total_documentado]']").val(  parseInt( $("[name='abono[total_documentado]']").val() ) + monto );
+            $(monto_query).val( 0 );
+            
+            actualizar_total_documentado();
+        }
+            
+
+        
+
+        return true;
+    }
+    $(function(){
+
+        $('.modalidad').attr({'value' : 1});
+
+        $('.selectInstitucion').change(function(){
+            if($('.selectInstitucion .distancia:selected').val() == 1){
+                $('.modalidad').attr({'value' : 2});
+            }
+            else{
+                $('.modalidad').attr({'value' : 1});
+            }
+        });
+
+        $(".datepicker").datepicker();
+        $(".table").on("click", ".quitar", function(){
+            elem = $(this).parent().parent();
+            monto = parseInt($(elem).find("[name$='[monto]']").val());
+            data_id = $(elem).find("[name$='[id]']").val();
+            elem.remove();
+            actualizar_monto(data_id, -monto);
+        });
+        $(".addAbono").click(function(){
+            data_id = 0;
+            base_query = "[name='abono";
+            monto_query = base_query + "[monto]']";
+            monto = parseInt( $(monto_query).val() );
+            medio_pago = parseInt( $(base_query + "[medio_pago]']").val() );
+        
+            
+            actualizar_monto(data_id, monto, function(){
+                $.post(
+                    "#{abono_detalle_forma_pago_ajax_path}", 
+                    {
+                        pago_comprometido_id: data_id, 
+                        medio_pago_id: medio_pago, 
+                        monto: monto
+                    }, 
+                    function(data){
+                    if (data) {
+                        $("#detail").show();
+                        
+                        $(monto_query).val( 0 ); 
+                        
+                        $(data).appendTo( "#detail > table" );
+                        actualizar_total_documentado();
+                    };
+                });    
+            });
+            
+        });
+
+        $("form").submit(function(){
+            var enviar = true;
+            mensaje = "";
+
+            $("input[name$='[numero_documento]']").each(function(i, v){
+                if( $(v).val().length == 0 && enviar )
+                {
+                    info("Debe ingresar toda la información de los abonos");
+                    enviar = false;
+                }
+            });
+            $("input[name$='[fecha_documento]']").each(function(i, v){
+                if( Date.parse( $(v).val() ) == null && enviar )
+                {
+                    info("Debe ingresar la fecha de los documentos");
+                    enviar = false;
+                    
+                }
+            });
+            if(!(parseInt( $("input[name='abono[total_documentado]']").val() ) > 0))
+            {
+                info("Debe documentar algún pago");
+                enviar = false;
+            }
+            if(!(parseInt( $("input[name='abono[numero_documento]']").val() ) > 0))
+            {
+                info("Debe ingresar el número del documento");
+                enviar = false;
+            }
+            if(!(parseInt( $("[name='abono[institucion_id]']").val() ) > 0))
+            {
+                info("Debe seleccionar una Institución Sede");
+                enviar = false;
+            }
+            if( $("[name='documento_encontrado']").val() == "0" )
+            {
+                enviar = false
+                mensaje += "Debe ingresar un numero de documento válido<br />";
+            }
+            if( mensaje != "" )
+                info(mensaje);
+
+            return enviar;
+        });
+
+        $("#check-documento").click(function(){
+            if(!(parseInt( $("input[name='abono[numero_documento]']").val() ) > 0))
+                info("Debe ingresar el número del documento");
+            else if(!(parseInt( $("input[name='abono[total_documentado]']").val() ) > 0))
+                info("Debe documentar algún pago");
+            else
+                $.getJSON(
+                    "#{ajax_alumno_verificar_validez_documento_anonimo_path @ejecutivo_matriculas.id,'ins',current_user_object.sede_id,'mod','td','nd'}"
+                        .replace("td", $('[name="abono[documento_venta]"]:checked').val())
+                        .replace("nd", $("input[name='abono[numero_documento]']").val())
+                        .replace("ins", $('[name="abono[institucion_id]"]').val())
+                        .replace("mod", $("input[name='abono[modalidad]']").val()),
+                    function(data) {
+                        notify_close();
+                        if( data.exito ) {
+                            $("[name='documento_encontrado']").val(1);
+                            $(".notificacion").html('<div class="alert alert-success">cont</div>'.replace('cont',"<b>"+data.mensaje+"</b>"));
+                        } else {
+                            notify_notice("Realizar abono", data.mensaje);
+                            $(".notificacion").html('<div class="alert alert-error">cont</div>'
+                            .replace("cont","<b>"+data.mensaje+"</b>"));
+                            $("[name='documento_encontrado']").val(0);
+                        }
+                    }
+                );
+        });
+
+    });
+        

@@ -1,0 +1,155 @@
+.sectionHeader
+	%h1  Acta de Validación de Asignaturas
+	%div.well
+		%form.form-search#buscar_alumno{:action => coordinador_carrera_ver_acta_convalidacion_path ,:method => "post"}
+			%input.input-large.search-query.required{type: "text", :placeholder => "Rut Alumno", style: 'height: 28px', :name => "busqueda"}
+			%button.btn.btn-primary{type: "submit"} 
+				%icon.icon-white.icon-search
+				Buscar Alumno
+		= notificaciones
+
+- unless @alumno.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action => coordinador_carrera_ver_acta_convalidacion_path ,:method => "post"}
+		%fieldset
+			%legend Información del alumno
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: "alumno_plan_estudio_id"}
+							-# selected =  @alumno_plan_estudio_seleccionado.blank? ? false : true
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => i.id , selected: @alumno_plan_estudio_seleccionado.blank? ? false : i.id == @alumno_plan_estudio_seleccionado.id }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"} 
+							%icon.icon-white.icon-search
+							Consultar
+	- unless @alumno_plan_estudio_seleccionado.blank?
+		%li.ui-helper-clearfix.cuatro-columnas
+			%div.contenedorElemento.separador
+				%label.etiqueta Plan Estudios:
+				%span= @alumno_plan_estudio_seleccionado.plan_estudio.nombre
+			%div.contenedorElemento.separador
+				%label.etiqueta Institución:
+				%span= @alumno_plan_estudio_seleccionado.institucion_sede_plan.institucion_sede.nombre
+			%div.contenedorElemento.separador
+				%label.etiqueta Ingreso al plan de estudios:
+				%span= @alumno_plan_estudio_seleccionado.periodo.nombre
+			%div.contenedorElemento.separador
+				%label.etiqueta Ingreso a la institución:
+				%span= #@alumno.anio_ingreso
+			%div.contenedorElemento
+				%label.etiqueta Jornada:
+				%span= get_name InstitucionSedePlan, :JORNADAS, @alumno_plan_estudio_seleccionado.institucion_sede_plan.jornada
+			%div.contenedorElemento
+				%label.etiqueta Modalidad:
+				%span= get_name InstitucionSedePlan, :MODALIDADES, @alumno_plan_estudio_seleccionado.institucion_sede_plan.modalidad
+			%div.contenedorElemento.separador
+				%label.etiqueta Estado:
+				%span= get_name Alumno, :ESTADOS_ACADEMICOS, @alumno_plan_estudio_seleccionado.estado
+			%div.contenedorElemento.separador
+				%label.etiqueta Número Ingresos:
+				%span= @alumno.ingresos
+			%div.contenedorElemento
+				%label.etiqueta Semestre que cursa:
+				%span= @alumno_plan_estudio_seleccionado.semestre
+
+- unless @datos_validacion.blank?
+	
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información del alumno
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span.nombre= @alumno_plan_estudio_seleccionado.alumno.datos_personales.rut
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span.nombre= @alumno_plan_estudio_seleccionado.alumno.datos_personales.nombre					
+					%div.contenedorElemento.separador
+						%label.etiqueta Plan Estudios:
+						%span.nombre= @alumno_plan_estudio_seleccionado.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Institución:
+						%span.nombre= @alumno_plan_estudio_seleccionado.institucion_sede_plan.institucion_sede.nombre
+					%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+						%i.icon-white.icon-print
+						Imprimir
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento
+						%label.etiqueta Jornada:
+						%span.nombre= get_name InstitucionSedePlan, :JORNADAS, @alumno_plan_estudio_seleccionado.institucion_sede_plan.jornada
+					%div.contenedorElemento
+						%label.etiqueta Modalidad:
+						%span.nombre= get_name InstitucionSedePlan, :MODALIDADES, @alumno_plan_estudio_seleccionado.institucion_sede_plan.modalidad
+					%div.contenedorElemento.separador
+						%label.etiqueta Ingreso a la institución:
+						%span.nombre= @alumno_plan_estudio_seleccionado.alumno.anio_ingreso
+	%table.table.table-striped#validacion
+		%thead
+			%tr
+				/%th.txLeft.nombre ID
+				%th.txLeft.nombre Código
+				%th.txLeft.nombre Asignatura Validada
+				%th.txLeft.nombre Docente Responsable
+				%th.txLeft.nombre Institución de Origen
+				%th.txLeft.nombre Carrera
+				%th.txLeft.nombre Asignatura de Origen 
+				%th.txLeft.nombre Sem.
+				%th.txLeft.nombre Año
+				%th.txLeft.nombre Nota Final
+		%tbody
+			- @datos_validacion.each do |i|
+				- asignatura = AsignaturasInstitucionesExternas.first :seccion_alumno_id => i.id
+				%tr 
+					/%td.nombre.nombre= i.convalidacion_homologacion.id
+					%td.nombre.nombre= i.asignatura.codigo
+					%td.nombre.nombre= i.asignatura.nombre
+					- if i.convalidacion_homologacion.responsable.blank?
+						%td.nombre.nombre Docente no asignado 
+					- else
+						%td.nombre.nombre= i.convalidacion_homologacion.responsable.nombre
+					%td.nombre.nombre= i.convalidacion_homologacion.institucion_externa.nombre
+					%td.nombre.nombre= i.convalidacion_homologacion.carrera_convalidada
+					- if asignatura.blank?
+						%td.nombre.nombre Sin Asignatura de origen 
+					- else 
+						%td.nombre.nombre= asignatura.nombre
+					%td.nombre.nombre= i.convalidacion_homologacion.semestre_cursa
+					%td.nombre.nombre= i.convalidacion_homologacion.anio_cursa
+					- if asignatura.blank?
+						%td.nombre.nombre Sin Nota 
+					- else
+						%td.nombre.nombre= asignatura.nota_final
+	%div.firma-acta-convalidacion-left
+		%p ___________________________________
+		- if @usuario.sede.id == 1
+			%h1 DIRECTOR DE ESCUELA
+		- else 
+			%h1 COORDINADOR DE CARRERA
+
+	%div.firma-acta-convalidacion-right
+		%p ___________________________________
+		- if @institucion_sede.sede.id == Sede::CONCEPCION 
+			%h1
+				= @vicerrector.sexo == Usuario::FEMENINO ? 'VICERRECTORA ACADEMICA' : 'VICERRECTOR ACADEMICO'	
+		- else
+			%h1
+				= @vicerrector.sexo == Usuario::FEMENINO ? 'DIRECTORA DE SEDE' : 'DIRECTOR DE SEDE'
+
+
+= datatable_src
+= datatable("validacion") 
+
+:css
+	@media print{
+		form.informacion-tabulada div.contenedorelemento span { font-size: 7pt !important; margin-left: 150px !important; }
+		form.informacion-tabulada label.etiqueta { font-size: 7pt !important; }
+
+	}

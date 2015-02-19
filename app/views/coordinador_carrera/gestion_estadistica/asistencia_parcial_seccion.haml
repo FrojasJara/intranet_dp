@@ -1,0 +1,63 @@
+.sectionHeader
+	%h1 Asistencia Parcial Sección 
+
+= notificaciones
+
+- unless @contenedor.size > 0
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	
+	%a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+		%i.icon-white.icon-print
+		Imprimir Resumen
+		
+
+	%div.solo-imprimir{style: "display:block !important; border:none !important; border-radius: 0px !important; margin-bottom: 10px !important;margin-top:  20px !important;"}
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Carrera:
+							%span= @asignatura[:carrera]
+						%div.contenedorElemento.separador
+							%label.etiqueta Asignatura:
+							%span= @asignatura[:nombre]
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura[:codigo]
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre:
+							%span= @asignatura[:semestre]
+						%div.contenedorElemento.separador
+							%label.etiqueta cantidad de alumnos:
+							%span= @asignatura[:cantidad_alumnos]
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @asignatura[:jornada]
+					%li.ui-helper-clearfix.cuatro-columnas
+	
+
+	%table.table.table-striped#alumnos
+		%thead
+			%tr
+				%th.TxtLft{colspan: 4} Información Asignatura (A= % Asistencia /  I= % Inasistencia)
+
+			%tr
+				%th.TxtLft Alumno
+				%th.TxtLft Rut
+				%th.TxtLft % A
+				%th.TxtLft % I
+		%tbody
+			- @contenedor.each do |item|
+				%tr
+					%td= item[:alumno]
+					%td= item[:rut_alumno]
+					%td= item[:asistencia]
+					%td= item[:inasistencia]
+
+= datatable_src
+= datatable("alumnos")

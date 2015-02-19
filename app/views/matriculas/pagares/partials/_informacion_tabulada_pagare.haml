@@ -1,0 +1,63 @@
+%form.informacion-tabulada
+	%fieldset
+		%legend Información del pagare
+		%ul
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut:
+					%span= @alumno[:usuario_alumno].rut			
+				%div.contenedorElemento.separador
+					%label.etiqueta Nombre:
+					%span= @alumno[:usuario_alumno].nombre	
+				%div.contenedorElemento.separador
+					%label.etiqueta Plan de estudios:
+					%span= @alumno[:carrera].nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Institución:
+					%span= @alumno[:institucion]
+				%div.contenedorElemento.separador
+					%label.etiqueta Estado académico:
+					%span= get_name Alumno, "ESTADOS_ACADEMICOS", @alumno[:alumno_plan_estudio].estado
+				%div.contenedorElemento.separador
+					%label.etiqueta Otras acciones:
+					%span
+
+						- if not no_mostrar == :ver
+							%a{:href => "#{matriculas_ver_path @pagare[:matricula].id, :anchor => "pagare-#{@pagare[:pagare].id}"}"}
+								%i.icon-zoom-in
+								Ver
+
+						- if not no_mostrar == :anular
+							%a{:href => "#{matriculas_pagare_anular_sustituir_path @pagare[:pagare].id}"}
+								%i.icon-trash
+								Anular/sustituir
+
+						- if not @pagare[:pagare].url.nil?
+							%a{:href => "#{@pagare[:pagare].url}"} 
+								%i.icon-download-alt
+								Descargar
+						- else
+							%span{:style => "display: inline; margin: 0;"} (PDF aún no generado)
+
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Nº Pagaré:
+					%span= @pagare[:pagare].numero			
+				%div.contenedorElemento.separador
+					%label.etiqueta Monto:
+					%span= dinero @pagare[:pagare].monto
+				%div.contenedorElemento.separador
+					%label.etiqueta Estado:
+					%span= get_name Pagare, "ESTADOS", @pagare[:pagare].estado
+				%div.contenedorElemento.separador
+					%label.etiqueta F. de emisión
+					%span= fecha_humana @pagare[:pagare].created_at
+				%div.contenedorElemento.separador
+					%label.etiqueta Cuotas matrícula:
+					%span= @pagare[:pagare].cuotas_matricula
+				%div.contenedorElemento.separador
+					%label.etiqueta Cuotas arancel:
+					%span= @pagare[:pagare].cuotas_arancel
+				%div.contenedorElemento.separador
+					%label.etiqueta Cuotas normativa:
+					%span= @pagare[:pagare].cuotas_normativa

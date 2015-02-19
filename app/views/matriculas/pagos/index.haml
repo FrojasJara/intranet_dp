@@ -1,0 +1,11 @@
+.page-header
+    = breadcrumb ["Recepción de pagos"]
+    %h1 Buscar alumno
+
+= notificaciones
+
+.well{style: 'margin-bottom: 0px; padding-bottom: 0px'}
+    = form_for :busqueda, class: 'form-search', method: :get do |f|
+        %input#busqueda.input-large.search-query{name: 'busqueda', placeholder: 'Rut alumno', style: 'height: 28px'}
+        %button.btn.btn-primary Buscar    
+    = link_to raw('<i class="icon-chevron-right"></i> Búsqueda avanzada de alumno'), herramientas_buscar_alumno_path

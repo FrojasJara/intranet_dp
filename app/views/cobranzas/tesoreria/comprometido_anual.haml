@@ -1,0 +1,137 @@
+:css
+    tfoot td label{
+        font-weight: bold !important;
+        color: #DE4945 !important;
+    }
+
+.page-header
+    .box{style: 'float: left; display: inline'}
+        %h2{style: 'margin-bottom: 0'}
+            Informe anual de pagos comprometidos
+            - if @tipo.to_i == 2
+                ="por pagar"
+            - elsif @tipo.to_i == 3
+                ="incobrables"
+            =@año.to_i
+        %h3
+            = @sede.nombre
+            - if @modalidad.to_i == InstitucionSedePlan::PRESENCIAL
+                = @institucion.nombre+" - Presencial"
+            - else
+                Distancia
+
+    .botones{:style => "float: right;"}
+        %a.not-print.btn.btn-info.impresion{:href => "#"}
+            %i.icon-white.icon-print
+            Imprimir
+    .clearfix
+
+%table#lista.table.table-condensed.table-bordered.table-striped
+    %thead
+        %tr
+            %th #
+            %th Carrera
+            %th Alumnos
+            %th Ene
+            %th Feb
+            %th Mar
+            %th Abr
+            %th May
+            %th Jun
+            %th Jul
+            %th Ago
+            %th Sep
+            %th Oct
+            %th Nov
+            %th Dic
+            %th Total
+    %tbody
+        - suma_suma_comprometido = 0
+        - suma_comprometido_enero = 0
+        - suma_comprometido_febrero = 0
+        - suma_comprometido_marzo = 0
+        - suma_comprometido_abril = 0
+        - suma_comprometido_mayo = 0
+        - suma_comprometido_junio = 0
+        - suma_comprometido_julio = 0
+        - suma_comprometido_agosto = 0
+        - suma_comprometido_septiembre = 0
+        - suma_comprometido_octubre = 0
+        - suma_comprometido_noviembre = 0
+        - suma_comprometido_diciembre = 0
+        - suma_alumnos = 0
+
+        - @resumen.each_with_index do |items,index|
+            - unless items.blank?
+                - item = items.last
+                - suma_comprometido = 0
+
+                - suma_comprometido = suma_comprometido+item[:enero]+item[:febrero]+item[:marzo]+item[:abril]+item[:mayo]+item[:junio]+item[:julio]+item[:agosto]+item[:septiembre]+item[:octubre]+item[:noviembre]+item[:diciembre]
+
+                - suma_suma_comprometido += suma_comprometido 
+                - suma_comprometido_enero += item[:enero]
+                - suma_comprometido_febrero += item[:febrero]
+                - suma_comprometido_marzo += item[:marzo]
+                - suma_comprometido_abril += item[:abril]
+                - suma_comprometido_mayo += item[:mayo]
+                - suma_comprometido_junio += item[:junio]
+                - suma_comprometido_julio += item[:julio]
+                - suma_comprometido_agosto += item[:agosto]
+                - suma_comprometido_septiembre += item[:septiembre]
+                - suma_comprometido_octubre += item[:octubre]
+                - suma_comprometido_noviembre += item[:noviembre] 
+                - suma_comprometido_diciembre += item[:diciembre]
+                - suma_alumnos += item[:alumnos]
+
+                %tr
+                    %td.txCenter= index+1
+                    %td.txCenter= item[:carrera]
+                    %td.txCenter= item[:alumnos]
+                    %td.txCenter= decimales item[:enero]
+                    %td.txCenter= decimales item[:febrero]
+                    %td.txCenter= decimales item[:marzo]
+                    %td.txCenter= decimales item[:abril]
+                    %td.txCenter= decimales item[:mayo]
+                    %td.txCenter= decimales item[:junio]
+                    %td.txCenter= decimales item[:julio]
+                    %td.txCenter= decimales item[:agosto]
+                    %td.txCenter= decimales item[:septiembre]
+                    %td.txCenter= decimales item[:octubre]
+                    %td.txCenter= decimales item[:noviembre]
+                    %td.txCenter= decimales item[:diciembre]
+                    %td.txCenter= decimales suma_comprometido 
+    %tfoot
+        %tr
+            %td.txCenter -
+            %td.txCenter -
+            %td.txCenter
+                %label= decimales suma_alumnos
+            %td.txCenter
+                %label= decimales suma_comprometido_enero
+            %td.txCenter
+                %label= decimales suma_comprometido_febrero
+            %td.txCenter
+                %label= decimales suma_comprometido_marzo
+            %td.txCenter 
+                %label= decimales suma_comprometido_abril
+            %td.txCenter
+                %label= decimales suma_comprometido_mayo
+            %td.txCenter
+                %label= decimales suma_comprometido_junio
+            %td.txCenter
+                %label= decimales suma_comprometido_julio
+            %td.txCenter
+                %label= decimales suma_comprometido_agosto
+            %td.txCenter
+                %label= decimales suma_comprometido_septiembre
+            %td.txCenter
+                %label= decimales suma_comprometido_octubre
+            %td.txCenter
+                %label= decimales suma_comprometido_noviembre
+            %td.txCenter
+                %label= decimales suma_comprometido_diciembre 
+            %td.txCenter
+                %label#comprometido= decimales suma_suma_comprometido 
+
+= datatable_src
+= datatable 'lista', {nosort: true}  

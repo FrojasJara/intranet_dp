@@ -1,0 +1,27 @@
+%h2 Antecedentes
+%table.table.table-condensed#lista
+	%thead
+		%tr
+			%th.TxtLft.nombre Nº
+			%th.TxtLft.nombre Renta
+			%th.TxtLft.nombre Lugar
+			%th.TxtLft.nombre Funcion
+			%th.TxtLft.nombre Ocupacion
+			%th.TxtLft.nombre Periodo
+			%th.TxtLft.nombre.no-imprimir Usuario
+			%th.TxtLft.nombre.no-imprimir Acción
+	%tbody
+		- @antecedentes.each_with_index do |a, index|
+			%tr
+				%td.txLeft.nombre= a.id              
+				%td.txLeft.nombre= a.renta
+				%td.txLeft.nombre= a.lugar.blank? ? "Sin informacion " : "#{a.lugar}" 
+				%td.txLeft.nombre= a.funcion.blank? ? "Sin informacion " : "#{a.funcion}" 
+				%td.txLeft.nombre= get_name Egresado, :OCUPACION, a.ocupacion
+				%td.txLeft.nombre= a.periodo.nombre 
+				%td.txLeft.nombre.no-imprimir= a.usuario.nombre_corto
+				%td.txLeft.nombre.no-imprimir
+					- if a.usuario.id == current_user_object.id
+						.btn-group
+							= link_to asistente_social_eliminar_antecedente_path(a.id,a.alumno_plan_estudio_id), class: 'btn btn-primary' do
+								Eliminar

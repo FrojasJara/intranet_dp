@@ -1,0 +1,15 @@
+/ %form{}
+/ 	%input{:type =>"text" } Procedimiento
+/ 	%input{:type =>"text" } Relacion
+/ 	- @controladores.each do |i|
+/ 		%ul#selector
+/ 			%li
+/ 				%strong
+/ 					=i[:nombre] 
+
+/ 				-#%ul
+/ 				- i[:procedimientos].each do |m|
+/ 					%input{:type => "checkbox", :id => "inlineCheckbox1", :value => "option1"}
+/ 						= m[:nombre]
+
+=debug @esquemas

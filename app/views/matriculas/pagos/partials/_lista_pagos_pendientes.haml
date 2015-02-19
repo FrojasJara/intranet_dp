@@ -1,0 +1,83 @@
+:ruby
+    total_monto = 0
+    total_saldo = 0
+    total_interes = 0
+    total_acumulado = 0
+
+    pagos_pendientes.each_with_index do |pc, index|
+        pe = pc[:pago_comprometido]
+        total_monto += pe.monto
+        total_saldo += pe.saldo
+        total_interes += pc[:interes]
+        total_acumulado += pe.acumulado(pc[:interes])
+    end
+:css
+    .red{
+        color:red;
+        font-weight: bold;
+    }
+%table.table.table-condensed.pagare
+    %thead
+        %tr
+            %th.txLeft Nº Cuota
+            %th.txLeft Tipo
+            %th.txLeft Pagaré
+            %th.txRight Monto
+            %th.txRight Saldo
+            %th.txRight Interés
+            %th.txRight Acumulado
+            %th.txRight Vencimiento
+            %th.txRight Prorroga
+            %th.txCenter % Desc Int
+            %th.txLeft Año
+            %th.txCenter Lugar
+            %th.txCenter Sede Plan
+            %th.txCenter Estado
+            - if defined?(seleccion) && seleccion
+                %th.txRight Sel.
+    %tfoot
+        %tr
+            %th{colspan: 3}
+            %th.txRight= dinero total_monto
+            %th.txRight= dinero total_saldo
+            %th.txRight= dinero total_interes
+            %th.txRight= dinero total_acumulado
+            %th{colspan: defined?(seleccion) ? 8 : 7}
+    %tbody
+        - pagos_pendientes.each_with_index do |pc, index| 
+            - pe = pc[:pago_comprometido]
+            - estado, atrasada = estado_cuota_class(pe)
+
+            %tr{class: "#{estado} #{atrasada}"}
+                %td.txCenter= pe.numero_cuota
+                %td= get_name PagoComprometido, :CENTROS_COSTOS, pe.centro_costo
+                %td= value pe.pagare, :numero
+                %td.txRight= number_to_currency pe.monto
+                %td.txRight= number_to_currency pe.saldo    
+                %td.txRight= number_to_currency pc[:interes]
+                %td.txRight
+                    - if defined?(seleccion) && seleccion
+                        = link_to dinero(pe.acumulado(pc[:interes])), matriculas_pagos_editar_path(params[:rut], pe.id), class: 'usa_tooltip', style: 'padding: 2px', title: 'Editar saldo e intereses', 'data-placement' => 'left'
+                    - else
+                        = dinero pe.acumulado(pc[:interes])
+                - fv, fvp = pe.fecha_vencimiento, pe.fecha_vencimiento_con_prorroga
+                - porcentaje = pe.porcentaje_prorroga
+                %td.txRight= link_to l(fv), matriculas_pagos_prorroga_path(params[:rut], pe.id), class: 'usa_tooltip', title: 'Ver prorrogas', 'data-placement' => 'right'
+                - if fv!=fvp
+                    %td.txRight= l(fvp)
+                    %td.txCenter= porcentaje.to_s+" %"
+                - else 
+                    %td.txRight
+                    %td.txCenter
+                %td= pe.plan_pago.matricula_plan.periodo.anio
+                - if pe.tiene_cobranza?(pe.id)
+                    %td.txCenter.red= get_name(Cobranza,:TIPOS,pe.cobranza.tipo)
+                - else
+                    %td.txCenter= "CARTERA" 
+                %td.txCenter= get_name(Sede, :SEDES, pe.plan_pago.matricula_plan.alumno_plan_estudio.institucion_sede_plan.institucion_sede.sede_id) unless(pe.plan_pago.matricula_plan.alumno_plan_estudio.blank? and pe.plan_pago.matricula_plan.blank? and pe.plan_pago.blank? and pe.blank?)
+                %td.estado_td
+                    - unless pe.estado_cobranza.blank?
+                        %i.icon-warning-sign 
+                        = pe.estado_cobranza
+                - if defined?(seleccion) && seleccion
+                    %td.txRight= check_box_tag "abono[pago_comprometido_id][#{pe.id}]"

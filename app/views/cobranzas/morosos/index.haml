@@ -1,0 +1,75 @@
+:css
+    legend{font-weight:bold;}
+
+/= render "matriculas/matriculas/admision/partials/assets_css"
+.page-Header
+    %h1 Buscar alumnos morosos
+
+= notificaciones
+
+= form_for :todos, url: cobranzas_morosos_informe_todos_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+    %fieldset
+        %legend Informe de alumnos morosos por sede
+        %br
+        %select{:name => "todos[institucion]", :id => "todos_institucion", :prompt => 'Seleccione institución', class: 'selectInstitucion'}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion[:nombre]
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{class: "modalidad", type: "hidden", name: "todos[modalidad]", value: InstitucionSedePlan::PRESENCIAL}
+        %input{type: "hidden", name: "todos[plan]", value: "All"}
+        %select{:name => "todos[sede]", :prompt => 'Seleccione sede'}
+            - @sedes.each do |item|
+                %option{:value => item[:id]}= item[:nombre]
+        %select.input-medium{name: "todos[periodo]", id: "todos_periodo"}
+            - @periodos.each do |item|
+                %option{value: item[:id]}= item.nombre
+        = f.submit 'Filtrar'
+        %br
+
+= form_for :resumen, url: cobranzas_morosos_informe_resumen_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+    %fieldset
+        %legend Informe de alumnos morosos por sede (Resumen por Carrera)
+        %br
+        %select{:name => "todos[institucion]", :id => "todos_institucion2", :prompt => 'Seleccione institución', class: 'selectInstitucion2'}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion[:nombre]
+            %option{class: 'distancia2', value: Institucion::IP}= 'Distancia'
+        %input{class: "modalidad2", type: "hidden", name: "todos[modalidad]", value: InstitucionSedePlan::PRESENCIAL}
+        %select{name: "todos[sede]", id: "todos_sede"}
+            - @sedes.each do |item|
+                %option{value: item[:id]}= item[:nombre]
+        %select.input-medium{name: "todos[anio]", id: "todos_anio"}
+            - @años.each do |item|
+                %option{value: item.anio}= item.anio
+        %select.input-medium{name: "todos[mes]", id: "todos_mes"}
+            - @meses.each_with_index do |item,index|
+                %option{value: index+1}= item
+        = f.submit 'Filtrar'
+        %br
+
+:javascript
+    $(function(){
+        $("#filtro_sede").change(function(){
+            window.location = "#{cobranzas_morosos_informe_path}?sede=" + $("#filtro_sede").val();
+        })
+        $('form').submit(function(){
+            notify_info('Generando informe, por favor espere...');
+            $('input[type=submit]').attr('disabled', true);
+        });
+        $('.selectInstitucion').change(function(){
+            if($('.selectInstitucion .distancia:selected').val() == 1){
+                $('.modalidad').attr({'value' : 2});
+            }
+            else{
+                $('.modalidad').attr({'value' : 1});
+            }
+        });
+        $('.selectInstitucion2').change(function(){
+            if($('.selectInstitucion2 .distancia2:selected').val() == 1){
+                $('.modalidad2').attr({'value' : 2});
+            }
+            else{
+                $('.modalidad2').attr({'value' : 1});
+            }
+        });
+    })

@@ -1,0 +1,138 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Doocentes
+%div.well
+    %ul.thumbnails
+        %li.span7
+            %p 
+                %strong ANTECEDENTES PERSONALES :
+            %div.well
+                %p
+                    %strong Rut: 
+                    = @item[:rut]
+
+                %p
+                    %strong Nombre:
+                    = "#{@item[:primer_nombre]}  #{@item[:segundo_nombre]} #{@item[:apellido_paterno]}  #{@item[:apellido_materno]}"
+                %p
+                    %strong Email:
+                    = @item[:email] ?  "#{@item[:email]}" : "Sin Email" 
+
+                %p
+                    %strong Domicilio:
+                    = "#{@item[:domicilio]} #{@item[:villa_poblacion]}"
+
+                %p
+                    %strong Fecha de Nacimiento:
+                    = @item[:fecha_nacimiento] ? "#{@item[:fecha_nacimiento]}" : "Sin informacion "
+                %p
+                    %strong Telefono Fijo:
+                    = @item[:telefono_fijo] ? "#{@item[:telefono_fijo]}" : "Sin informacion "
+
+                    %strong Telefono Movil:
+                    = @item[:telefono_movil] ? "#{@item[:telefono_movil]}" : "Sin informacion "  
+                %p
+                    %strong Profesion:
+                    = @item[:profesion] ? "#{@item[:profesion]}" : "Sin informacion"
+
+                %p
+                    %strong Estado:
+                    = @item[:en_ejercicio] ? "Actualmente en  ejercicio" : "No se encuentra ejerciendo en la Institución."
+
+            - unless @antecedentes.blank?
+                %p 
+                    %strong EXPERIENCIA LABORAL :
+                    - @antecedentes.each do |a| 
+                        - if a.tipo_antecedente == 2
+                            %div.well
+                                %p
+                                    %strong Institución:
+                                    = a.lugar
+                                %p
+                                    %strong Cargo:
+                                    = a.detalle
+                                %p
+                                    %strong Fecha
+                                    = "desde #{a.desde} hasta #{a.hasta}" 
+                                %p
+                                    %strong Descripcion 
+                                    = a.descripcion
+                %p 
+                    %strong EXPERIENCIA DOCENTE :
+                    - @antecedentes.each do |a| 
+                        - if a.tipo_antecedente == 3
+                            %div.well
+                                %p
+                                    %strong Institución:
+                                    = a.lugar
+                                %p
+                                    %strong Cargo:
+                                    = a.detalle
+                                %p
+                                    %strong Fecha
+                                    = "desde #{a.desde} hasta #{a.hasta}" 
+                                %p
+                                    %strong Descripcion 
+                                    = a.descripcion                
+                %p 
+                    %strong ESTUDIO Y PERFECCIONAMIENTO LABORAL :
+                    - @antecedentes.each do |a| 
+                        - if a.tipo_antecedente == 1
+                            %div.well
+                                %p
+                                    %strong Institución:
+                                    = a.lugar
+                                %p
+                                    %strong Cargo:
+                                    = a.detalle
+                                %p
+                                    %strong Fecha
+                                    = "desde #{a.desde} hasta #{a.hasta}" 
+                                %p
+                                    %strong Descripcion 
+                                    = a.descripcion
+                %p 
+                    %strong ANTECEDENTES PERSONALES Y DESARROLLO :
+                    - @antecedentes.each do |a| 
+                        - if a.tipo_antecedente == 4
+                            %div.well
+                                %p
+                                    %strong Institución:
+                                    = a.lugar
+                                %p
+                                    %strong Cargo:
+                                    = a.detalle
+                                %p
+                                    %strong Fecha
+                                    = "desde #{a.desde} hasta #{a.hasta}" 
+                                %p
+                                    %strong Descripcion 
+                                    = a.descripcion
+                %p 
+                    %strong OTROS ANTECEDENTES :
+                    - @antecedentes.each do |a| 
+                        - if a.tipo_antecedente == 5
+                            %div.well
+                                %p
+                                    %strong Institución:
+                                    = a.lugar
+                                %p
+                                    %strong Cargo:
+                                    = a.detalle
+                                %p
+                                    %strong Fecha
+                                    = "desde #{a.desde} hasta #{a.hasta}" 
+                                %p
+                                    %strong Descripcion 
+                                    = a.descripcion
+            -#    %strong
+            -#        Curriculum: 
+            -#%p= raw @item[:curriculum]
+                    
+        %li.span2
+            %a.thumbnail{:href => "#"} 
+                %img{:src => "http://placehold.it/160x120"}
+
+

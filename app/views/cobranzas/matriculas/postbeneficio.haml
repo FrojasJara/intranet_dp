@@ -1,0 +1,165 @@
+.page-header
+    - unless @us_alumno.blank?
+        - unless params[:matricula_id].blank?
+            = breadcrumb [["Planes Pago", cobranzas_matriculas_postbeneficio_path(@us_alumno.rut)],"Beneficio Postmatricula"]
+    %h1 Beneficio para alumnos con beneficio
+
+= notificaciones
+
+= render :partial => 'partials/buscar_con_rut'
+
+- unless @us_alumno.blank?
+    %br
+    = render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+    = render partial: 'partials/notificaciones/info', locals: {:mensaje => 'Recuerde que este es un proceso irrevesible que cambiará la información financiera del alumno.<br />Este proceso no modifica el contrato y pagaré ya generados, son modificaciones post-matricula.'}
+    = render partial: 'partials/notificaciones/warning', locals: {:mensaje => '<span>El beneficio sobre beneficio es válido solo para alumnos que ya poseen algún beneficio y se aplica solo a la deuda actual del alumno.</span>'}
+    = render partial: 'partials/notificaciones/error', locals: {:mensaje => 'No podrá anular esta matrícula ya que el alumno no es de su sede'} unless @usuario.sede.eql?(@us_alumno.sede)
+
+    %br
+
+    - if params[:matricula_id].blank?
+        %table.table.table-condensed
+            %thead
+                %tr
+                    %th ID
+                    %th Estado
+                    %th Periodo
+                    %th Fecha
+                    %th Ejecutivo
+                    %th
+            %tbody
+                - @datos.each do |item|
+                    - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+                    %tr
+                        %td.txCenter= mat.id
+                        %td.txCenter= get_name MatriculaPlan, :ESTADOS, mat.estado
+                        %td.txCenter= periodo.nombre
+                        %td.txCenter= l mat.created_at
+                        %td.txCenter= ejecutivo.nombre_corto
+                        %td.txCenter
+                            - if @usuario.sede.eql?(@us_alumno.sede)
+                                %a.btn.btn-primary{:href => "#{params[:rut]}/#{mat.id}"} 
+                                    %i.icon-white.icon-plus-sign
+                                    Agregar Beneficio
+    - else
+        - item = @datos.first
+        - mat, planes, periodo = item[:matricula], item[:planes], item[:periodo]
+
+        %form{id: 'beneficio', method: 'POST', action: cobranzas_matriculas_agregar_postbeneficio_path}
+            %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+            %h3="Matrícula #{periodo.nombre} (#{get_name(MatriculaPlan, :ESTADOS, mat.estado)})"
+            %br
+            %select.required{name: 'descuento_id', id: 'descuentos'}
+                %option{value: ""} ::: Seleccione un descuento :::
+                - @descuentos.each do |descuento|
+                    %option{value: descuento.id, id: descuento.porcentaje}= "#{descuento.nombre} #{descuento.porcentaje}%"
+            %br
+            %br     
+            %table.table.table-condensed
+                %thead
+                    %tr
+                        %th
+                        %th Plan Pago
+                        %th Tipo
+                        %th Pagaré
+                        %th Periodo
+                        %th Matricula
+                        %th Arancel
+                        %th Deuda Actual
+                        %th Beneficio
+                        %th Post Beneficio
+                        %th Beneficio Actual
+                        %th Valor Post Beneficio
+                        %th Beneficio Total
+                        %th Arancel total
+                %tbody
+                    - cont = 0
+                    - planes.each do |pl|
+                        - pagare = pl[:plan].pagares(estado: Pagare::VIGENTE).last
+
+                        %tr{class: 'planes'}
+                            %td.txCenter
+                                %input.required{type: 'radio', name: 'plan_pago_id', value: pl[:plan].id, id: 'radio'}
+                            %td.txCenter= pl[:plan].id unless pl[:plan].id.blank?
+                            %td.txCenter= get_name MatriculaPlan,:TIPOS,pl[:plan].tipo
+                            %td.txCenter
+                                - unless pagare.blank?
+                                    = pagare.numero unless pagare.numero.blank?
+                            %td.txCenter= pl[:plan].periodo.nombre unless pl[:plan].periodo_id.blank?
+                            %td.txCenter= pl[:plan].matricula unless pl[:plan].matricula.blank?
+                            %td.arancel.txCenter= pl[:plan].arancel unless pl[:plan].arancel.blank?
+                            %td.deuda.txCenter= pl[:plan].deuda unless pl[:plan].deuda.blank?
+                            %td.descuento-nombre.txCenter= pl[:plan].descuento.nombre+" "+pl[:plan].descuento.porcentaje.to_s+"%" unless pl[:plan].descuento_id.blank?
+                            %td.postdescuento-nombre.txCenter
+                            %td.descuento-valor.txCenter= pl[:plan].descuento_aplicado unless pl[:plan].descuento_aplicado.blank?
+                            %td.postdescuento-valor.txCenter
+                            %td.descuentos-valor.txCenter= pl[:plan].descuento_aplicado unless pl[:plan].descuento_aplicado.blank?
+                            %td.arancel-total.txCenter= pl[:plan].arancel_total unless pl[:plan].arancel_total.blank?
+
+            %input.btn.btn-primary{type: 'submit', value: 'Agregar Post Beneficio'}
+:javascript
+    $(function(){
+
+        $('.fecha').datepicker();
+
+        $('input').removeClass('error');
+
+        $('#beneficio').validate({
+            invalidHandler: function(form, validator) {
+                notify_error("Beneficio sobre beneficio", "Debe seleccionar el plan de pago y descuento que desea agregar.");
+            }
+        });
+
+        $('#descuentos').change(function(){
+            $.each($('.planes'),function(){
+                if($('#descuentos option:selected').val() != ""){
+                    $(this).children('.postdescuento-nombre').text($('#descuentos option:selected').text());
+
+                    $(this).children('.postdescuento-valor').text(
+                        parseInt(
+                            $(this).children('.deuda').text()
+                        ) *
+                        parseInt(
+                            $('#descuentos option:selected').attr('id')
+                        ) / 100  
+                    );
+
+                    $(this).children('.descuentos-valor').text(
+                    	parseInt(
+                            $(this).children('.postdescuento-valor').text()
+                        )  +
+
+                        parseInt(
+                            $(this).children('.descuento-valor').text()
+                        ) 
+                    );
+
+                    $(this).children('.arancel-total').text(
+                    	parseInt(
+                    		$(this).children('.arancel').text()
+                    	) -
+                    	parseInt(
+                    		$(this).children('.postdescuento-valor').text()
+                    	) -
+                        parseInt(
+                            $(this).children('.descuento-valor').text()
+                        ) 
+                    );
+                }
+                else{
+                    $(this).children('.postdescuento-nombre').text('-');
+                    $(this).children('.postdescuento-valor').text('0');
+
+                    $(this).children('.arancel-total').text(
+                        parseInt(
+                            $(this).children('.arancel').text()
+                        ) -
+                        parseInt(
+                            $(this).children('.descuento-valor').text()
+                        ) 
+                    );
+                }
+            });
+        });
+    });

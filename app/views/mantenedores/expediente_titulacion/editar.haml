@@ -1,0 +1,168 @@
+.sectionHeader
+	%h1  Edición Expediente de Titulación
+
+	%form.informacion-tabulada{:action => mantenedores_expedientes_titulacion_registrar_modificacion_path ,:method => "post"}
+		%fieldset
+			%legend Información 
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera
+						%span= @alumno_plan_estudio.plan_estudio.nombre
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Institución
+						%span= @alumno_plan_estudio.institucion_sede
+		%div.well
+			%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+			%input{:type=>"hidden", name: "trabajo_id", value: @trabajo.id}
+			%div.contenedorElemento.separador
+				%label.etiqueta{:style=>"margin-right:142px;"} Estado
+				%select.estado{:name => "trabajo_titulo[estado]"}
+					- @estados.each do |estado|
+						%option{:value => "#{TrabajoTitulo.const_get estado}", selected: @trabajo.estado.eql?(TrabajoTitulo.const_get estado)}= get_name TrabajoTitulo, "ESTADOS", TrabajoTitulo.const_get(estado)
+			%div.contenedorElemento.separador
+				%label.etiqueta Rol:
+				%input.rol{ :name => "trabajo_titulo[rol]", value: @trabajo.rol}
+			%div.contenedorElemento.separador
+				%label.etiqueta Fecha:
+				%input.fecha2.fechas{ :name => "trabajo_titulo[fecha]", value: @trabajo.fecha}
+			%label.trabajo Nombre Trabajo Título:
+			%input.importante{ name: "trabajo_titulo[nombre]", value: @trabajo.nombre }
+		%legend Docente Evaluadores
+		%legend.leyenda Docentes Evaluadores
+		%table.table.table-striped#alumnos
+			%thead			
+				%tr
+					%th.TxtLft Docente
+					%th.TxtLft Tipo
+					%th.TxtLft Nota
+					%th.TxtLft Firma
+			%tbody
+				- suma = 0.0
+				- @docentes.each do |d|
+					%tr
+						%td
+							%input.docenteInput{:name => "docente_trabajo_titulo[#{d.id}][][docente_id]", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", :value => d.docente.datos_personales.nombre + " | " +d.docente.datos_personales.rut}
+						%td
+							%span= get_name DocenteTrabajoTitulo, :TIPO, d.tipo
+
+						%td	
+							%input.TxtNota{type: "text", name: "docente_trabajo_titulo[#{d.id}][][nota]", value: d.nota}
+						%td	
+							%span
+					- suma = d.nota + suma
+				- nota_evaluadores = suma / 2
+				%tr
+					%td	
+					%td.final Nota Final
+					%td= nota_evaluadores.round(1)
+					%td
+						
+		%legend Comisión Examinadora								
+		%legend.leyenda Comisión Examinadora
+		%table.table.table-striped
+			%thead			
+				%tr
+					%th.TxtLft Docente
+					%th.TxtLft Tipo
+					%th.TxtLft Exposición
+					%th.TxtLft Defensa
+					%th.TxtLft Firma
+			%tbody
+				- exp = 0.0
+				- defe = 0.0
+				- cont = 0
+				- @comisiones.each do |c|
+					%tr
+						%td
+							%input.docenteInput{:name => "comision_examinadora[#{c.id}][][docente_id]", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", :value => c.docente.datos_personales.nombre + " | " +c.docente.datos_personales.rut}
+						%td
+							%span Comisión
+						%td
+							%input.TxtNota{type: "text", name: "comision_examinadora[#{c.id}][][nota_expocision]", value: c.nota_expocision}
+						%td	
+							%input.TxtNota{type: "text", name: "comision_examinadora[#{c.id}][][nota_defensa]", value: c.nota_defensa}
+						%td	
+							%span
+					-exp = c.nota_expocision + exp
+					-defe = c.nota_defensa + defe
+					- cont = cont + 1
+				- expo  = exp /cont
+				- defen = defe /cont
+				- final = (expo + defen)/2 
+				%tr
+					%td	
+					%td.final Nota Final
+					%td= final.round(1)
+					%td
+					%td
+		%button.btn.btn-primary{type: "submit"}
+			Guardar edición
+
+						
+:css
+	input.importante {
+		font-size: 13px;
+		padding: 13px;
+		width: 1140px;
+		border-bottom: 1px solid red;
+		border-top: 1px solid red;
+		line-height: 180%;
+		margin-top: 7px;
+	}
+	label.trabajo { 
+		font-weight: bold; 
+		display: inline !important;
+		text-transform: none;
+		font-size: 12px !important;
+		line-height: normal !important;
+	}
+	.final{ 
+		font-weight: bold; 
+		display: inline !important;
+		text-transform: none;
+		font-size: 12px !important;
+		margin: 0;
+		line-height: normal !important;
+	}
+	.docenteInput{
+		padding: 4px;
+		font: 12px "lucida grande",tahoma,verdana,arial,sans-serif !important;
+		-moz-box-sizing: content-box;
+		-webkit-box-sizing: content-box;
+		box-sizing: content-box;
+		color: black !important;
+		height: auto !important;
+		margin: 0 !important;
+		width: 300px;
+	}
+	.rol{ margin-left: 160px; width: 100px}
+	.fecha2{ margin-left: 144px; width: 100px}
+	.estado{width: 100px}
+	.leyenda{ display: none; }
+	.nota{ display: none; }
+:javascript
+	$(document).ready(function(){
+		$(".ajax-typeaheadres").typeahead({ 
+			ajax: {
+				url: "/mantenedores/secciones/typeaheadresp", //ruta al controlador q retorna las personas
+				timeout: 300, //tiempo de espera
+				triggerLength: 2, // a 3 caracteres empieza a buscar
+				method: "get",
+			},
+			items: 16 //cantidad de resultados a traer cada vez
+		});
+	});
+	$('#loading-example-btn').click(function () {
+		$(this).button('loading');
+	});
+	$(".fechas").live("focusin", function(){
+		$(this).datepicker();
+	});

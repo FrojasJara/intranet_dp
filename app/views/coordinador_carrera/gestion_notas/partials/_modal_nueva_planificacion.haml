@@ -1,0 +1,95 @@
+.modal.fade.hide{:id => "nueva_planificacion", :style => "width: 700px"}	
+	.modal-header
+		%button.close.resetear{:data => {:dismiss => "modal"}}
+			x
+		%h3
+			%span= "#{asignatura.nombre} - #{@seccion.nombre}"
+	.modal-body
+		%form.form-inline#form-programacion{:action => coordinador_carrera_registrar_planificacion_seccion_path, :method => "post"}	
+			%div.control-group.inline
+				.control-label
+					%label ID Sección
+				.controls
+					%input.span2{:name => "planificacion[seccion_id]", :type => "text", :readonly => "readonly", value: "#{@seccion.blank? ? '' : @seccion.id }"}
+			%div.control-group.inline
+				.control-label
+					%label Nº Notas Parciales
+				.controls
+					%input.span2.required{:name => "planificacion[cantidad_notas]", :type => "number", :min => 1}
+
+			%div.form-actions			
+				%a.btn.btn-success#crear_planificacion
+					%i.icon.icon-white.icon-plus
+					Crear
+				%button.btn.btn-primary#guardar_planificacion
+					%i.icon.icon-white.icon-ok
+					Guardar
+			%div#tabla_planificacion
+	.modal-footer{style: "background-color: white;"}
+		%button.btn.btn-default.resetear{:data => {:dismiss => "modal"}}
+			Cancelar
+:css
+	div.modal-backdrop {
+		background-color: #808080 !important;
+	}
+	div.fade{
+		border-radius: 7px !important;
+	}
+:javascript
+	$(document).ready(function(){
+		$("#form-programacion").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Planificar Evaluación", "<strong>Recuerde!</strong> ingresar el número de evaluaciones a realizar durante el semestre. <br /> <strong>No olvide!</strong> ingresar la información de cada evaluación.");
+			},
+				submitHandler: function(form) {
+					var suma = 0.0;
+					$.each($(".ponderacion_nota"), function(index, value) {
+							suma += parseInt(value.value);
+							suma = suma.toFixed(2)
+						});
+					if(suma == 1){
+						form.submit();
+					}
+					else
+					{
+						notify_info("Planificar Evaluación", "<strong>Atención!</strong> la ponderación debe dar exactamente <b>1</b> .");	
+					}
+			}
+		});
+		$("#crear_planificacion").on("click", function(){
+			var cantidad_notas = $("input[name='planificacion[cantidad_notas]']").val();
+			var numero_nota = 1;
+			var $tabla = "";
+
+			
+			$tabla = "<table class='table table-striped' id='tem_plan'>";
+			$tabla 	+= "<thead> ";
+			$tabla	+=	"<tr>";
+			$tabla	+=		"<th class='TxtLft'> Número</th>";
+			$tabla	+=		"<th class='TxtLft'> Fecha Planificada</th>";
+			$tabla	+=		"<th class='TxtLft'> Ponderación</th>";
+			$tabla	+= "<tbody>";
+
+			for(var i=0; i < cantidad_notas ; i++)
+			{
+				numero_nota = i + 1;
+
+				$tabla += "<tr>";
+				$tabla += "<td><input class='span1 required' type='text' name='planificacion[notas][" + numero_nota + "][numero]' value=" + numero_nota +  " /></td>";
+				$tabla += "<td><input class='span2 fechas required' type='text' name='planificacion[notas][" + numero_nota + "][fecha_planificada]'/></td>";
+				$tabla += "<td><input class='span1 required ponderacion_nota' type='text' name='planificacion[notas][" + numero_nota + "][ponderacion]' /> (ej.: 0.25)</td>";
+				$tabla += "</tr></tbody>"; 
+			}
+
+			$("#tabla_planificacion").html($tabla);
+		
+		});
+		$(".resetear").on("click", function(){
+			$("#tem_plan tr").remove();
+			$('#form-programacion')[0].reset();
+
+		});
+		$(".fechas").live("focusin", function(){
+			$(this).datepicker();
+		});
+	});

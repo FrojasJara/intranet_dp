@@ -1,0 +1,73 @@
+#asignaturas-abiertas
+	:css
+		col.numero { width: 60px; }
+		col.asignatura { width: 180px; }
+		col.inscritos { width: 45px; }
+		col.aprobados { width: 45px; }
+		col.reprobados { width: 45px; }
+		col.homologados { width: 45px; }
+		col.convalidados { width: 45px; }
+		col.horarios { width: 260px; }
+		col.sede { width: 220px; }
+
+		#asignaturas-abiertas ol {
+			list-style: decimal;
+			padding-left: 15px
+		}
+
+		#asignaturas-abiertas th, #asignaturas-abiertas td { vertical-align: middle; }
+
+	.page-header
+		%h1= "Asignaturas abiertas en el #{periodo_en_curso[:nombre]}"
+
+	= render "docentes/docentes/partials/informacion_tabulada_docente"
+	= notificaciones
+		
+	- if @existen_datos		
+		%table.table.table-condensed
+			%colgroup
+				%col.numero
+				%col.asignatura
+				%col.sede
+				%col.inscritos
+				%col.aprobados
+				%col.reprobados
+				%col.homologados
+				%col.convalidados
+				%col.horarios
+				%col.opciones
+			%thead
+				%tr
+					%th.txCenter Seccion
+					%th.txLeft Asignaturas
+					%th.txLeft Sede
+					%th.txCenter INS
+					%th.txCenter APR
+					%th.txCenter REP
+					%th.txCenter HOM
+					%th.txCenter CON
+					%th.txLeft Horarios
+					%th.txLeft.not-print
+			%tbody
+				- @asignaturas_abiertas.each do |item|
+					%tr
+						%td.txCenter= item[:seccion].numero
+						%td.txLeft
+							%ol
+								- item[:asignaturas].each do |item2|
+									%li= item2.nombre
+						%td.txLeft= item[:institucion_sede]
+						%td.txCenter= item[:seccion].alumnos_inscritos
+						%td.txCenter= item[:seccion].alumnos_aprobados
+						%td.txCenter= item[:seccion].alumnos_reprobados
+						%td.txCenter= item[:seccion].alumnos_homologados
+						%td.txCenter= item[:seccion].alumnos_convalidados
+						%td.txLeft
+							%ol
+								- item[:horarios].each do |item2|
+									%li
+										= "#{get_name Horario, 'DIAS', item2[:horario].dia}, de #{item2[:bloque].hora_inicio} a #{item2[:bloque].hora_termino} en #{item2[:sala].nombre}"
+
+						%td.txLeft.dropdown.not-print
+							= opciones @usuario.id, item[:seccion].id
+

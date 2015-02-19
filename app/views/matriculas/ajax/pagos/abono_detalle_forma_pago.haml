@@ -1,0 +1,23 @@
+- tipo_documento = %w(pagare-slash-cheque).include?(@medio_pago.slug) ? 'Cheque' : @medio_pago.nombre
+%tr
+    %td= @pago_comprometido.blank? ? '-' : @pago_comprometido.id
+    %td= tipo_documento
+    %td= number_to_currency @monto
+    %td
+        - if %w(depositos pagare-slash-cheque transferencia).include? @medio_pago.slug
+            = text_field_tag "#{@base_name}[numero_documento]", '', placeholder: "Número de #{tipo_documento}"
+        - if %w(pagare-slash-cheque).include? @medio_pago.slug
+            = text_field_tag "#{@base_name}[fecha_documento]", '', placeholder: "Fecha del documento"
+    %td
+        - if %w(pagare-slash-cheque tarjeta-debito).include? @medio_pago.slug
+            = select_tag "#{@base_name}[banco]", options_for_select(Banco.all(fields: [:nombre, :id]).map{|x| [x.nombre, x.id]})
+        - if %w(tarjeta-credito).include? @medio_pago.slug
+            = select_tag "#{@base_name}[tarjetas_credito]", options_for_select(TarjetasCredito.all(fields: [:nombre, :id]).map{|x| [x.nombre, x.id]})
+    %td.txRight
+        %a.btn.btn-mini.btn-danger.quitar
+            %i.icon-white.icon-minus-sign
+            Quitar
+    - unless @pago_comprometido.blank? 
+        = hidden_field_tag "#{@base_name}[id]", @pago_comprometido.id
+    = hidden_field_tag "#{@base_name}[monto]", @monto
+    = hidden_field_tag "#{@base_name}[medio_pago]", @medio_pago.id

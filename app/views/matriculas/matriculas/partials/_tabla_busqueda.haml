@@ -1,0 +1,71 @@
+= datatable_src
+= datatable "matriculas"
+
+%table#matriculas.table.table-condensed
+	%colgroup
+		%col.numero
+		%col.alumno
+		%col.rut
+		%col.carrera
+		%col.institucion
+		%col.periodo
+		%col.tipo_matricula
+		%col.fecha_registro
+	%thead
+		%tr
+			%th.txCenter Nº Mat. / Estado
+			%th.txLeft Alumno
+			%th.txCenter Rut
+			%th.txLeft Carrera
+			%th.txLeft.not-sorting Institución
+			%th.txCenter Periodo
+			%th.txCenter F. de registro
+	%tbody
+		- @matriculas.each do |item|
+			%tr
+				%td.txCenter
+					= item[:matricula].id
+					%strong{:style => "display: block"}= get_name MatriculaPlan, "ESTADOS", item[:matricula].estado
+				%td.txLeft.dropdown
+					%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+						= item[:usuario].nombre
+						%b.caret
+					%ul.dropdown-menu
+						%li
+							%a{:href => "#{matriculas_ver_path item[:matricula].id}"}
+								%i.icon-zoom-in
+								Ver matrícula
+						%li
+							%a{:href => "#{matriculas_planes_path item[:matricula].id}"} 
+								%i.icon-list-alt
+								Ver planes de pago
+						%li
+							%a{:href => "#{matriculas_editar_path item[:matricula].id}"}
+								%i.icon-edit
+								Editar matrícula
+				%td.txCenter= item[:usuario].rut
+				%td.txLeft= item[:plan_estudio].nombre
+				%td.txLeft= item[:sede]
+				%td.txCenter= item[:periodo].nombre
+				%td.txCenter= fecha_humana item[:matricula].created_at
+
+:css
+	col.numero { width: 100px; }
+	col.alumno { width: 140px; }
+	col.rut { width: 90px; }
+	col.carrera { width: 160px; }
+	col.institucion { width: 160px; }
+	col.periodo { width: 45px; }
+	col.tipo_matricula { width: 100px; }
+	td.dropdown.open ul.dropdown-menu {
+		left: 75px !important;
+		top: 28px !important;
+	}
+:javascript
+	$(document).ready(function() {
+		$("div.modal form").validate({
+			submitHandler: function(form) {
+				form.submit();
+			}
+		});
+	})

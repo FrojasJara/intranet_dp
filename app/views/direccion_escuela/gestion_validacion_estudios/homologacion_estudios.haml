@@ -1,0 +1,239 @@
+:css
+	#tabla_asignaturas .control-group{display:inline-block;}
+	#select_tipo_validacion{display:inline-block;}
+	.span-select-periodo{width: 80px !important;}
+	.input_nota{width:30px !important;}
+.sectionHeader
+	%h1 Buscar Alumno
+%div.well
+	%form.form-search#buscar_alumno{:action => direccion_escuela_homologacion_estudios_path ,:method => "post"}
+		%input.input-large.search-query.required{type: "text", :placeholder => "Rut Alumno", style: 'height: 28px', :name => "busqueda"}
+		%button.btn.btn-primary{type: "submit"} 
+			%icon.icon-white.icon-search
+			Buscar Alumno
+	= notificaciones
+
+- unless @alumno.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action => direccion_escuela_homologacion_estudios_path ,:method => "post"}
+		%fieldset
+			%legend Información del alumno
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: "alumno_plan_estudio_id"}
+							-# selected =  @alumno_plan_estudio_seleccionado.blank? ? false : true
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => i.id , selected: @alumno_plan_estudio_seleccionado.blank? ? false : i.id == @alumno_plan_estudio_seleccionado.id }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"} 
+							%icon.icon-white.icon-search
+							Consultar
+				- unless @alumno_plan_estudio_seleccionado.blank?
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Plan Estudios:
+							%span= @alumno_plan_estudio_seleccionado.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Institución:
+							%span= @alumno_plan_estudio_seleccionado.institucion_sede_plan.institucion_sede.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso al plan de estudios:
+							%span= @alumno_plan_estudio_seleccionado.periodo.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso a la institución:
+							%span= @alumno.anio_ingreso
+						%div.contenedorElemento
+							%label.etiqueta Jornada:
+							%span= get_name InstitucionSedePlan, :JORNADAS, @alumno_plan_estudio_seleccionado.institucion_sede_plan.jornada
+						%div.contenedorElemento
+							%label.etiqueta Modalidad:
+							%span= get_name InstitucionSedePlan, :MODALIDADES, @alumno_plan_estudio_seleccionado.institucion_sede_plan.modalidad
+						%div.contenedorElemento.separador
+							%label.etiqueta Estado:
+							%span= get_name Alumno, :ESTADOS_ACADEMICOS, @alumno_plan_estudio_seleccionado.estado
+						%div.contenedorElemento.separador
+							%label.etiqueta Número Ingresos:
+							%span= @alumno.ingresos
+						%div.contenedorElemento
+							%label.etiqueta Semestre que cursa:
+							%span= @alumno_plan_estudio_seleccionado.semestre
+	
+- unless @alumno_plan_estudio_seleccionado.blank?
+
+	%form#registrar_convalidacion{action: direccion_escuela_registrar_homologacion_path, method: "post"}
+		%input{type: "hidden", name: "asignatura_convalidada[alumno_plan_estudio]", value: @alumno_plan_estudio_seleccionado.id}
+		%input{type: "hidden", name: "asignatura_convalidada[institucion_sede]", value: @alumno_plan_estudio_seleccionado.institucion_sede_plan.institucion_sede.id}
+		%input{type: "hidden", name: "asignatura_convalidada[semestre_cursa]", value: @alumno_plan_estudio_seleccionado.semestre}
+		%input{type: "hidden", name: "asignatura_convalidada[tipo]", value: "2"}
+		%div.well
+			-#= render :partial => "direccion_escuela/partials/contenedor_ingresar_carrera_convalidar"
+			= render :partial => "direccion_escuela/partials/contenedor_ingresar_carrera_homologar"
+			%hr
+		%button.btn.btn-primary{type: "submit"}
+			Guardar Convalidacion
+		%hr
+		%div.detalle_asignaturas
+			- unless @asignaturas.blank?
+				%table.table.table-striped#tabla_asignaturas
+					%thead
+						%tr
+							%th.TxtLft Codigo
+							%th.TxtLft Nombre
+							%th.TxtLft Semestre
+							%th.TxtLft Información
+					%tbody
+						- @asignaturas.each do |a|
+							%tr
+								%td= a.codigo
+								%td= a.nombre
+								%td= a.semestre
+								%td
+									%div.informacion_convalidacion
+										%div.control-group
+											%label.control-label Año curso
+											%div.controls
+												%select.span-select-periodo.required{:name => "asignatura_convalidada[convalidacion][#{a.id}][anio]", disabled: true}
+													- Periodo.all(:order => [:anio.desc, :semestre.desc]).each do |p|
+														%option{value: p.anio}= p.anio
+										%div.control-group
+											%label.control-label Sem.
+											%div.controls
+												%input.input_nota.informacion_asignatura.required{type: "text", :name => "asignatura_convalidada[convalidacion][#{a.id}][semestre]",:disabled => true}
+										%div.control-group
+											%label.control-label Nota
+											%div.controls
+												%input.input_nota.informacion_asignatura.required{type: "text", :name => "asignatura_convalidada[convalidacion][#{a.id}][nota_externa]",:disabled => true}
+										%div{class: 'control-group'}
+											%label.control-label Asignatura
+											%div.controls
+												%input.informacion_asignatura.required{type: "text", :name => "asignatura_convalidada[convalidacion][#{a.id}][asignatura_externa]", :disabled => true}
+										%div.control-group
+											%label.control-label Docente Responsable
+											%div.controls.docente
+												%input.informacion_asignatura.required{type: "text", :name => "asignatura_convalidada[convalidacion][#{a.id}][Docente]", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", :disabled => true}
+												
+												%input.required{:name => "asignatura_convalidada[convalidacion][#{a.id}][asignatura_origen_id]",type: "hidden",:disabled => true,value:a.id}
+										%div.control-group
+											%label.control-label Periodo
+											%div.controls
+												%select.span-select-periodo.required{:name => "asignatura_convalidada[convalidacion][#{a.id}][periodo]", disabled: true}
+													- Periodo.all(:order => [:anio.desc, :semestre.desc]).each do |p|
+														%option{value: p.id}= p.nombre
+
+										%input.habilitar_convalidacion{type: "checkbox"}
+		
+-#= render :partial => "direccion_escuela/partials/modal_convalidar_asignatura"
+-#= render :partial => "direccion_escuela/partials/modal_homologar_asignatura"
+
+
+:javascript
+	$(document).ready(function(){
+		var procedimiento = 0;
+		// $("#form_plan_estudio").submit(function(event){
+		// 	event.preventDefault();
+
+		// });
+	
+	$("#ingresar_docente").on("click",function(){
+		$("#contenedor_ingresar_docente").show();
+	});
+
+	$("#btn_cancelar_ingreso_docente").live("click", function(){
+		$("#contenedor_ingresar_docente").hide();
+	});
+
+	// Mostrar Ingreso Institucion Externa
+	$("#ingresar_institucion_externa").on("click",function(){
+		
+		$("#contenedor_ingresar_institucion_externa").show();
+	});
+	// Cerrar Ingreso de Institucion Externa
+	$("#btn_cancelar_ingreso_institucion_externa").live("click", function(){
+		$("#contenedor_ingresar_institucion_externa").hide();
+	});
+
+	// Procedimiento a realizar
+	$(".btn_validacion").on("click", function(){
+		console.log(procedimiento);
+		switch(procedimiento)
+		{
+			case 1:
+				$("#modal_convalidar_asignatura").modal("show");
+				break;
+			case 2:
+				$("#modal_homologar_asignatura").modal("show");
+				break;
+			default:
+				break;
+		}
+	});
+
+
+	$('select[name="seleccionar_accion"]').on('change', function() {
+		procedimiento = parseInt(this.value);
+	  	switch(procedimiento){
+	  		case 1:
+	  			$("#contenedor_ingresar_carrera").show();
+	  			$(".informacion_convalidacion").show();
+	  			break;
+	  		case 2:
+	  			$("#contenedor_ingresar_carrera").show();
+	  			break;
+	  		default:
+	  			break;
+	  	}
+	});
+
+	$(".habilitar_convalidacion").change(function() {
+		$(this).parent().find("input[type='text']").attr("disabled", ! this.checked);
+		$(this).parent().find("select").attr("disabled", ! this.checked);
+		$(this).parent().find("input[type='hidden']").attr("disabled", ! this.checked);		
+	
+	});
+
+	$("#registrar_convalidacion").validate({
+		invalidHandler: function(form, validator) {
+			notify_info("Registro Convalidacion", "Por favor, compruebe que ha ingresado correctamente la información. y busco al docente");
+		},
+		submitHandler: function(form) {
+			form.submit();
+		}
+	});
+
+	// Buscar Docente
+
+	$(".ajax-typeaheadres").typeahead({ 
+			ajax: {
+				url: "/mantenedores/secciones/typeaheadresp", //ruta al controlador q retorna las personas
+				timeout: 300, //tiempo de espera
+				triggerLength: 2, // a 3 caracteres empieza a buscar
+				method: "get",
+			},
+			items: 16 //cantidad de resultados a traer cada vez
+	});
+
+	$(".btn-buscar-docente").on("click", function(){
+		var nombre = $(this).parent().find("input[type='hidden']").attr("id");
+		var rut = $(this).prev().val();
+
+		$.post("#{ajax_direccion_escuela_buscar_docente_por_rut_path}", { "rut": rut },
+			function(data){
+				if(data.status){
+					$('#'+nombre).val(data.usuario.usuario_id);
+					$('#'+nombre).parent().parent().parent().append( "<p>"+data.usuario.nombre+"</p>" );
+					//$(#nombre).attr("value", data.usuario.usuario_id);
+					notify_success("Exito!", "<strong>El docente!</strong> " + data.mensaje );
+				}else{
+					notify_error("Error!", "<strong>Problema!</strong> " + data.mensaje );
+								console.log(data);
+				}
+
+			}, "json");
+	});
+	})

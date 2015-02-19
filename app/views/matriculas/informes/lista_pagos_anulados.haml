@@ -1,0 +1,47 @@
+.page-header
+    %h1 Lista de pagos anulados
+    %h2    
+        = @f_i
+        = "hasta #{@f_t}" unless @f_t.blank?
+
+%table#lista.table.table-condensed
+    %thead
+        %tr
+            %th Nº Doc
+            %th Monto Doc
+            %th Fecha Emisión
+            %th Fecha Anulación
+            %th Estado
+            %th Ejecutivo
+            %th Monto Abono
+            %th Saldo
+            %th Rut
+            %th Nombre
+            %th Carrera
+            %th.txCenter Sede Plan
+
+    %tbody
+        - @datos.each do |item|
+            - doc, abonos, ejecutivo, alum = item[:documento], item[:abonos], item[:ejecutivo], item[:datos_personales]
+            - color = cycle('#FFF', '#EEE')
+            - abonos.each do |abono|
+                %tr{style: "background-color: #{color}"}
+                    %td= doc.numero
+                    %td= doc.monto
+                    %td= l doc.fecha_emision
+                    %td= l doc.fecha_anulacion
+                    %td= get_name DocumentoVenta, :ESTADOS, doc.estado
+                    %td= ejecutivo.iniciales
+                    %td= abono.monto
+                    %td= abono.saldo
+                    %td= alum[:rut]
+                    %td= alum[:nombre]
+                    %td= alum[:carrera]
+                    %td
+                        - unless doc.alumno_plan_estudio.blank?
+                            = get_name(Sede, :SEDES, doc.alumno_plan_estudio.institucion_sede_plan.institucion_sede.sede_id)
+                        - else
+                            = get_name(Sede, :SEDES, doc.institucion_sede.sede_id)
+
+= datatable_src
+= datatable 'lista'

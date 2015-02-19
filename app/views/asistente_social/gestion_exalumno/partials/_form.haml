@@ -1,0 +1,43 @@
+.well
+	%h1 Agregar Antecedente
+	%form#egresado{action: asistente_social_registrar_antecedente_path, method: "post"}
+		%input{type: "hidden", name: "antecedente[alumno_plan_estudio_id]", value: @alumno_plan_estudio.id}
+		%input{type: "hidden", name: "antecedente[usuario_id]", value: current_user_object.id}
+		%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+		%div.control-group
+			%label{:class => "control-label"} Ocupación
+			%div.controls
+				= select("antecedente", "ocupacion", for_select(Egresado, :OCUPACION), {:prompt => ":: Seleccione una ocupación ::"},  {:class => 'required'} )
+		%div.control-group
+			%label{:class => "control-label"} Periodos
+			%div.controls
+				= select("antecedente", "periodo_id", @periodos.collect {|i| [ i.nombre, i.id ] }, {:prompt => ":: Seleccione un periodo ::"},  {:class => 'required'})
+		%div.control-group
+			%label{:class => "control-label"} Renta
+			%div.controls
+				= number_field("antecedente", "renta",{:class => 'required'})
+		%div.control-group
+			%label{:class => "control-label"} Lugar
+			%div.controls
+				%input{:type => "text", name: "antecedente[lugar]"}
+		%div.control-group
+			%label{:class => "control-label"} Función
+			%div.controls
+				%input{:type => "text", name: "antecedente[funcion]",style:"width:600px;"}
+		%button.btn.btn-primary
+			%i.icon-hdd.icon-white
+			Guardar
+:javascript
+	$(document).ready(function(){
+		$("#egresado").validate({
+			invalidHandler: function(form, validator) {
+				notify_error("Error en el Registro", "Por favor, compruebe que ha ingresado correctamente la información.");
+			},
+			submitHandler: function(form) {
+				if( confirm("¿Está seguro que desea Guardar los Antecedentes?") ) {
+					notify_info("Espere un momento", "Por favor, Espere mientras se resgistra los antecedentes Gracias");
+					form.submit();
+				}
+			}
+		});
+	});

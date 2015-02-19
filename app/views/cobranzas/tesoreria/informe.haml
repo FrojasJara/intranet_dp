@@ -1,0 +1,137 @@
+:css
+    legend{font-weight:bold;}
+    input.fecha{
+        width:150px;
+        text-align: center !important;
+    }
+
+= render "matriculas/matriculas/admision/partials/assets_css"
+.page-header
+    = breadcrumb %w(Tesorería Informes)
+    %h1 Informes de Tesorería
+
+%div.span10
+    = notificaciones    
+    = form_for :filtro, url: cobranzas_tesoreria_informe_tesorero_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Tesorero diario o por rango de fechas Presencial
+            %br
+            = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - InstitucionSede.all.each do |item|
+                    - unless current_role[:nombre] == "Administrador" || current_role[:nombre] == "Vicerrector Financiero"
+                        - if item.sede_id.to_i == @usuario.sede_id.to_i
+                            %option{:value => item.id}= item.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+                    - else
+                        %option{:value => item.id}= item.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :distancia, url: cobranzas_tesoreria_cajas_distancia_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Tesorero diario o por rango de fechas Distancia
+            %br
+            = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+            %select.input-medium{:name => 'tipo'}
+                %option{:value => RangoDocumento::DISTANCIA} Distancia
+                %option{:value => RangoDocumento::DISTANCIA_DEPOSITO} Distancia depósitos
+                %option{:value => RangoDocumento::TALONARIOS_DISTANCIA} Todos
+            %select.input-medium{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - @instituciones_sedes_distancia.each do |item|
+                    - unless current_role[:nombre] == "Administrador" || current_role[:nombre] == "Vicerrector Financiero"
+                        - if item.sede_id.to_i == @usuario.sede_id.to_i
+                            %option{:value => item.id}= item.nombre.gsub("Instituto Profesional - ", "").gsub("Casa matriz ", "").gsub("Sede ", "")
+                    - else 
+                        %option{:value => item.id}= item.nombre.gsub("Instituto Profesional - ", "").gsub("Casa matriz ", "").gsub("Sede ", "")
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :resumen, url: cobranzas_tesoreria_resumen_clasificado_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Resumen Clasificado ingreso caja diaria 
+            %br
+            = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => 'institucion_id', class: 'selectInstitucion'}
+                - @instituciones.each do |institucion|
+                    %option{:value => institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia', value: Institucion::IP}="Distancia"
+            %input{class: "modalidad", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL}
+            %select{:name => 'sede_id'}
+                - @sedes.each do |sede|
+                    - unless current_role[:nombre] == "Administrador" || current_role[:nombre] == "Vicerrector Financiero"
+                        - if sede.id.to_i == @usuario.sede_id.to_i
+                            %option{:value => sede[:id]}= sede[:nombre]
+                    - else 
+                        %option{:value => sede[:id]}= sede[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :ingresos, url: cobranzas_tesoreria_informe_ingresos_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Informe de ingresos
+            %br
+            = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - InstitucionSede.all.each do |item|
+                    - unless current_role[:nombre] == "Administrador" || current_role[:nombre] == "Vicerrector Financiero"
+                        - if item.sede_id.to_i == @usuario.sede_id.to_i
+                            %option{:value => item.id}= item.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+                    - else
+                        %option{:value => item.id}= item.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+            = f.submit 'Filtrar'
+            %br
+
+    %form{id: 'comprometido_anual', method: 'POST', action: cobranzas_tesoreria_comprometido_anual_path}
+        %fieldset
+            /- token_tag nil
+            %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+            %legend Informe anual de pagos comprometidos (Resumen por Carrera)
+            %br
+            %select{:name => "todos[institucion]", :id => "todos_institucion2", :prompt => 'Seleccione institución', class: 'selectInstitucion2'}
+                - @instituciones.each do |institucion|
+                    %option{value: institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia2', value: Institucion::IP}= 'Distancia'
+            %input{class: "modalidad2", type: "hidden", name: "todos[modalidad]", value: InstitucionSedePlan::PRESENCIAL}
+            %select{name: "todos[sede]", id: "todos_sede"}
+                - @sedes.each do |item|
+                    %option{value: item[:id]}= item[:nombre]
+            %select.input-medium{name: "todos[anio]", id: "todos_anio"}
+                - @años.each do |item|
+                    %option{value: item.anio}= item.anio
+            %select.input-medium{name: "todos[tipo]", id: "todos_tipo"}
+                %option{value: 1} Total Comprometido
+                %option{value: 2} Por Pagar
+                %option{value: 3} Incobrable
+            %input{type: 'submit',value: 'Filtrar'}   
+
+    :javascript
+        $(document).ready(function(){
+            $('.fecha').datepicker();
+            $('form').submit(function(){
+                notify_info('Generando informe, por favor espere...');
+                $('input[type=submit]').attr('disabled', true);
+            });
+            $('.modalidad').attr({'value' : 1});
+            $('.modalidad2').attr({'value' : 1});
+            
+            $('.selectInstitucion').change(function(){
+                if($('.selectInstitucion .distancia:selected').val() == 1){
+                    $('.modalidad').attr({'value' : 2});
+                }
+                else{
+                    $('.modalidad').attr({'value' : 1});
+                }
+            });
+            $('.selectInstitucion2').change(function(){
+                if($('.selectInstitucion2 .distancia2:selected').val() == 1){
+                    $('.modalidad2').attr({'value' : 2});
+                }
+                else{
+                    $('.modalidad2').attr({'value' : 1});
+                }
+            });
+        });

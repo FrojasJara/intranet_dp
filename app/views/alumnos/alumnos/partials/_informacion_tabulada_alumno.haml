@@ -1,0 +1,147 @@
+%form.informacion-tabulada
+	%fieldset
+		%legend Información del alumno
+		%ul.ui-helper-clearfix
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					= label_tag "Rut:", nil, :class => "etiqueta"
+					%span= @usuario.rut			
+				%div.contenedorElemento.separador
+					= label_tag "Nombre:", nil, :class => "etiqueta"
+					%span= @usuario.nombre		
+				%div.contenedorElemento.separador
+					= label_tag "Plan de estudios:", nil, :class => "etiqueta"
+					%span= @plan_consultado[:nombre]
+				%div.contenedorElemento.separador
+					= label_tag "Institución:", nil, :class => "etiqueta"
+					%span= @plan_consultado[:institucion_sede]
+				%div.contenedorElemento.separador
+					= label_tag "Ingreso al plan de estudios:", nil, :class => "etiqueta"
+					%span= @plan_consultado[:inscripcion].anio_ingreso
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					= label_tag "Ingreso a la institución:", nil, :class => "etiqueta"
+					%span= @alumno.anio_ingreso		
+				%div.contenedorElemento
+					= label_tag "Jornada:", nil, :class => "etiqueta"
+					%span= get_name InstitucionSedePlan, "JORNADAS", @plan_consultado[:institucion_sede_plan].jornada
+				%div.contenedorElemento
+					= label_tag "Modalidad:", nil, :class => "etiqueta"
+					%span= get_name InstitucionSedePlan, "MODALIDADES", @plan_consultado[:institucion_sede_plan].modalidad
+				%div.contenedorElemento.separador
+					= label_tag "Situación académica:", nil, :class => "etiqueta"
+					%span= get_name Alumno, "ESTADOS_ACADEMICOS", @plan_consultado[:inscripcion].estado	
+				%div.contenedorElemento.separador
+					= label_tag "Nro. de ingresos:", nil, :class => "etiqueta"
+					%span= @alumno.ingresos
+				%div.contenedorElemento
+					= label_tag "Semestre que cursa:", nil, :class => "etiqueta"
+					%span= @plan_consultado[:inscripcion].semestre
+
+		- if current_role_can?(:cobranzas) or current_role_can?(:coordinador_carrera) or current_role_can?(:matriculas) 
+			.periodo-transicion.not-print
+				%h3 Otras acciones
+
+				%ul
+					%li	
+						%a{:href => "#{alumno_generar_inscripcion_asignaturas_path @usuario.id, @plan_consultado[:inscripcion].id}", :style => "font-weight: bold;"}
+							%i.icon-ok-sign
+							Inscripcion de asignaturas
+					%li	
+						%a{:href => "#{alumno_obtener_malla_curricular_path @usuario.id, @plan_consultado[:inscripcion].id}", :style => "font-weight: bold;"} Malla curricular
+					%li
+						%a{:href => "#{alumno_obtener_informe_curricular_path @usuario.id, @plan_consultado[:inscripcion].id}"} Informe curricular
+					%li	
+						%a{:href => "#{alumno_obtener_horario_path @usuario.id, @plan_consultado[:inscripcion].id}"} Horario
+
+				%ul
+					%li	
+						%a{:href => "#{alumno_obtener_asignaturas_inscritas_path @usuario.id, @plan_consultado[:inscripcion].id}", :style => "font-weight: bold;"} Asignaturas inscritas
+					%li	
+						%a{:href => "#{alumno_obtener_asignaturas_cursadas_path @usuario.id}"} Asignaturas cursadas
+					%li	
+						%a{:href => "#{alumno_obtener_asignaturas_abandonadas_path @usuario.id, @plan_consultado[:inscripcion].id}"} Asignaturas abandonadas
+					%li	
+						%a{:href => "#{alumno_obtener_calificaciones_path @usuario.id}"} Calificaciones
+
+				%ul
+					
+					%li	
+						%a{:href => "#{alumno_obtener_asistencias_path @usuario.id}"} Asistencias
+					%li	
+						%a{:href => "#{alumno_obtener_matriculas_path @usuario.id, @plan_consultado[:inscripcion].id}"} Matrículas y planes de pago
+					%li	
+						%a{:href => "#{matriculas_pagos_bitacora_cobranzas_path @plan_consultado[:inscripcion].id}"} Bitacora Academica
+					%li	
+						%a{:href => "#{matriculas_pagos_bitacora_cobranzas_path @plan_consultado[:inscripcion].id}"} Situaciones Academ/Admin
+				%ul
+					%li
+						%a.btn.btn-success{:style => "margin-top: 2px;", :href => "#modal_#{@plan_consultado[:inscripcion].id}", :data => {:toggle => "modal"}}
+							%i.icon-white.icon-edit
+							Cambiar jornada
+
+			:css
+				form.informacion-tabulada div.periodo-transicion { 
+					position: static;
+					margin-top: 10px;
+					border-top: 1px solid #e0e0e0;
+					padding-top: 10px;
+				}
+
+				form.informacion-tabulada div.periodo-transicion a { font-size: 12px; }
+				form.informacion-tabulada div.periodo-transicion ul { float: left; margin-right: 15px; }
+				form.informacion-tabulada div.periodo-transicion li { margin-bottom: 3px; line-height: 100%; }
+
+				@media print{
+					form.informacion-tabulada div.contenedorelemento span { font-size: 7pt !important; margin-left: 150px !important; }
+					form.informacion-tabulada label.etiqueta { font-size: 7pt !important; }
+				}
+
+
+- if es_periodo_transicion? and es_academico? and @plan_consultado[:institucion_sede_plan].modalidad == InstitucionSedePlan::PRESENCIAL
+	.modal.hide{:id => "modal_#{@plan_consultado[:inscripcion].id}", :style => "width: 560px"}	
+		.modal-header
+			%button.close{:data => {:dismiss => "modal"}}
+				x
+			%h3{:style => "margin-bottom: 0;"} Cambio de jornada
+		= form_tag "#{transicion_editar_inscripcion_carreras_path @plan_consultado[:inscripcion].id}", :method => "post" do
+			%input{:type => "hidden", :name => "usuario_id", :value => @usuario.id}
+
+			%input{:type => "hidden", :name => "inscripcion_plan[id]", :value => @plan_consultado[:inscripcion].id}
+			%input{:type => "hidden", :name => "carrera_dictada_in[institucion_sede_id]", :value => @plan_consultado[:institucion_sede_plan].institucion_sede_id}
+			%input{:type => "hidden", :name => "carrera_dictada_in[plan_estudio_id]", :value => @plan_consultado[:id]}
+			%input{:type => "hidden", :name => "carrera_dictada_in[periodo_id]", :value => @plan_consultado[:institucion_sede_plan].periodo_id}
+
+			%input{:type => "hidden", :name => "carrera_dictada_out[institucion_sede_id]", :value => @plan_consultado[:institucion_sede_plan].institucion_sede_id}
+			%input{:type => "hidden", :name => "carrera_dictada_out[plan_estudio_id]", :value => @plan_consultado[:id]}
+			%input{:type => "hidden", :name => "carrera_dictada_out[periodo_id]", :value => @plan_consultado[:institucion_sede_plan].periodo_id}
+
+			.modal-body
+				%p
+					Jornada actual:
+					%span{:style => "text-transform: uppercase;"}= get_name InstitucionSedePlan, "JORNADAS", @plan_consultado[:institucion_sede_plan].jornada
+				- InstitucionSedePlan::JORNADAS_EFECTIVAS.each do |jornada|
+					%label.radio
+						%input{:name => "carrera_dictada_in[jornada]", :type => "radio", :value => InstitucionSedePlan.const_get(jornada)}= get_name InstitucionSedePlan, "JORNADAS", InstitucionSedePlan.const_get(jornada)
+			
+				= render :partial => "partials/notificaciones/info", :locals => { :mensaje => "Debe verificar primero que la carrera en cuestión se dictará en la jornada deseada."}
+
+			.modal-footer
+				%button.btn.btn-primary.loading-button{:type => "submit", :data => {"loading-text" => "... actualizando registro ..."}}
+					%i.icon-white.icon-edit
+					Cambiar jornada
+
+	:javascript
+		$(document).ready(function() {
+			$("#modal_#{@plan_consultado[:inscripcion].id} :radio").val([#{@plan_consultado[:institucion_sede_plan].jornada}]);
+			$("#modal_#{@plan_consultado[:inscripcion].id} form").submit(function() {
+				if( !confirm("¿Está seguro que desea cambiar al alumno de jornada?")) return false;
+				$(this).find("button.loading-button").button("loading");
+			})
+		})
+
+	:css
+		#modal_#{@plan_consultado[:inscripcion].id} div.alert {
+			margin: 15px 0 0 0;
+			border-radius: 0;
+		}

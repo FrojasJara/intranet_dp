@@ -1,0 +1,6 @@
+.cuerpo.medio-5
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][centro_costo]", :value => "#{centro_costo}", :disabled => "disabled"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][fecha_pago_realizado]", :disabled => "disabled", :value => "#{@hoy}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][fecha]", :disabled => "disabled", :value => "#{@hoy}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}

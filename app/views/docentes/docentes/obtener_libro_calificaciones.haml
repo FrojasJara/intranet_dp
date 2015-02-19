@@ -1,0 +1,133 @@
+#libro-calificaciones
+	= datatable_src
+	= datatable "alumnos", {msg_zero: "No se han encontrado alumnos"}
+
+	:css
+		col.numero { width: 30px; }
+		col.rut { width: 100px; }
+		col.estado { width: 120px; }
+		col.instancia { width: 100px; }
+		col.np { width: 60px; }
+		col.ne { width: 65px; }
+		col.ner { width: 65px; }
+		col.nf { width: 65px; }
+		col.pgr { width: 65px; }
+		col.asistencia { width: 60px; }
+		col.trabajador { width: 60px; }
+
+		td.estado > i { display: none; }
+		td.aprobada { font-weight: bold; color: #426600; }
+		td.estado.aprobada i.icon-ok { display: inline-block; }
+		td.reprobada { font-weight: bold; color: red; }
+		td.estado.reprobada i.icon-remove { display: inline-block; }
+		td.justificada { font-weight: bold; }
+		td.ausentada { font-weight: bold; color: red; }
+		td.calificacion-final.no-asistio {
+			color: red;
+			font-weight: bold;
+		}
+
+		@media print {
+			td.estado > i { display: none !important; }
+		}
+
+		#libro-calificaciones th, #libro-calificaciones td {
+			vertical-align: middle;
+			line-height: normal;
+		}
+
+		#libro-calificaciones th.calificacion-parcial {
+			background-color: #426600 !important;
+			color: white !important;
+		}
+		#libro-calificaciones th.calificacion-final {
+			background-color: #4A9FFF !important;
+			color: white !important;
+		}
+		th.calificacion-parcial span { display: block !important; font-size: 10px; }
+		th.calificacion-parcial span.ponderacion { font-weight: bold; }
+
+		td.calificacion-parcial { background-color: #E1FFD5 !important; }
+		td.calificacion-final { background-color: #DFECFF !important; }
+
+	.page-header
+		%h1 Libro de calificaciones
+
+	= render "docentes/docentes/partials/seleccion_periodo_seccion" if @existe_seccion
+
+	= notificaciones
+
+	- if not @seccion.nil? and @existen_datos
+		= render "docentes/docentes/partials/informacion_tabulada_seccion"
+		%table.table.table-condensed#alumnos
+			%colgroup
+				%col.numero
+				%col.rut
+				- if @es_presencial
+					%col.trabajador
+					%col.asistencia
+				%col.alumno
+				%col.estado
+				- @libro[:planificaciones].each do
+					%col.instancia
+				- if @es_presencial
+					%col.pgr
+				%col.np
+				%col.ne
+				%col.ner
+				%col.nf
+			%thead
+				%tr
+					%th.txCenter #
+					%th.txLeft Rut
+					- if @es_presencial
+						%th.txCenter T.
+						%th.txCenter Asis.
+					%th.txLeft Alumno
+					%th.txLeft Estado
+					- @libro[:planificaciones].each do |item|
+						%th.txCenter.calificacion-parcial
+							%span.instancia= item.nombre
+							%span.ponderacion= "(#{item.ponderacion}%)"
+					- if @es_presencial
+						%th.txCenter.calificacion-parcial P. G. R.
+					%th.txCenter N. P.
+					%th.txCenter.calificacion-final N. E.
+					%th.txCenter.calificacion-final N. E. R.
+					%th.txCenter.calificacion-final N. F.
+			%tbody
+				- @libro[:alumnos].each_with_index do |item, index|
+					- estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado
+					%tr
+						%td.txCenter= index + 1
+						%td.txLeft= item[:datos].rut
+						- if @es_presencial
+							%td.txCenter
+								- if not item[:trabajador].nil?
+									%i.icon-ok
+							%td.txCenter= "#{item[:inscripcion].porcentaje_horas_asistidas}%"
+						%td.txLeft= item[:datos].nombre
+						%td{:class => "txLeft estado #{estado}"}
+							%i.icon-ok
+							%i.icon-remove
+							= estado
+
+						- item[:calificaciones].each do |calificacion|
+							- nota = calificacion[:nota]
+							- estado_nota = get_name(CalificacionParcial, "ESTADOS", calificacion[:estado_nota])
+							%td{:class => "txCenter calificacion-parcial #{estado_nota}"}
+								- if calificacion[:planificacion].estado == PlanificacionCalificacion::APLICADA
+									- if not calificacion[:estado_nota] == CalificacionParcial::JUSTIFICADA
+										= calificacion[:nota]
+									- else
+										P. G. R.
+						- if @es_presencial
+							%td.txCenter.pgr.calificacion-parcial= item[:inscripcion].nota_global_recuperativa
+						%td.txCenter= item[:inscripcion].nota_presentacion
+
+						- asistio_examen = (not item[:inscripcion].asistio_examen.nil? and not item[:inscripcion].asistio_examen)
+						%td{:class => "txCenter calificacion-final #{asistio_examen ? 'no-asistio' : ''}"}= item[:inscripcion].nota_examen
+
+						- asistio_examen_repeticion = (not item[:inscripcion].asistio_examen_repeticion.nil? and not item[:inscripcion].asistio_examen_repeticion)
+						%td{:class => "txCenter calificacion-final #{asistio_examen_repeticion ? 'no-asistio' : ''}"}= item[:inscripcion].nota_examen_repeticion
+						%td.txCenter.calificacion-final= item[:inscripcion].nota_final

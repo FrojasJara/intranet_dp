@@ -1,0 +1,28 @@
+:javascript
+	$(document).ready(function() {
+		$("form.secciones-abiertas").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+			},
+			submitHandler: function(form) {
+				location.href = $(form).find("select.secciones").val();
+			}
+		})
+		var valor = $("select.secciones option[value$='#{(not @seccion.nil?) ? @seccion.id : nil}']").val();
+		$("select.secciones").val(valor);
+	})
+
+= form_tag "#", :class => "secciones-abiertas", :method => "get" do
+	%fieldset
+		%legend Selección de la sección
+		%ul
+			%li.ui-helper-clearfix
+				%div.contenedorElemento.separador
+					%label Sección
+					%select.secciones.required{:name => "secciones"}
+						%option{:value => ""} :: Seleccione una sección ::
+						- @asignaturas_abiertas.each do |a|
+							%option{:value => "#{current_url @usuario.id, a[:seccion_id]}"}= a[:asignatura]
+					
+				%div.contenedorElemento.separador
+					%input.btn.btn-primary{:type => "submit", :value => "Consultar", :style => "margin-top: 19px;"}

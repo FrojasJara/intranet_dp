@@ -1,0 +1,81 @@
+.modal.fade.hide{:id => "editar_planificacion", :style => "width: 700px"}	
+	.modal-header
+		%button.close.restaurar{:data => {:dismiss => "modal"}}
+			x
+		%h3
+			%span= "#{asignatura.nombre} - #{@seccion.nombre}"
+	.modal-body
+		%form#form_actualizar_planificacion{action: registrar_modificacion_planificacion_seccion_path, method: "post"}
+			%table.table.table-striped#edicion
+				%thead
+					%tr
+						%th.TxtLft Número
+						%th.TxtLft Nombre
+						%th.TxtLft Tipo
+						%th.TxtLft Fecha / Ponderacion
+				%tbody
+					- @notas_planificadas.each do |i|
+						%tr{:class => "#{i.id}"}
+							%td
+								%input.span1.required{type: "text", name: "planificacion[#{i.id}][numero]", value: "#{i.numero}"}
+							%td= i.nombre_nota
+							%td= i.tipo_nota
+							%td
+								%input.span2.fechas.required{type: "text", name: "planificacion[#{i.id}][fecha_comprometida]", value: "#{i.fecha_comprometida}"}
+								%input.span1.ponderacion_nota.required{type: "text", name: "planificacion[#{i.id}][ponderacion_porcentual]", value: i.ponderacion}
+	.modal-footer{style: "background-color: white;"}
+		%button.btn.btn-default.restaurar{:data => {:dismiss => "modal"}}
+			Cancelar
+		%button.btn.btn-warning#btn_actualizar_planificacion
+			Guardar
+			%i.icon.icon-white.icon-hdd
+:javascript
+	$(document).ready(function(){
+		var htmlForm = $("#form_actualizar_planificacion").html();
+		$(".restaurar").on("click", function(){
+			$("#edicion").remove();
+			$( "#form_actualizar_planificacion" ).html( htmlForm );
+		});
+		$("#btn_actualizar_planificacion").on("click", function(){
+			$("#form_actualizar_planificacion").submit();
+		});
+
+		$("#form_actualizar_planificacion").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Modificar Planificación", "<strong>Recuerde!</strong> especificar la información de las fechas y de la ponderación de cada evaluación.");
+			},
+				submitHandler: function(form) {
+					
+					if($("#form_actualizar_planificacion").find("input[type='text']:not(:disabled)").length > 0)
+					{
+						var suma = 0.0;
+						$.each($(".ponderacion_nota"), function(index, value) {
+							console.log(value.value);
+							suma += parseFloat(value.value);
+						});
+						suma = suma.toFixed(2)
+						console.log(suma);
+						if(suma == 1){
+							form.submit();
+							notify_info("Editando Planificacion", "<strong>Aguarde!</strong> mientras la planificación de notas esta siendo registra.");
+						}
+						else
+						{
+							notify_info("Planificar Evaluación", "<strong>Atención!</strong> la ponderación debe dar exactamente <b>1</b> .");	
+						}
+					}
+					else
+					{
+						notify_info("Modificar Planificación", "<strong>Recuerde!</strong> Seleccionar al menos una fecha a modificar!");					
+					}
+				}
+		});
+
+		$(".checkbox-modificar-planificacion").change(function() {
+			$(this).prev().attr("disabled", ! this.checked);
+			$(this).prev().prev().attr("disabled", ! this.checked);
+		});
+		$(".fechas").live("focusin", function(){
+			$(this).datepicker();
+		});
+	});

@@ -1,0 +1,313 @@
+.page-header
+    = breadcrumb [["Extensión de plan de pago", matriculas_extender_path], "Rut"]
+
+= notificaciones
+
+= @us_alumno.inspect
+%br
+
+= @matriculas.inspect
+= render "matriculas/matriculas/admision/partials/assets"
+
+= form_tag "#{matriculas_registrar_superior_ip_path}", :method => "post", :class => "admision admision-superior" do
+    .fixed-header
+        .page-header
+            %h1
+                Extensión plan de pagos
+                %small de alumnos superiores
+
+        %ul.admision-nuevo.nav.ui-helper-clearfix
+            %li
+                %a{:href => "#identificacion-alumno"}   1. Identificación del alumno
+            %li
+                %a{:href => "#datos-personales-apoderado"} 2. Datos del apoderado
+            %li
+                %a{:href => "#descuentos"} 3. Cálculo del arancel
+            %li
+                %a{:href => "#planes-pago"} 4. Planes de pago
+            %li
+                %a{:href => "#documento-venta"} 5. Emisión de documentos
+
+        %button.btn.btn-primary.loading-button{:type => "submit", :data => {"loading-text" => "... matriculando ..."}}
+            %i.icon-white.icon-ok
+            Matricular
+
+    .matricula-superior.contenedor-matricula
+
+        #datos-personales-postulante.bloque
+            .page-header
+                %h2 Datos personales del postulante
+            %legend Identificación
+            .control-group
+                %label.control-label (*) R.U.N.
+                .controls
+                    %input.rut.input-xlarge.required.r39{:type => "text", :name => "usuario_alumno[rut]", :maxlength => 10, value: @us_alumno.rut, readonly: true}
+                    %input.n1{:type => "hidden", :name => "rut_alumno"}
+
+            %br
+            .control-group
+                %label.control-label (*) Primer nombre
+                .controls
+                    %input.required.input-large.x3.r39{:type => "text", :name => "usuario_alumno[primer_nombre]", :maxlength => 25, value: @us_alumno.primer_nombre}
+            .control-group
+                %label.control-label Segundo nombre
+                .controls
+                    %input.input-large.x3.r39{:type => "text", :name => "usuario_alumno[segundo_nombre]", :maxlength => 25, value: @us_alumno.segundo_nombre}
+            .control-group
+                %label.control-label (*) Apellido paterno
+                .controls
+                    %input.required.input-large.x3.r39{:type => "text", :name => "usuario_alumno[apellido_paterno]", :maxlength => 25, value: @us_alumno.apellido_paterno}
+            .control-group
+                %label.control-label (*) Apellido materno
+                .controls
+                    %input.required.input-large.x3.r39{:type => "text", :name => "usuario_alumno[apellido_materno]", :maxlength => 25, value: @us_alumno.apellido_materno}
+            %br
+            .control-group
+                %label.control-label (*) F. nacimiento (dd/mm/aaaa)
+                .controls
+                    %input.required.input-medium.fecha.x3.r39{:type => "text", :name => "usuario_alumno[fecha_nacimiento]", :maxlength => 10, value: l(@us_alumno.fecha_nacimiento)}
+            .control-group
+                %label.control-label (*) Estado civil
+
+                .controls
+                    %select.required.input-xlarge.x3.r39{:name => "usuario_alumno[estado_civil]"}
+                        %option{:value => ""} :: Seleccione un estado civil ::
+                        - @estados_civiles.each do |estado|
+                            %option{:value => "#{Usuario.const_get estado}", selected: (Usuario.const_get(estado).to_i == @us_alumno.estado_civil)}= get_name Usuario, "ESTADOS_CIVILES", Usuario.const_get(estado)
+            .control-group
+                %label.control-label (*) Sexo
+                .controls
+                    - @sexos.each do |sexo|
+                        %label.radio.inline
+                            %input.required.r39.zr{:type => "radio", :value => "#{Usuario.const_get sexo}", :name => "usuario_alumno[sexo]", checked: Usuario.const_get(sexo).eql?(@us_alumno.sexo)}= get_name Usuario, "SEXOS", Usuario.const_get(sexo)
+            %br
+            .control-group
+                %label.control-label (*) Domicilio
+                .controls
+                    %input.required.input-xlarge.x3.r39.ic{:type => "text", :name => "usuario_alumno[domicilio]", :maxlength => 255, value: @us_alumno.domicilio}   
+            .control-group
+                %label.control-label Villa/Población
+                .controls
+                    %input.input-xlarge.x3.r39.ic{:type => "text", :name => "usuario_alumno[villa_poblacion]", :maxlength => 255, value: @us_alumno.villa_poblacion}
+            %br
+            .control-group
+                %label.control-label Teléfono fijo
+                .controls
+                    %select.x3.r39.ic{:type => "text", :style => "width: 40px; padding: 3px;", :name => "usuario_alumno[codigo_area_telefono]"}
+                        %option{:value => ""} -
+                        - @codigos_fijos.each do |codigo|
+                            %option{:value => "#{codigo}", selected: (codigo.to_s == @us_alumno.codigo_area_telefono.to_s)}= codigo
+                    %input.required.input-small.x3.r39.ic{:type => "text", :name => "usuario_alumno[telefono_fijo]", :maxlength => 8, value: @us_alumno.telefono_fijo}
+            .control-group
+                %label.control-label Teléfono móvil
+                .controls
+                    %input.input-small.x3.r39.ic{:type => "text", :name => "usuario_alumno[telefono_movil]", :maxlength => 8, value: @us_alumno.telefono_movil}  
+            .control-group
+                %label.control-label Email
+                .controls.input-prepend{:style => "width: 260px;"}
+                    %span.add-on @
+                    %input.sin_enie.email.input-large.x3.r39.ic{:type => "text", :name => "usuario_alumno[email]", :maxlength => 50, value: @us_alumno.email}
+            %br
+            %legend Procedencia
+            .control-group
+                %label.control-label (*) Región
+                .controls
+                    %select.required.span2.x3.r39{:name => "usuario_alumno[region_id]"}
+                        %option{:value => ""} :: Seleccione una región ::
+                        - @regiones.each do |region|
+                            %option{:value => "#{region.id}", selected: region.id == @us_alumno.region_id}= region.nombre
+            .control-group
+                %label.control-label (*) Comuna
+                .controls
+                    %select.required.span2.x3.r39{:name => "usuario_alumno[comuna_id]"}
+                        %option{:value => ""} :: Seleccione una comuna ::
+                        - Comuna.all( region_id: @us_alumno.region_id ).each do |i|
+                            %option{value: i.id, selected: i.id == @us_alumno.comuna_id}= i.nombre
+
+            .control-group
+                %label.control-label (*) País de origen
+                .controls
+                    %select.required.span2.x3.r39{:name => "usuario_alumno[pais_id]"}
+                        %option{:value => ""} :: Seleccione un país ::
+                        - @paises.each do |pais|
+                            %option{:value => "#{pais.id}"}= pais.nombre
+            .control-group
+                %label.control-label (*) E. educacional
+                .controls
+                    %select.required.span2.x3.r39.kp{:name => "alumno[establecimiento_educacional]"}
+                        %option{:value => ""} :: Seleccione una procedencia ::
+                        - @procedencias.each do |procedencia|
+                            %option{:value => "#{Alumno.const_get procedencia}", selected: Alumno.const_get(procedencia).eql?(@us_alumno.alumno.establecimiento_educacional)}= get_name Alumno, "EST_EDUCACIONALES", Alumno.const_get(procedencia)
+                    = @us_alumno.alumno.inspect
+            .control-group
+                %label.control-label (*) Medio
+                .controls
+                    %select.required.span2.x3.r39.kp{:name => "matricula_plan[medio]"}
+                        %option{:value => ""} :: Seleccione una medio ::
+                        - @medios.each do |medio|
+                            %option{:value => "#{Cotizacion.const_get medio}", selected: Cotizacion.const_get(medio).eql?(@matriculas.last.medio)}= get_name Cotizacion, "MEDIOS", Cotizacion.const_get(medio)
+            %legend Documentos presentados
+            .control-group
+                .controls
+                    - @documentos_alumno.each do |documento|
+                        %label.checkbox.inline
+                            %input.required.r39.zr.da{:type => "checkbox", :name => "documentos_alumno[]", :value => "#{Alumno.const_get(documento)}", :disabled => "disabled"}= get_name Alumno, "DOCUMENTOS", Alumno.const_get(documento)
+
+            .control-group{:style => "display: block"}
+                .controls
+                    %label{:style => "font-weight: bold;"} Si el alumno no ha presentado algún documento, ingrese a los siguientes enlaces:
+                    .controls
+                        %a{:href => "http://certificados.mineduc.cl/mvc/home/index", :style => "display: block;", :target => '_blank'}
+                            %i.icon-download-alt
+                            Licencia de Enseñanza Media
+                        %a{:href => "https://www.registrocivil.cl/OficinaInternet/servlet/MuestraPagina?contexto=0&pagina=/OficinaInternet/servlet/HomeVenta", :style => "display: block;", :target => '_blank'}
+                            %i.icon-download-alt
+                            Certificado de Nacimiento
+
+            %input.integridad-postulante.required.n1{:type => "hidden", :name => "integridad-postulante"}
+            %input{:type => "hidden", :name => "matricula_plan[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+            %input{:type => "hidden", :name => "plan_pago[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+
+        :javascript
+            $(document).ready(function(){
+                var $contenedor_postulante = $("#datos-personales-postulante");
+
+                // Todo el formulario menos el rut, los botones, el sexo y los documentos
+                var $x3 = $contenedor_postulante.find(":input.x3");
+
+                // Todos los campos del formulario menos los botones
+                var $r39 = $contenedor_postulante.find(":input.r39");
+
+                // Los documentos del alumno y el sexo
+                var $zr = $contenedor_postulante.find(":input.zr");
+
+                // Solo los documentos del alumno
+                var $da = $contenedor_postulante.find(":input.da");
+                
+                /* | Datos de contacto |
+                 * | Domicilio, Villa/poblacion, Telefono fijo, Telefono movil, Email |
+                 */
+                var $ic = $contenedor_postulante.find(":input.ic");
+
+                /* | Documentos que un usuario/postulante (no alumno) debe presentar |
+                 * | Establecimiento educacional, medio |
+                 */
+                var $kp = $contenedor_postulante.find(":input.kp");
+
+                var $primer_nombre = $contenedor_postulante.find("input[name='usuario_alumno[primer_nombre]']");
+                var $boton_buscar = $contenedor_postulante.find("button.buscar-alumno");
+                var $boton_cambiar = $contenedor_postulante.find("button.cambiar-postulante");
+                var $rut = $contenedor_postulante.find("input.rut");
+                var $medio = $contenedor_postulante.find("input[name='matricula_plan[medio]'']");
+         
+                $("select[name='usuario_alumno[pais_id]']").val(1);
+                $("select[name='usuario_alumno[region_id]']").change(function() {
+                    var valor = $(this).val();
+                    var $comunas = $("select[name='usuario_alumno[comuna_id]']");
+                    if (valor) {
+                        $.getJSON(
+                            "#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+                            function(data) {
+                                var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+                                $(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+                                $comunas.html(nuevos).removeAttr("disabled");
+                            }
+                        )
+                    } else {
+                        $comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", true);
+                    }
+                })
+
+                $boton_buscar.click(function(e) {
+                    e.preventDefault();
+                    $x3.val("");
+
+                    if ( $rut.val() && rut_valido($rut.val()) ) {
+                        notify_loader("Proceso de matrículas", "Por favor, aguarda un momento mientras realizamos la búsqueda ...");
+                        // Solo el ID del alumno y la verificacion si es alumno
+                        $contenedor_postulante.find(":input.h5").remove();
+                        $.getJSON(
+                            "#{url_postulante 1}".replace("1", $rut.val()),
+                            function(data) {
+                                notify_close();
+                                if( data.exito ) {
+                                    if ( data.data ) {
+                                        // Alumno matriculable que ya existe en el sistema
+                                        notify_notice("Proceso de matrículas", data.mensaje);
+                                        var datos = data.data;
+
+                                        $("input[name='usuario_alumno[primer_nombre]']").val(datos.primer_nombre);
+                                        $("input[name='usuario_alumno[segundo_nombre]']").val(datos.segundo_nombre);
+                                        $("input[name='usuario_alumno[apellido_paterno]']").val(datos.apellido_paterno);
+                                        $("input[name='usuario_alumno[apellido_materno]']").val(datos.apellido_materno);
+                                        $("input[name='usuario_alumno[fecha_nacimiento]']").val(datos.fecha_nacimiento);
+                                        $("input[name='usuario_alumno[sexo]']").val([datos.sexo]);
+                                        $("select[name='usuario_alumno[estado_civil]']").val(datos.estado_civil);
+                                        $("input[name='usuario_alumno[domicilio]']").val(datos.domicilio);
+                                        $("input[name='usuario_alumno[villa_poblacion]']").val(datos.villa_poblacion);
+                                        $("select[name='usuario_alumno[codigo_area_telefono]']").val(datos.codigo_area_telefono);
+                                        $("input[name='usuario_alumno[telefono_fijo]']").val(datos.telefono_fijo);
+                                        $("input[name='usuario_alumno[telefono_movil]']").val(datos.telefono_movil);
+                                        $("input[name='usuario_alumno[email]']").val(datos.email);
+                                        $("select[name='usuario_alumno[region_id]']").val(datos.region_id);                         
+                                        $("select[name='usuario_alumno[pais_id]']").val(datos.pais_id);
+                                        $("select[name='usuario_alumno[comuna_id]']").html("<option value='' selected='selected'>" + datos.comuna + "</option>");
+
+                                        if (data.es_alumno) {
+                                            $contenedor_postulante.append("<input type='hidden' class='h5' name='inscripcion_plan[alumno_id]' value='" + datos.alumno_id + "'>");
+                                            $r39.not($rut).attr("disabled", "disabled").css("border", "1px solid lightGrey;");
+                                        } else {
+                                            $da.removeAttr("disabled");
+                                            $kp.removeAttr("disabled");
+                                            $medio.removeAttr("disabled");
+                                            $r39.not($da).not($rut).not($kp).attr("disabled", "disabled").css("border", "1px solid lightGrey;");
+                                        }
+
+                                        $contenedor_postulante.append("<input type='hidden' class='h5' name='usuario_postulante_id' value='" + datos.id + "'>");
+                                        $ic.removeAttr("disabled")              
+                                        formulario_integro();
+                                        
+                                    } else {
+                                        // Alumno matriculable que no existe en el sistema
+                                        notify_notice("Proceso de matrículas", data.mensaje);
+                                        $r39.removeAttr("disabled");
+                                        $x3.val("");
+                                        formulario_integro();
+                                        $primer_nombre.focus();
+                                    }
+                                    $rut.attr("readonly", "readonly");
+                                    $boton_buscar.hide();
+                                    $boton_cambiar.show();
+                                } else {
+                                    // Alumno que no se puede matricular por sus estado academico/administrativo
+                                    $x3.val("");
+                                    $r39.not($rut).attr("disabled", "disabled").css("border", "1px solid lightGrey;");
+                                    $rut.focus();
+                                    formulario_no_integro();
+                                    notify_error("Proceso de matrículas", data.mensaje);
+                                }
+                            }
+                        );
+                    } else {
+                        notify_info("Proceso de matrículas", "Por favor, ingrese un rut válido.");
+                        formulario_no_integro();
+                        $rut.focus();
+                    }
+                })
+                
+                $boton_cambiar.click(function(e) {
+                    e.preventDefault();
+
+                    $x3.val("").attr("disabled", "disabled");
+                    $zr.attr("disabled", "disabled");
+
+                    formulario_no_integro();
+                    $rut.removeAttr("readonly").val("").focus();
+
+                    $(this).hide();
+                    $boton_buscar.show();
+                })
+
+                function formulario_integro() { $contenedor_postulante.find("input.integridad-postulante").val("OK"); }
+                function formulario_no_integro() { $contenedor_postulante.find("input.integridad-postulante").removeAttr("value"); }
+            })

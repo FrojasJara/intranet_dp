@@ -1,0 +1,16 @@
+:css
+	.bloque_formulario .control-group{display:inline-block;}
+
+%div#contenedor_ingresar_carrera
+	%div.bloque_formulario
+		%h2 Información Carrera de Origen
+		%div#form-carrera-convalidar
+			%fieldset
+				%div.control-group
+					%label.control-label Carrera a Homologar
+					%div.controls
+						%input.required{type: "text", :name => "carrera_convalidada[carrera_nombre]"}
+				%div.control-group
+					%label.control-label Número Documento
+					%div.controls
+						%input.required{type: "text", :name => "carrera_convalidada[numero_documento]"}

@@ -1,0 +1,69 @@
+%h2 Matrículas
+%ul.nav.nav-list
+    %li.nav-header Admisión
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            Admisión
+            %i.icon.icon-chevron-right
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{matriculas_admision_nuevo_ip_path}"} Alumnos nuevos
+            %li
+                %a{:href => "#{matriculas_admision_superior_ip_path}"} Alumnos superiores  
+            %li
+                %a{:href => "#{matriculas_admision_convalidado_path}"} Convalidación - Traslado
+            %li
+                %a{:href => "#{matriculas_admision_extension_path}"} Extensiones plan pago    
+
+    %li.divider
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            Buscar procesos de matrículas
+            %i.icon.icon-chevron-right
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{matriculas_buscar_por_numero_path}"} Por número
+            %li
+                %a{:href => "#{matriculas_buscar_por_rut_path}"} Por rut de alumnos
+    %li.divider          
+    %li.nav-header Pagares
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            Buscar pagares
+            %i.icon.icon-chevron-right
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{matriculas_pagare_buscar_por_numero_path}"} Por número
+
+            %li
+                %a{:href => "#{matriculas_pagare_buscar_por_rut_path}"} Por rut de alumnos
+
+    %li.nav-header Pagos
+    %li
+        %a{:href => matriculas_pagos_buscar_alumno_path} Recepción de pagos
+    %li
+        %a{:href => matriculas_certificados_path} Emisión de certificados
+    %li
+        %a.usa_tooltip{:href => matriculas_documento_venta_path, :title => 'Buscar Boletas y Facturas para<br />visualización o modificación de<br /> número y/o fecha', 'data-placement' => 'right'} Buscar Doc. Venta
+    %li
+        %a.usa_tooltip{:href => matriculas_pagos_ingresar_path, :title => 'Ingresar Boletas y Facturas de<br />Alumnos antiguos o no registrados', 'data-placement' => 'right'} Ingresar Doc. Venta
+
+
+    %li.nav-header Informes
+    %li
+        %a{:href => "#{pagos_detalle_cajas_diarias_path}"} Detalle de cajas diarias
+    %li
+        %a{:href => "#{matriculas_informes_path}"} Generar informes
+    %li.nav-header Cobranzas
+    %li
+        %a{:href => matriculas_cobranzas_envio_mails_listados_path} Envío Mails Cobranza
+    %li
+        %a{:href => matriculas_cobranzas_envio_mails_mails_matricula_path} Envío Mails Matricula
+    %li.nav-header Consultas
+    %li
+        %a{href: tipo_matriculas_cotizacion_path} Nueva consulta
+    %li
+        %a{:href => "#{matriculas_cotizacion_path}"} Consultas realizadas 
+    %li
+        %a{:href => matriculas_cotizaciones_informes_path} Informes 
+

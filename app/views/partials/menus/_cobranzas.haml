@@ -1,0 +1,51 @@
+%h2 Cobranzas
+%ul.nav.nav-list
+    / %li.nav-header Ejecutivos
+    / %li
+    /     %a{:href => cobranzas_ejecutivos_ingreso_ejecutivo_matricula_path} Ejecutivos
+    %li.nav-header Talonarios
+    %li
+        %a{:href => cobranzas_rangos_documentos_talonarios_path} Talonarios
+    %li.nav-header Matrículas
+    %li
+        %a{:href => cobranzas_matriculas_informes_path} Informes
+    / %li
+    /     %a{:href => cobranzas_matriculas_anulacion_path} Anulación Plan
+    %li
+        %a{:href => cobranzas_matriculas_edicion_path} Edición Planes
+    %li
+        %a{:href => cobranzas_matriculas_beneficio_path} Beneficios Postmatricula
+    %li
+        %a{:href => cobranzas_matriculas_postbeneficio_path} Beneficios Sobre Beneficio
+    %li.nav-header Tesorería
+    %li
+        %a{:href => cobranzas_tesoreria_informe_path} Informes
+    %li.nav-header Morosos
+    %li
+        %a{:href => cobranzas_morosos_informe_path} Informes
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            Cobranza Externa
+            %i.icon.icon-chevron-right
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => cobranzas_morosos_cobranza_externa_ingreso_path} Ingreso Cobranza Externa
+            %li
+                %a{:href => cobranzas_morosos_cobranza_externa_informes_path} Listado Cuotas Envio Cobranza Externa
+            %li
+                %a{:href => cobranzas_morosos_cobranza_externa_informe_letras_situacion_pagadas_path} Listado Cuotas Con Situación Pagadas
+    %li.nav-header Pagos
+    %li
+        %a{:href => cobranzas_pagos_index_path} Arreglar pagos
+    %li
+        %a{:href => cobranzas_pagos_repactacion_path} Repactaciones
+
+%h2 Alumno
+%ul.nav.nav-list
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Asistencia
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => apoyo_docente_buscar_alumno_path} Resumen Asistencia/Notas Alumno

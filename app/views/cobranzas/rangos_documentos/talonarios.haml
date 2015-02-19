@@ -1,0 +1,168 @@
+:css
+    input{
+        width:80px !important;
+    }
+    legend{
+        font-weight: bold;
+    }
+    .no-mostrar{
+        display: none;
+    }
+    label{
+        float: left;
+        width:125px;
+        font-weight: bold;
+    }
+
+.page-Header
+    %h1 Gestión de Talonarios
+
+= notificaciones
+
+= form_for :talonarios, url: cobranzas_rangos_documentos_recepcion_path, html: {class: 'form-inline informacion-tabulada',id: 'talonarios'} do |f|
+    %fieldset
+        %select.required{:name => "ejecutivo", :id => "ejecutivo"}
+            - @ejecutivos_matriculas = @ejecutivos_matriculas.sort_by{|ejecutivo| ejecutivo.datos_personales.nombre}
+
+            %option{value: ""} .: Seleccione un Ejecutivo :.
+            
+            - @ejecutivos_matriculas.each do |ejecutivo|
+                %option{value: ejecutivo[:id]}= ejecutivo.datos_personales.nombre
+        %select.required{:name => "talonario", :id => "talonario"}
+            %option{value: ""} .: Seleccione un Talonario :.
+        %input{type: 'hidden',id: 'talonario_id',value:'',name: 'talonario_id'}
+        %input{type: 'submit', id: 'cerrar', class: 'btn btn-primary', value: 'Recepción'}
+        / %input{type: 'submit', id: 'actualizar', class: 'btn btn-primary', value: 'Modificar'}
+        %br
+        %br
+        %a{id: 'agregar',class: 'btn btn-success'}
+            %i{class: 'icon-white icon-plus-sign'}
+            Agregar Talonario
+
+%form{id: 'insertar-talonario', class: 'no-mostrar',method: 'post', action: cobranzas_rangos_documentos_agregar_path}
+    %fieldset
+        %legend Ingrese información del talonario que desea agregar
+        %br
+        %input.required{type: 'hidden', id: 'ejecutivo_id', value: '', name: 'ejecutivo_id'}
+        %input.required{type: 'hidden', id: 'institucion_id', value: '1', name: 'institucion_id'}
+        .control-group
+            %label.control-label Rango inicio:
+            .controls
+                %input{type: 'number', id: 'inicio', value: 0, name: 'inicio',min: 0}
+        .control-group
+            %label.control-label Rango fin:
+            .controls
+                %input{type: 'number', id: 'fin', value: 0, name: 'fin',min: 0}
+        .control-group
+            %label.control-label Número Talonario:
+            .controls
+                %input{type: 'number', id: 'numero', value: 0, name: 'numero',min: 0}
+        .control-group
+            %label.control-label Tipo:
+            .controls
+                %select.input-medium{:id=>"tipo",:name=>"tipo"}
+                    - RangoDocumento::TIPOS.each_with_index do |tipo,index|
+                        %option{value: index+1}= tipo
+        .control-group
+            %label.control-label Centro Costos:
+            .controls
+                %select.input-medium{:id=>"centro_costos",:name=>"centro_costos"}
+                    - RangoDocumento::CENTRO_COSTOS.each_with_index do |cc,index|
+                        %option{value: index+1}= cc
+        %input.btn.btn-success{type: 'submit', value: 'Guardar'}
+
+:javascript
+    $(document).ready(function() {
+        $("#ejecutivo").change(function(){
+            $('#ejecutivo_id').val($(this).val());
+
+            $('#talonario_id').val('');
+
+            var ejecutivo_matriculas_id = $(this).val();
+            $.ajax({
+                url: "#{ajax_cobranzas_buscar_talonarios_path}",
+                type: 'POST',
+                data: {ejecutivo_matriculas_id : ejecutivo_matriculas_id},
+                success: function(data) {
+                    var options = "<option value=''>.: Seleccione un Talonario :.</option>";
+                    $.each(data.talonarios, function(key,value){
+                        options = options +  
+                                "<option value="+value.id+">"+ 
+                                    value.inicio+"-"+value.fin+" ("+value.nombre+")"+
+                                "</option>"
+                    });
+                    $("#talonario").html(options);
+                }
+            });
+        });
+
+        $("#talonarios").validate({
+            invalidHandler: function(form, validator) {
+                notify_error("Error Recepción Talonario", "Por favor, compruebe que ha seleccionado el ejecutivo y talonario asociado al ejecutivo.");
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        });
+
+        $("#insertar-talonario").validate({
+            invalidHandler: function(form, validator) {
+                notify_error("Error Guardar Talonario","Seleccione un ejecutivo.");
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        });
+
+        $("#agregar").click(function(){
+            if($('#insertar-talonario').attr('class') == 'no-mostrar'){
+                $('#insertar-talonario').removeClass('no-mostrar');
+                
+                $("#agregar").removeClass('btn-success');
+                $("#agregar").addClass('btn-warning');
+
+                $("#agregar i").removeClass('icon-plus-sign');
+                $("#agregar i").addClass('icon-minus-sign');
+            }
+            else{
+                $('#insertar-talonario').addClass('no-mostrar');
+
+                $("#agregar").removeClass('btn-warning');
+                $("#agregar").addClass('btn-success');
+
+                $("#agregar i").removeClass('icon-minus-sign');
+                $("#agregar i").addClass('icon-plus-sign');
+            }
+        });
+
+        /* Incluir todos los centro de costos */
+        $("#centro_costos").change(function(){
+            //Centros costo IP
+            if($('#centro_costos').val() == 3 || $('#centro_costos').val() == 4 || $('#centro_costos').val() == 1){
+                $('#institucion_id').val(1);
+            }
+            //Centro costo CFT
+            else if($('#centro_costos').val() == 2){
+                $('#institucion_id').val(2);
+            }
+            //Centro costo CEIA
+            else if($('#centro_costos').val() == 5){
+                $('#institucion_id').val(3);
+            }
+            //Centro costo PREU
+            else if($('#centro_costos').val() == 6){
+                $('#institucion_id').val(4);
+            }
+            //Centro costo OTEC
+            else if($('#centro_costos').val() == 7){
+                $('#institucion_id').val(5);
+            }
+            else{
+                $('#institucion_id').val('');
+            }
+        });
+
+        $("#talonario").change(function(){
+            $('#talonario_id').val($(this).val());
+        });
+    })

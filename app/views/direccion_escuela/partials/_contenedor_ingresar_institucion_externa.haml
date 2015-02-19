@@ -1,0 +1,66 @@
+:css
+	.bloque_formulario .control-group{display:inline-block;}
+
+%div#contenedor_ingresar_institucion_externa{style:"display:none;"}
+	%h2 Información Institución
+	%div.bloque_formulario
+		%form#form-ingresar-institucion-externa
+			%div.control-group
+				%label.control-label Código
+				%div.controls
+					%input.required{:type => "text", :name => "institucion[codigo]"}
+			%div.control-group
+				%label.control-label Sector
+				%div.controls
+					%input.required{:type => "text", :name => "institucion[sector]"}
+			%div.control-group
+				%label.control-label Nombre Institución
+				%div.controls
+					%input.required{:type => "text", :name => "institucion[nombre]"}
+
+			%div.control-group
+				%label.control-label Domicilio
+				%div.controls
+					%input.required{type: "text", :name => "institucion[domicilio]"}
+			
+
+	%div.modal-footer
+		%button.btn#btn_cancelar_ingreso_institucion_externa Cancelar
+		%button.btn.btn-primary#btn-ingresar-nueva-institucion-externa Guardar
+
+:javascript
+	$(document).ready(function(){
+
+		$("#btn-ingresar-nueva-institucion-externa").on("click", function(){
+			$("#form-ingresar-institucion-externa").submit();
+		});	
+		
+		$("#form-ingresar-institucion-externa").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Ingresar Institución Externa", "<strong>Recuerde!</strong> Ingresar toda la información de la institucion, revise atentamente que toda la información este correcta.");
+				},
+				submitHandler: function(form) {
+					//form.preventDefault();
+					var values = $("#form-ingresar-institucion-externa").serialize();
+					$.post(
+						"#{ajax_direccion_escuela_ingresar_institucion_externa_nueva_path}", 
+						values,
+						function(data){
+							if(data.status)
+							{
+								notify_success("Guardar Institución","<strong>Éxito</strong> " + data.mensaje);
+							}
+							else
+							{
+								
+								notify_error("Guardar Institución","<strong>Error!</strong> " + data.mensaje);
+							}
+						}, 
+						"json"
+					);
+
+					$(this).trigger('reset');
+			}
+		});
+
+	});

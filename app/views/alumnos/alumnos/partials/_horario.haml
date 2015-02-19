@@ -1,0 +1,56 @@
+:css
+    table.horario-alumno.table tbody th { 
+        background-color: #EEE !important; 
+        text-align: center !important; 
+        vertical-align: middle !important; 
+    }
+    table.horario-alumno.table tbody td { 
+        text-align: center !important; 
+        border-right: 1px solid #DDD !important; 
+        border-top: none !important;
+        border-bottom: 1px solid #DDD !important;
+    }
+    table.horario-alumno.table tbody span { display: block; }
+    table.horario-alumno.table col.lunes { width: 140px; }
+    table.horario-alumno.table col.martes { width: 140px; }
+    table.horario-alumno.table col.miercoles { width: 140px; }
+    table.horario-alumno.table col.jueves { width: 140px; }
+    table.horario-alumno.table col.viernes { width: 140px; }
+    table.horario-alumno.table col.sabado { width: 140px; }
+     @media print {
+        table.horario-alumno.table td, table.horario-alumno.table th { 
+            line-height: normal !important; 
+            vertical-align: middle !important;
+        }
+         table.horario-alumno.table tbody th { font-weight: normal !important; font-size: 11px !important; }
+        table.horario-alumno.table col.bloque { width: 130px !important; }
+    }
+
+
+%table.table.table-condensed.horario-alumno
+    %colgroup
+        %col.bloque
+        %col.lunes
+        %col.martes
+        %col.miercoles
+        %col.jueves
+        %col.viernes
+        %col.sabado
+    %thead
+        %tr
+            %th.horario.horario  Bloque
+            %th.horario.horario  Lunes
+            %th.horario.horario  Martes
+            %th.horario.horario  Miercoles
+            %th.horario.horario  Jueves
+            %th.horario.horario  Viernes
+            %th.horario.horario  Sábado
+    %tbody
+        - @horario.each do |item|
+            %tr
+                %th= item[:bloque].nombre
+                - item[:dias].each do |item2|
+                    %td
+                        - if item2[:hay_clases?] and not item2[:topon?]
+                            .horario= item2[:asignaturas].last.nombre
+                            %span.horario= "(#{item2[:asignaturas].first.codigo})"

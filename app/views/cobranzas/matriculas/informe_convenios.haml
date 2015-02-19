@@ -1,0 +1,104 @@
+%h3 
+    Informe de convenios alumnos nuevos matriculados
+    = @p_f_i
+    = " - #{@p_f_t}" unless @p_f_t.blank?
+    - if @institucion_sede.blank?
+        = "- Todas las Sedes"
+    - else
+        = @institucion_sede.nombre
+
+%table#informe.table.table-condensed
+    %thead
+        %tr
+            %th Total de Alumnos 
+            %th Alumnos con Convenio
+            %th Alumnos sin Convenio
+    %tbody
+        - if @matriculas.blank? or @matriculas.count.eql? 0
+            %tr
+                %td{colspan: 11} No hay registros
+        - else
+            - alumnos_con_convenio = 0
+            - alumnos_sin_convenio = 0
+
+            - @matriculas.each do |item|
+                - plan_pago = item[:plan_pago]
+
+                - if !plan_pago.descuento_id.blank?
+                    - if plan_pago.descuento_id != 107
+                        - alumnos_con_convenio = alumnos_con_convenio.to_i + 1
+                    - else
+                        - alumnos_sin_convenio = alumnos_sin_convenio.to_i + 1
+                - else
+                    - if plan_pago.descuento_aplicado != 0
+                        - alumnos_con_convenio = alumnos_con_convenio.to_i + 1
+                    - else
+                        - alumnos_sin_convenio = alumnos_sin_convenio.to_i + 1
+                
+            %tr
+                %td{style: "text-align:center"}= alumnos_con_convenio + alumnos_sin_convenio
+                %td{style: "text-align:center"}= alumnos_con_convenio
+                %td{style: "text-align:center"}= alumnos_sin_convenio
+                
+%table#informe.table.table-condensed
+    %thead
+        %tr
+            %th #
+            %th Descuento
+            %th Cantidad de Alumnos 
+    %tbody
+        - if @descuentos.blank? or @descuentos.count.eql? 0
+            %tr
+                %td{colspan: 2} No hay registros
+        - else
+            - contador_sin_descuento = 0
+            - contador_con_descuento = 0
+            - indice = 0
+            - total = 0
+
+            - @descuentos.each_with_index do |descuento,index|
+                - contador = 0
+
+                %tr
+                    - if descuento.id != 107
+                        %td{style: "text-align:center"}= index + 1
+                        %td= descuento.nombre+" "+descuento.porcentaje.to_s+"%"
+                    
+                    - @matriculas.each do |matricula|
+                        - plan_pago = matricula[:plan_pago]
+                        
+                        - if plan_pago.descuento_id.blank?
+                            - if index == 0
+                                - if plan_pago.descuento_aplicado == 0
+                                    - contador_sin_descuento = contador_sin_descuento + 1
+                                - else 
+                                    - contador_con_descuento = contador_con_descuento + 1
+                        - else
+                            - if plan_pago.descuento_id == descuento.id
+                                - if plan_pago.descuento_id != 107
+                                    - contador = contador + 1
+                                - else
+                                    - contador_sin_descuento = contador_sin_descuento + 1
+
+                    - if descuento.id != 107
+                        %td{style: "text-align:center"}= contador
+                    - indice = index
+                    - total = total + contador
+
+            %tr 
+                %td{style: "text-align:center"}= indice + 2
+                %td= "Sin Convenio"
+                %td{style: "text-align:center"}= contador_sin_descuento
+            %tr 
+                %td{style: "text-align:center"}= indice + 3
+                %td= "Convenio Indefinido"
+                %td{style: "text-align:center"}= contador_con_descuento
+            %tr 
+                %td
+                %td= "Total"
+                %td{style: "text-align:center"}=total + contador_con_descuento + contador_sin_descuento
+            
+= datatable_src
+= datatable 'informe'
+
+

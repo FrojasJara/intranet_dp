@@ -1,0 +1,334 @@
+.page-header
+	%h1 Detalle de cajas diarias
+
+%form.form-search.busqueda.not-print{:action => "#{current_url}"}
+	%fieldset
+		%legend Caja diaria
+		%ul
+			%li.ui-helper-clearfix
+				%div.contenedorElemento.separador
+					%label Ejecutivo
+					%select{:name => "ejecutivo_id"}
+						- if @ejecutivo_matriculas.datos_personales.rol.cobranzas == true
+							- @ejecutivos.each do |item|
+								%option{:value => item[:id]}= item.datos_personales.nombre_corto
+						- else 
+							%option{:value => @ejecutivo_matriculas.id}= @ejecutivo_matriculas.datos_personales.nombre_corto
+				%div.contenedorElemento.separador
+					%label Fecha de consulta
+					%input.required.fecha.input-small{:type => "text", :name => "fecha", :value => "#{(@fecha) ? @fecha : @hoy}"}
+				%div.contenedorElemento.separador
+					%label Institución
+					%select{:name => "institucion_sede_id"}
+						- @instituciones_sedes.each do |item|
+							%option{:value => item[:institucion_sede_id]}= item[:nombre]
+				%div.contenedorElemento.separador
+					%label Modalidad
+					- @modalidades.each do |modalidad|
+						%input.required{:type => "radio", :name => "modalidad", :value => InstitucionSedePlan.const_get(modalidad)}
+						= get_name InstitucionSedePlan, "MODALIDADES", InstitucionSedePlan.const_get(modalidad)
+				%div.contenedorElemento.separador{:style => "margin-top: 19px;"}
+					%button.btn{:type => "submit"}
+						%i.icon-search
+						Consultar
+						
+					- if @mostrar_datos
+						%a.not-print.btn.btn-info.impresion{:href => "#"}
+							%i.icon-white.icon-print
+							Imprimir
+
+:javascript
+	$(document).ready(function() {
+		$("form.busqueda").validate({
+			invalidHandler: function(form) {
+				notify_info("Detalle de cajas diarias", "Por favor, ingrese información para realizar la búsqueda");
+			}
+		})
+
+		$("select[name='institucion_sede_id']").val(#{@institucion_sede_id});
+		$("input[name='modalidad']").val([#{@modalidad}]);
+	})
+
+= notificaciones
+
+- if @mostrar_datos
+	= render "matriculas/pagos/partials/informacion_tabulada_ejecutivo"
+
+	= datatable_src
+	= datatable "entradas"
+
+	%table.table.table-condensed.entradas#entradas
+		%colgroup
+			%col.tipo-documento
+			%col.numero
+			%col.estado
+			%col.fecha-pago
+			%col.centro-costo
+			%col.medio-pago
+			%col.numero-documento
+			%col.monto
+			%col.interes
+			%col.alumno
+			%col.rut
+			%col.carrera
+		%thead
+			%tr
+				%th.txLeft T. D.
+				%th.txLeft Número
+				%th.txCenter F. Pago
+				%th.txCenter C. C.
+				%th.txLeft Forma de pago
+				%th.txCenter Nro. Doc.
+				%th.txRight Valor
+				%th.txRight Interes
+				%th.txRight Total
+				%th.txLeft Alumno
+				%th.txLeft Rut
+				%th.txLeft Carrera
+				%th.txCenter Sede Plan
+		%tfoot
+			%tr
+				%th.txLeft Total
+				%td
+				%td
+				%td
+				%td
+				%td
+				%td.txRight= dinero @cajas.map{ |caja| caja[:abono].monto }.inject(:+)
+				%td.txRight= dinero @cajas.map{ |caja| caja[:abono].interes }.inject(:+)
+				%td.txRight= dinero @cajas.map{ |caja| (caja[:abono].monto + caja[:abono].interes) }.inject(:+)
+				%td
+				%td
+				%td
+				%td
+		%tbody
+			- @cajas.each do |caja|
+				- es_anonimo = caja[:anonimo] ? "anonimo" : ""
+				%tr{:class => es_anonimo}
+					%td.txLeft= get_name DocumentoVenta, "TIPOS", caja[:documento].tipo
+					%td.txLeft= caja[:documento].numero
+					//%td.txLeft= get_name DocumentoVenta,"ESTADOS", caja[:documento].estado
+					%td.txCenter= fecha_humana2 caja[:documento].fecha_emision
+					%td.txCenter= caja[:tipo_abono].nombre
+					%td.txLeft= caja[:medio_pago]
+					%td.txCenter= caja[:abono].numero_documento
+					%td.txRight= dinero caja[:abono].monto
+					%td.txRight= dinero caja[:abono].interes
+					%td.txRight= dinero caja[:abono].monto + caja[:abono].interes
+					%td.txLeft= caja[:datos_personales][:nombre]
+					%td.txLeft= caja[:datos_personales][:rut]
+					%td.txLeft= caja[:plan_estudio]
+					%td.txCenter
+						- unless caja[:documento].alumno_plan_estudio.blank?
+							= get_name(Sede, :SEDES, caja[:documento].alumno_plan_estudio.institucion_sede_plan.institucion_sede.sede_id)
+						- else
+							= get_name(Sede, :SEDES, caja[:documento].institucion_sede.sede_id)
+
+	.cajas-secundarias
+		%table.table.table-condensed.estrecha.formas-pago
+			%caption Desglose según formas de pago
+			%colgroup
+				%col.medio-pago
+				%col.monto
+			%thead
+				%tr
+					%th.txLeft Forma de pago
+					%th.txRight Total
+			%tfoot
+				%tr
+					%th.txLeft Total
+					%td.txRight= dinero @formas_pago.map{ |forma| forma[:total] }.inject(:+)
+			%tbody
+				- @formas_pago.each do |forma|
+					%tr
+						%td.txLeft= forma[:medio]
+						%td.txRight= dinero forma[:total]
+
+		%table.table.table-condensed.estrecha.centros-costos
+			%caption Desglose según centros de costos
+			%colgroup
+				%col.centro-costo
+				%col.monto
+			%thead
+				%tr
+					%th.txLeft Centro de costo
+					%th.txRight Total
+			%tfoot
+				%tr
+					%th.txLeft Total
+					%td.txRight= dinero @centros_costos.map{ |centro| centro[:monto] + centro[:interes] }.inject(:+)
+			- interes = @centros_costos.map{ |centro| centro[:interes] }.inject(:+)
+			%tbody
+				- @centros_costos.each do |centro|
+					%tr
+						%td.txLeft= centro[:centro_costo].nombre
+						%td.txRight= dinero centro[:monto]
+				- if interes > 0
+					%tr
+						%td.txLeft INTERÉS
+						%td.txRight= dinero interes
+
+		%table.table.table-condensed.estrecha.documentos-venta
+			%caption Desglose según documentos de venta
+			%colgroup
+				%col.documento
+				%col.monto
+			%thead
+				%tr
+					%th.txLeft Documento
+					%th.txRight Total
+			%tfoot
+				%tr
+					%th.txLeft Total
+					%td.txRight= dinero @documentos_venta.map{ |documento| documento[:total] }.inject(:+)
+			%tbody
+				- @documentos_venta.each do |documento|
+					%tr
+						%td.txLeft= get_name DocumentoVenta, "TIPOS",  documento[:tipo]
+						%td.txRight= dinero documento[:total]
+ 
+
+		%table.table.table-condensed{style: 'margin-top: 10px'}
+			%caption Desglose detalle de cheques al día
+			%thead
+				%tr
+					%th.txCenter Rut alumno
+					%th.txCenter Nº serie
+					%th.txCenter Emisión Boleta
+					%th.txCenter Fecha cheque
+					%th.txCenter Banco
+					%th.txCenter Monto
+			%tfoot
+				%tr
+					%th.txCenter Total
+					%th
+					%th
+					%th
+					%th
+					%th#ChequeDia.txCenter
+			%tbody
+				- @cajas.each do |caja|
+					- if caja[:medio_pago] == 'Cheque al día'
+						%tr
+							%td.txCenter= caja[:datos_personales][:rut]
+							%td.txCenter= caja[:abono].numero_documento
+							%td.txCenter= fecha_humana2 caja[:abono].created_at
+							%td.txCenter= fecha_humana2 caja[:abono].fecha_documento
+							%td.txCenter= caja[:abono].banco.nombre
+							%td.ChequeDia.txCenter
+								= (caja[:medio_pago] == 'Cheque al día') ? (caja[:abono].monto + caja[:abono].interes) : 0
+		%table.table.table-condensed{style: 'margin-top: 20px'}
+			%caption Desglose detalle de cheques a Fecha
+			%thead
+				%tr
+					%th.txCenter Rut alumno
+					%th.txCenter Nº serie
+					%th.txCenter Emisión Boleta
+					%th.txCenter Fecha cheque
+					%th.txCenter Banco
+					%th.txCenter Monto
+			%tfoot
+				%tr
+					%th.txCenter Total
+					%th
+					%th
+					%th
+					%th
+					%th#ChequeFecha.txCenter
+			%tbody
+				- @cajas.each do |caja|
+					- if caja[:medio_pago] == 'Cheque a Fecha'
+						%tr
+							%td.txCenter= caja[:datos_personales][:rut]
+							%td.txCenter= caja[:abono].numero_documento
+							%td.txCenter= fecha_humana2 caja[:abono].created_at
+							%td.txCenter= fecha_humana2 caja[:abono].fecha_documento
+							%td.txCenter= caja[:abono].banco.nombre
+							%td.ChequeFecha.txCenter
+								= (caja[:medio_pago] == 'Cheque a Fecha') ? (caja[:abono].monto + caja[:abono].interes) : 0
+
+	.firmas
+		%span.ejecutivo Firma Ejecutivo
+		%span.tesorero Firma Tesorero
+
+	:css
+		div.cajas-secundarias { overflow: hidden; margin-bottom: 30px; }
+		div.cajas-secundarias > table { margin-right: 40px !important; float: left; clear: none !important; }
+					
+		.entradas.entradas col.tipo-documento { width: 55px; }
+		.entradas col.estado { width: 70px; }
+		.entradas col.fecha-pago { width: 75px; }
+		.entradas col.rut { width: 80px; }
+
+		.formas-pago col.medio-pago { width: 120px; }
+		.formas-pago col.monto { width: 120px; }
+
+		.centros-costos col.centro-costo { width: 120px; }
+		.centros-costos col.monto { width: 120px; }
+
+		.documentos-venta col.documento { width: 120px; }
+		.documentos-venta col.monto { width: 120px; }
+
+		tr.anonimo { background-color: #FFDAB9; }
+
+		.firmas { 
+			overflow: hidden; 
+			text-transform: uppercase; 
+			width: 100%;
+		}
+		.firmas > span { padding: 5px 20px; border-top: 1px solid black;}
+		.firmas .ejecutivo { float: left; }
+		.firmas .tesorero { float: right; }
+		
+		ol.centro-costos {
+			list-style-type: decimal;
+			padding-left: 15px;
+		}
+
+		table.entradas {
+			margin-right: auto !important;
+			margin-left: 0 !important;
+		}
+
+		div.datatables_wrapper {
+			overflow: hidden;
+		}
+
+		@media print {
+			@page{
+				size: landscape;
+				margin-top: 5px!important;
+			}
+			table.table tbody td { font-size: 7pt !important; }
+			table.table thead th { font-size: 7pt !important; }
+			table.table tfoot td { font-size: 7pt !important; }
+			table.table tfoot th { font-size: 7pt !important; }
+			.entradas col.estado { width: 45px; }
+			.entradas col.rut { width: 55px; }
+			.entradas col.fecha-pago { width: 55px; }
+			caption { position: static !important; }
+			div.datatables_wrapper { position: static !important; overflow: visible !important; }
+			div.logo-img { display: none!important;}
+			.firmas .ejecutivo { font-size: 7pt; float: left; }
+			.firmas .tesorero { font-size: 7pt; float: right; }
+			h1 { font-size: 9pt !important; }
+			h3 { font-size: 9pt !important;}
+			legend { margin-top: none!important; }
+		}
+
+	:javascript
+		$(document).ready(function(){
+			var sum1 = 0;
+			var sum2 = 0;
+
+			$('.ChequeDia').each(function() {
+				sum1 += Number($(this).text());
+			});
+			
+			$('.ChequeFecha').each(function() {
+				sum2 += Number($(this).text());
+			});
+
+			$('#ChequeDia').text(sum1);
+			$('#ChequeFecha').text(sum2);
+		});

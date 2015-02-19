@@ -1,0 +1,166 @@
+- required = {:input_html => {:required => true}}
+- config = required
+- largo_class = {:class => 'input-xxlarge'}
+
+= render "matriculas/matriculas/admision/partials/assets_css"
+
+
+
+= simple_form_for :certificado, url: (@item.new? ? matriculas_certificados_generar_path : matriculas_certificados_editar_path(params[:rut], params[:id])), html: {id: "form-pagado",class: 'form-inline'} do |f|
+	= f.input :plan_estudio, {collection: @matriculas.map{|x| ["#{x[:plan_estudio].nombre}, #{x[:periodo].nombre}", x[:alumno_plan_estudio].id]}, prompt: 'Seleccione el plan de estudio'}.merge(required).merge({ :input_html => largo_class, selected: @item.new? ? 0 : @item.alumno_plan_estudio_id})
+
+	- if @alumno_plan_estudios.last.estado == Alumno::REGULAR
+		= f.input :certificado, {collection: TipoAbono.all(tipo:TipoAbono::CERTIFICADOS).map{|x| [x.nombre, x.id]}, prompt: 'Seleccione el certificado'}.merge(required).merge({selected: @item.new? ? 0 : @item.tipo_abono_id})
+	- else
+		= f.input :certificado, {collection: TipoAbono.all(tipo:TipoAbono::CERTIFICADOS,:slug.not => 'certificado-alumno-regular').map{|x| [x.nombre, x.id]}, prompt: 'Seleccione el certificado'}.merge(required).merge({selected: @item.new? ? 0 : @item.tipo_abono_id})
+	%br
+	- if completo
+		= f.input :presentado_en, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.lugar))
+		= f.input :para_tramite, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.observacion))
+		= f.input :cursa_el, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.cursa))
+		= f.input :observacion, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.observacion2))
+		= f.input :linea_1, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.linea1))
+		= f.input :linea_2, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.linea2))
+	- elsif @item.abono.blank?
+		= f.input :medio_pago, {collection: MedioPago.for_select}.merge(required).merge({prompt: 'Seleccione el medio de pago', :selected => @item.new? ? 0 : @item.abono.medio_pago_id})
+		= f.input :monto, required.merge(:input_html => {:value => @item.new? ? 0 : @item.abono.documento_venta.monto, required: true,type: 'number',min: 0})
+		%a.btn.btn-success.addAbono
+			%i.icon-white.icon-plus-sign
+			Agregar
+		%br
+		%div{id: "detail", style: 'display: none'}
+			%table.table.table-condensed
+		%br
+		= f.input :tipo_documento, {collection: for_select(DocumentoVenta, :TIPOS), prompt: 'Seleccione el tipo de documento'}.merge({selected: (@item.new? ? '' : @item.abono.documento_venta.tipo)}) 
+		= f.input :numero_documento, required.merge(:input_html => {:value => @item.new? ? '' : @item.abono.documento_venta.numero, required: true})
+	- if completo
+		= hidden_field_tag 'documento_encontrado', 1
+	- else
+		.control-group
+			= hidden_field_tag 'documento_encontrado', 0
+			%a#check-documento.btn.btn-warning{href: '#noti'} 
+				%i.icon-search.icon-white
+				Buscar documento
+		#noti.notificacion
+	%br
+	= f.submit 'Generar', class: 'btn btn-primary'
+
+:javascript
+	
+	function info(texto){
+		notify_info("Información", texto);
+	}
+
+	function actualizar_monto(data_id, monto, funcion_post){
+
+		if (funcion_post != undefined) {
+			if( !(monto > 0) )          { info("El valor no puede ser menor o igual a 0"); return false; }
+			funcion_post();
+		} else {
+			$(medio_query).val('');
+			$(monto_query).val( 0 );
+			$(medio_query).attr('disabled',false); 
+			$(monto_query).attr('disabled',false); 
+			$('.addAbono').removeClass('invisible'); 
+		}
+
+		return true;
+	}
+	$(function(){
+		$(".datepicker").datepicker();
+
+		$(".table").on("click", ".quitar", function(){
+			elem = $(this).parent().parent();
+			monto = parseInt($(elem).find("[name$='[monto]']").val());
+			data_id = $(elem).find("[name$='[id]']").val();
+			elem.remove();
+			actualizar_monto(data_id, -monto);
+		});
+
+		$(".addAbono").click(function(){
+			data_id = 0;
+			base_query = "[name='certificado";
+			monto_query = base_query + "[monto]']";
+			medio_query = base_query + "[medio_pago]']";
+			monto = parseInt( $(monto_query).val() );
+			medio_pago = parseInt( $(base_query + "[medio_pago]']").val() );
+
+			actualizar_monto(data_id, monto, function(){
+				$.post(
+					"#{abono_detalle_forma_pago_ajax_path}", 
+					{
+						pago_comprometido_id: data_id, 
+						medio_pago_id: medio_pago, 
+						monto: monto
+					}, 
+					function(data){
+					if (data) {
+						$("#detail").show();
+
+						//$(monto_query).val( 0 ); 
+						$(monto_query).attr('disabled',true);
+						$(medio_query).attr('disabled',true); 
+						$('.addAbono').addClass('invisible');  
+
+						$(data).appendTo( "#detail > table" );
+					};
+				});
+			});
+		});
+
+		$("#form-pagado").validate({
+			invalidHandler: function(form, validator) {notify_error("Atención", "Hay datos que no ha completado.")
+			}, 
+			submitHandler: function(form) {
+				if($("[name='documento_encontrado']").val()=="0"){
+					notify_error("Atención","Debe ingresar un numero de documento válido.<br />");
+				}
+				else{
+					notify_loader("Generando certificado....", "Por favor espere.");
+
+					form.submit();
+				}
+			}
+		});
+
+		if(#{completo} == true)	
+			$("[name='certificado[plan_estudio]'], [name='certificado[certificado]'], [name='certificado[tipo_documento]'], [name='certificado[numero_documento]'], [name='certificado[monto]'], [name='certificado[medio_pago]']").each(function(){$(this).attr('disabled', 'disabled');
+			});
+
+		$("#check-documento").click(function(){
+			
+			mensaje="";
+			
+			if($('[name="certificado[plan_estudio]"]').val()==""){
+				mensaje += "Debe seleccionar el plan de estudio.<br />";
+			}
+			if($('[name="certificado[tipo_documento]"]').val()==""){
+				mensaje += "Debe seleccionar el tipo de documento.<br />";
+			}
+			if($('[name="certificado[numero_documento]"]').val()==""){
+				mensaje += "Debe seleccionar el número del documento.<br />";
+			}
+
+			if(mensaje!="")
+				notify_error("Atención",mensaje);
+
+			$.getJSON(
+				"#{ajax_alumno_verificar_validez_certificados_path @ejecutivo_matriculas.id, 'ins', 'td', 'nd'}"
+					.replace("ins", $('[name="certificado[plan_estudio]"]').val())
+					.replace("td", $('[name="certificado[tipo_documento]"]').val())
+					.replace("nd", $("input[name='certificado[numero_documento]']").val()),
+				function(data) {
+					notify_close();
+					if( data.exito ) {
+						$("[name='documento_encontrado']").val(1);
+						$(".notificacion").html('<div class="alert alert-success">cont</div>'.replace('cont', "<b>"+data.mensaje+"</b>"));
+					} else {
+						notify_notice("Realizar abono", data.mensaje);
+						$(".notificacion").html('<div class="alert alert-error">cont</div>'
+						.replace("cont","<b>"+data.mensaje+"</b>"));
+						$("[name='documento_encontrado']").val(0);
+					}
+				}
+			);
+		});
+	});

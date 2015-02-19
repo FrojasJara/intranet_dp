@@ -1,0 +1,54 @@
+%div.modal.hide.fade{id: "modal_ingresar_planificacion", tabindex:"-1",role: "dialog", "aria-labelledby"=>"myModalLabel", "aria-hidden"=>"true"}
+	%div.modal-header
+		%button.close{:type => "button", "data-dismiss" => "modal", "aria-hidden" => true}×
+		%h3{id: "myModalLabel"} Crear Clases
+	%div.modal-body
+		%form.form-horizontal#nueva_sala{:action => apoyo_docente_registrar_nueva_sala_path, :method => "post"}
+
+			%div.control-group
+				%label.control-label Nº De Clases
+				%div.controls
+					%input.required{:type => "text", :name => "numero_clases"}
+
+			%div.control-group
+				%label.control-label Fecha Inicio
+				%div.controls
+					%input.required{:type => "number", :name => "fecha_inicio", :min => 1}
+			
+			%div.control-group
+				%label.control-label Dias
+				%div.controls
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+					%input{:type => "number", :name => "sala[capacidad]", :min => 1}
+			
+			%div.control-group
+				%label.control-label Es Laboratorio ?
+				%div.controls
+					%input{:type => "checkbox", :name => "es_laboratorio"}
+					%input{:type => "hidden", :name => "sala[es_laboratorio]", :value => 0}
+
+	%div.modal-footer
+		%button.btn{"data-dismiss" => "modal", "aria-hidden" => true} Cancelar
+		%button.btn.btn-primary#registrar_nueva_sala{} Nueva Sala
+  
+:javascript
+	$(document).ready(function(){
+		$("input[name='es_laboratorio']").change(function() {
+			$(this).is(':checked') ? $(this).next().val("1") : $(this).next().val("0");
+		});
+
+		$("#registrar_nueva_sala").on("click", function(){
+			$("#nueva_sala").submit();
+		});
+		$("#nueva_sala").validate({
+			invalidHandler: function(form, validator) {
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+	});

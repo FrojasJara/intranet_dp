@@ -1,0 +1,53 @@
+.periodo-transicion.not-print.dropdown
+	%a{:href => "#modal_inscripcion_#{item[:asignatura].id}", :data => {:toggle => "modal"}}
+		Agregar
+		%b.caret
+	.modal.hide.modal-inscripcion{:id => "modal_inscripcion_#{item[:asignatura].id}"}	
+		.modal-header
+			%button.close{:data => {:dismiss => "modal"}}
+				x
+			%h3= item[:nombre_real_asignatura]
+		= form_tag "#{transicion_crear_inscripcion_asignaturas_path}", :method => "post", :class => "crear-inscripcion", :id => "f_#{item[:asignatura].id}" do
+			%input{:type => "hidden", :name => "seccion_out[estado]", :value => Seccion::CERRADA}
+			%input{:type => "hidden", :name => "seccion_out[cupos]", :value => 1}
+			%input{:type => "hidden", :name => "seccion_out[numero]", :value => 20}
+			- unless @jornada.blank?
+				%input{:type => "hidden", :name => "seccion_out[jornada]", :value => @jornada}
+			%input{:type => "hidden", :name => "seccion_out[institucion_sede_id]", :value => @institucion_sede_id}
+
+			%input{:type => "hidden", :name => "seccion_in[institucion_sede_id]", :value => @institucion_sede_id}
+			%input{:type => "hidden", :name => "seccion_in[links_secciones_dictadas][][asignatura_id]", :value => item[:asignatura].id}
+
+			%input{:type => "hidden", :name => "inscripcion_seccion[alumno_plan_estudio_id]", :value => @plan_consultado[:inscripcion].id}
+			.modal-body
+				.control-group
+					.controls{:style => "margin-top: 4px;"}
+						%select.required{:style => "width: 100px;", :name => "seccion_in[periodo_id]"}
+							%option{:value => ""} :: Periodo ::
+							- @periodos.each do |periodo|
+								%option{:value => periodo.id}= periodo.nombre
+				.control-group
+					.controls{:style => "margin-top: 4px;"}
+						%select.required{:style => "width: 100px;", :name => "inscripcion_seccion[estado]"}
+							%option{:value => ""} :: Estado ::
+							- @estados_inscripciones.each do |estado|
+								- if not estado == :INSCRITA
+									%option{:value => "#{AlumnoInscritoSeccion.const_get estado}"}= get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion.const_get(estado)
+				.control-group
+					.controls{:style => "margin-top: 4px;"}
+						%input.required.calificacion_con_0{:type => "text", :placeholder => ":: Nota ::", :style => "width: 100px; height: 15px !important;", :name => "inscripcion_seccion[nota_final]"}
+
+			.modal-footer
+				%button.btn.btn-primary.loading-button{:type => "submit", :data => {"loading-text" => "... creando registro ..."}}
+					%i.icon-white.icon-plus
+					Crear inscripcion
+
+	:javascript
+		$("#f_#{item[:asignatura].id}").validate({
+			submitHandler : function(form) {
+				if(confirm("¿Está seguro que desea crear esta inscripción?")) {
+					$(form).find(":input.loading-button").button('loading');
+					form.submit();
+				}
+			}
+		});

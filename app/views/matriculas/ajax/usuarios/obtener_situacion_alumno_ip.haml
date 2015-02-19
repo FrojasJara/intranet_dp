@@ -1,0 +1,315 @@
+.items-container.de{:style => "margin-top: 15px; padding: 15px 0; border: 1px solid #eee; border-style: solid none;"}
+	.page-header
+		%h3 Datos del alumno
+	.item
+		%label Rut:
+		%span= @usuario_alumno.rut
+	%br
+	.item
+		%label Año de ingreso a la institución:
+		%span= @alumno.anio_ingreso
+	%br
+	.item
+		%label Nro. de ingresos:
+		%span= @alumno.ingresos
+	%br
+	.contacto
+		.control-group
+			%label.control-label (*) Primer nombre
+			.controls
+				%input.required.s1.s2.input-large{:type => "text", :name => "usuario_alumno[primer_nombre]", :maxlength => 25, :value => @usuario_alumno.primer_nombre}
+		.control-group
+			%label.control-label Segundo nombre
+			.controls
+				%input.s1.s2.input-large{:type => "text", :name => "usuario_alumno[segundo_nombre]", :maxlength => 25, :value => @usuario_alumno.segundo_nombre}
+		.control-group
+			%label.control-label (*) Apellido paterno
+			.controls
+				%input.required.s1.s2.input-large{:type => "text", :name => "usuario_alumno[apellido_paterno]", :maxlength => 25, :value => @usuario_alumno.apellido_paterno}
+		.control-group
+			%label.control-label (*) Apellido materno
+			.controls
+				%input.required.s1.s2.input-large{:type => "text", :name => "usuario_alumno[apellido_materno]", :maxlength => 25, :value => @usuario_alumno.apellido_materno}
+		.control-group
+			%label.control-label (*) Domicilio
+			.controls
+				%input.required.input-xlarge{:type => "text", :name => "usuario_alumno[domicilio]", :maxlength => 255, :value => @usuario_alumno.domicilio}	
+		.control-group
+			%label.control-label Villa/Población
+			.controls
+				%input.input-xlarge{:type => "text", :name => "usuario_alumno[villa_poblacion]", :maxlength => 255, :value => @usuario_alumno.villa_poblacion}
+		.control-group
+			%label.control-label Sector
+			.controls
+				%input.input-xlarge{:type => "text", :name => "usuario_alumno[sector]", :maxlength => 255, :value => @usuario_alumno.sector}
+		%br
+		.control-group
+			%label.control-label Teléfono fijo
+			.controls
+				%select{:type => "text", :style => "width: 40px; padding: 3px;", :name => "usuario_alumno[codigo_area_telefono]"}
+					%option{:value => ""} -
+					- @codigos_fijos.each do |codigo|
+						%option{:value => "#{codigo}"}= codigo
+				%input.required.input-small{:type => "text", :name => "usuario_alumno[telefono_fijo]", :maxlength => 8, :value => @usuario_alumno.telefono_fijo}
+		.control-group
+			%label.control-label Teléfono móvil
+			.controls
+				%input.input-small.x3.r39.ic{:type => "text", :name => "usuario_alumno[telefono_movil]", :maxlength => 8, :value => @usuario_alumno.telefono_movil}	
+		.control-group
+			%label.control-label Email
+			.controls.input-prepend{:style => "width: 260px;"}
+				%span.add-on @
+				%input.sin_enie.email.input-large{:type => "text", :name => "usuario_alumno[email]", :maxlength => 32, :value => @usuario_alumno.email}		
+		%br
+		.control-group
+			%label.control-label (*) País de origen
+			.controls
+				%select.required.span2.x3.r39{:name => "usuario_alumno[pais_id]"}
+					%option{:value => ""} :: Seleccione un país ::
+					- @paises.each do |pais|
+						%option{:value => "#{pais.id}"}= pais.nombre
+		.control-group
+			%label.control-label (*) Región
+			.controls
+				%select.required.span2.x3.r39{:name => "usuario_alumno[region_id]"}
+					%option{:value => ""} :: Seleccione una región ::
+					- @regiones.each do |region|
+						%option{:value => "#{region.id}"}= region.nombre
+		.control-group
+			%label.control-label (*) Comuna
+			.controls
+				%select.required.span2.x3.r39{:disabled => "disabled", :name => "usuario_alumno[comuna_id]", :disabled => "disabled"}
+					%option{:value => @usuario_alumno.comuna_id}= @usuario_alumno.comuna.nombre
+
+	.item{:style => "width: 700px;"}
+		%label Carreras vigentes:
+		%span
+			%ul.planes
+				- @data.each do |item|
+					%li
+						%label.radio
+							- if not item[:es_moroso]
+								%input.required{:type => "radio", 
+									:name => "matricula_plan[alumno_plan_estudio_id]", 
+									:value => item[:alumno_plan_estudio].id,
+									:data => {"disabled-class" => "m_#{item[:institucion_sede_plan].modalidad}_#{item[:plan].nivel}"}}	
+								= "#{item[:plan].nombre} - rev #{item[:plan].revision}"	
+							- else
+								%div.moroso
+									%span.carrera= "#{item[:plan].nombre} - rev #{item[:plan].revision}"
+									Presenta deuda en:
+									%ul
+										%li= "La matrícula N° #{item[:matricula]}"
+										%li= "El plan de pagos N° #{item[:plan_pago]} del #{item[:periodo]}"
+										%li= "El pagaré N° #{item[:pagare]}"
+										%li= "La cuota N° #{item[:cuota].numero_cuota} del #{item[:cuota].fecha_vencimiento} por #{dinero item[:cuota].monto}"
+
+	.page-header
+		%h3 Información del plan de estudios
+
+	.template
+		.item
+			%label Jornada:
+			%span
+		.item
+			%label Plan de estudios:
+			%span
+		.item
+			%label Modalidad:
+			%span
+		.item
+			%label Institución:
+			%span
+		.item
+			%label Situación académica:
+			%span
+		.item
+			%label Ingreso al plan de estudios:
+			%span
+		.page-header
+			%h3 Precios 
+		.item
+			%label Matrícula:
+			%span	
+		%br
+		.item
+			%label Arancel:
+			%span
+		%br
+		.item
+			%label Repactación:
+			%span		
+
+	- @data.each do |item|
+		%div{:class => "plan_inscrito_#{item[:alumno_plan_estudio].id}", :style => "display: none;"}
+			.item
+				%label Jornada:
+				%span= get_name InstitucionSedePlan, "JORNADAS", item[:institucion_sede_plan].jornada
+			.item
+				%label Plan de estudios:
+				%span= item[:plan].nombre
+			.item
+				%label Modalidad:
+				%span= get_name InstitucionSedePlan, "MODALIDADES", item[:institucion_sede_plan].modalidad
+			.item
+				%label Institución:
+				%span= item[:institucion_sede].nombre
+			.item
+				%label Situación académica:
+				%span= get_name Alumno, "ESTADOS_ACADEMICOS", item[:alumno_plan_estudio].estado
+			.item
+				%label Ingreso al plan de estudios:
+				%span= item[:alumno_plan_estudio].anio_ingreso
+			.page-header
+				%h3 Precios 
+			.item
+				%label Matrícula:
+				%span{:style => "margin-left: 255px;"}= dinero item[:matricula]	
+			- if item[:plan].nivel == PlanEstudio::TECNICO
+				.item
+					%label Arancel:
+					%span{:style => "margin-left: 255px;"}= dinero item[:arancel_dos_semestres_tecnico]
+				%br
+				.item
+					%label Arancel contado:
+					%span{:style => "margin-left: 255px;"}= dinero item[:arancel_dos_semestres_tecnico_contado]
+				%br
+				.item
+					%label Arancel práctica/trabajo de título:
+					%span{:style => "margin-left: 255px;"}= dinero item[:arancel_practica_trabajo_titulo]
+				%br
+				.item
+					%label Arancel práctica/trabajo de título contado:
+					%span{:style => "margin-left: 255px;"}= dinero item[:arancel_practica_trabajo_titulo_contado]
+			
+			- if item[:plan].nivel == PlanEstudio::PROFESIONAL
+
+				- case item[:institucion_sede_plan].modalidad
+				- when InstitucionSedePlan::PRESENCIAL then
+					%br
+					.item
+						%label Arancel:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_dos_semestres_profesional]
+					%br
+					.item
+						%label Arancel contado:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_dos_semestres_profesional_contado]
+					%br
+					.item
+						%label Arancel salida intermedia:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_salida_intermedia]
+					%br
+					.item
+						%label Arancel salida intermedia contado:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_salida_intermedia_contado]
+				- when InstitucionSedePlan::DISTANCIA then 
+					%br
+					.item
+						%label Arancel 1º a 4º nivel:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_distancia_1_a_4]
+					%br
+					.item
+						%label Arancel 5º a 8º nivel:
+						%span{:style => "margin-left: 255px;"}= dinero item[:arancel_distancia_5_a_8]
+			%br
+			.item
+				%label Repactación:
+				%span{:style => "margin-left: 255px;"}= dinero item[:repactacion]
+				
+			%input.matricula.d1{:type => "hidden", :value => item[:matricula], :name => "plan_pago[matricula]", :disabled => "disabled"}
+			%input.matricula.m1{:type => "hidden", :value => item[:matricula], :disabled => "disabled"}
+			%input.d1{:type => "hidden", :value => item[:institucion_sede].id, :name => "institucion_sede_id", :disabled => "disabled"}
+			%input.ui3.institucion-sede-plan-id.d1{:type => "hidden", :value => item[:institucion_sede_plan].id, :disabled => "disabled"}
+			%input.repactacion.d1{:type => "hidden", :value => item[:repactacion], :name => "plan_pago[repactacion]", :disabled => "disabled"}
+			%input.repactacion.m1{:type => "hidden", :value => item[:repactacion], :disabled => "disabled"}
+			
+			- if item[:plan].nivel == PlanEstudio::TECNICO
+				%input.m1.arancel-dos-semestres-tecnico{:type => "hidden", :value => item[:arancel_dos_semestres_tecnico], :disabled => "disabled"}
+				%input.m1.arancel-dos-semestres-tecnico-contado{:type => "hidden", :value => item[:arancel_dos_semestres_tecnico_contado], :disabled => "disabled"}
+				%input.m1.arancel-practica-trabajo-titulo{:type => "hidden", :value => item[:arancel_practica_trabajo_titulo], :disabled => "disabled"}
+				%input.m1.arancel-practica-trabajo-titulo-contado{:type => "hidden", :value => item[:arancel_practica_trabajo_titulo_contado], :disabled => "disabled"}
+			
+			- if item[:plan].nivel == PlanEstudio::PROFESIONAL
+				- case item[:institucion_sede_plan].modalidad
+				- when InstitucionSedePlan::PRESENCIAL then
+					%input.m1.arancel-dos-semestres-profesional{:type => "hidden", :value => item[:arancel_dos_semestres_profesional], :disabled => "disabled"}
+					%input.m1.arancel-dos-semestres-profesional-contado{:type => "hidden", :value => item[:arancel_dos_semestres_profesional_contado], :disabled => "disabled"}
+					%input.m1.arancel-salida-intermedia{:type => "hidden", :value => item[:arancel_salida_intermedia], :disabled => "disabled"}
+					%input.m1.arancel-salida-intermedia-contado{:type => "hidden", :value => item[:arancel_salida_intermedia_contado], :disabled => "disabled"}
+				- when InstitucionSedePlan::DISTANCIA then
+					%input.m1.arancel-distancia-1-4{:type => "hidden", :value => item[:arancel_distancia_1_a_4], :disabled => "disabled"}
+					%input.m1.arancel-distancia-5-8{:type => "hidden", :value => item[:arancel_distancia_5_a_8], :disabled => "disabled"}
+
+			%input.m1.p1.v0{:type => "hidden", :name => "plan_pago[arancel]", :value => 0, :disabled => "disabled"}
+
+%input.de.required.usuario_id{:type => "hidden", :name => "usuario_alumno[id]", :value => "#{@usuario_alumno.id}"}
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor = $("#identificacion-alumno");
+		var $contenedor_descuentos = $("#descuentos");
+		var contenido_original_descuentos = $contenedor_descuentos.html();
+		var $contenedor_documento_venta = $("#documento-venta");
+		var contenido_original_documento_venta = $contenedor_documento_venta.html();
+		
+		$contenedor.find("select[name='usuario_alumno[codigo_area_telefono]']").val(#{@usuario_alumno.codigo_area_telefono});
+		$contenedor.find("select[name='usuario_alumno[region_id]']").val(#{@usuario_alumno.region_id});
+		$contenedor.find("select[name='usuario_alumno[pais_id]']").val(#{@usuario_alumno.pais_id});
+
+		$contenedor.on("change", "ul.planes input:radio", function() {
+			var disabled_class = $(this).attr("data-disabled-class");
+
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+			limpiar_plan_pago_normativa();
+			$contenedor_descuentos.html(contenido_original_descuentos);
+			$contenedor_documento_venta.html(contenido_original_documento_venta);
+
+			$contenedor.find("div.template").remove();
+			$contenedor_plan = $contenedor.find("div.plan_inscrito_" + this.value);
+			$contenedor_plan_oculto = $contenedor.find("div[class^='plan_inscrito']").not($contenedor_plan);
+
+			$contenedor_plan_oculto.find(":input.d1").attr("disabled", "disabled");
+			$contenedor_plan.find(":input.d1").removeAttr("disabled");
+			$contenedor_plan_oculto.hide();			
+			$contenedor_plan.show();
+
+			/*
+			 * :input.m1 = Tienen que ser movidos al contenedor de Calculo del arancel
+			 * | arancel, arancel salida intermedia y matricula | (:hiddens)
+			 */
+			$contenedor_plan.find(":input.m1").clone(true, true).removeAttr("disabled").appendTo($contenedor_descuentos);
+
+			/*
+			 * :input.ui3 = Tienen que ser movidos al contenedor del documento de venta
+			 * | institucion_sede_plan | (:hiddens)
+			 */
+			$contenedor_plan.find(":input.ui3").clone(true, true).removeAttr("disabled").appendTo($contenedor_documento_venta);			
+
+			/*
+				Las listas de seleccion de descuentos y tipo de matricula, y boton para calcular descuentos
+			*/
+			$contenedor_descuentos.find(":input.w1").removeAttr("disabled");
+			var $tipos_matriculas = $contenedor_descuentos.find("select.tipo-matricula");
+			$tipos_matriculas.find("option").not("." + disabled_class).attr("disabled", "disabled");
+			$tipos_matriculas.find("option." + disabled_class).addClass("selectable");
+		})
+
+		$contenedor.on("change", "select[name='usuario_alumno[region_id]']", function() {
+			var valor = $(this).val();
+			var $comunas = $("select[name='usuario_alumno[comuna_id]']");
+			if (valor) {
+				$.getJSON(
+					"#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+					function(data) {
+						var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+						$(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+						$comunas.html(nuevos).removeAttr("disabled");
+					}
+				)
+			} else {
+				$comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", true);
+			}
+		})
+	})
+

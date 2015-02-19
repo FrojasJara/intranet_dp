@@ -1,0 +1,459 @@
+.sectionHeader
+	%h1 Programación Clases
+	= notificaciones
+%div.well
+	- url_metodo = apoyo_docente_ver_programacion_seccion_path
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => url_metodo, :texto_boton => "Ver", :filtro => @filtro}
+	
+
+- if not @seccion.blank? and @clases.blank?
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p Aún no se han programado clases para esta sección.
+	%input{id: "total", name: "total", type: "hidden", value: "0"}
+
+	%div.well
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Carrera:
+							%span= @seccion.asignatura_base.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Asignatura:
+							%span= @seccion.asignatura_base.nombre			
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @seccion.asignatura_base.codigo
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.nombre
+	%div.form-inline
+		%fieldset
+			%div.control-group.inline
+				.control-label
+					%label ID Sección
+				.controls
+					%input.span2{:name => "clase[seccion_id]", :type => "text", :readonly => "readonly", value: "#{@seccion.blank? ? '' : @seccion.id }"}
+			%div.control-group.inline#dias_horas
+				.control-label
+					%label Dia y hora
+				.controls
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[1]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]", :class => "inlineCheckbox2", type: "checkbox" ,value: 1 } 
+							Lunes
+				
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[2]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]",:class => "inlineCheckbox2", type: "checkbox" ,value: 2 }
+							Martes
+				
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[3]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]", :class => "inlineCheckbox2", type: "checkbox", value: 3 }
+							Miercoles
+				
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[4]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]", :class => "inlineCheckbox2", type: "checkbox", value: 4 }
+							Jueves
+				
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[5]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]", :class => "inlineCheckbox2" ,type: "checkbox", value: 5 }
+							Viernes
+				
+					%label{ :class=> "checkbox-inline"}
+						%input.span1.dias#numInput{:name => "hora[6]", :type => "number", :min => 1,disabled: true}
+						%input.habilitar_campo{name:"dia_Checkbox[]", :class => "inlineCheckbox2", type: "checkbox", value: 6 }
+							Sabado
+			%div.form-actions			
+				%a.btn.btn-success#crear_bloques_salas
+					%i.icon.icon-white.icon-plus
+					Asignar bloques y salas
+			%div#tabla_horario_sala
+			%div.form-actions#acciones.oculto
+				%div.control-group.inline
+					.control-label
+						%label Fecha de Inicio
+					.controls
+						%input.span2.required{id: "datepicker1",:name => "clase[fecha_inicio]", :type => "text", :class => "fecha"}
+				%div.control-group.inline
+					.control-label
+						%label Fecha de Termino
+					.controls
+						%input.span2.required{id: "datepicker2",:name => "clase[fecha_termino]", :type => "text", :class => "fecha"}	
+				%a.btn.btn-success#crear_clases
+					%i.icon.icon-white.icon-plus
+					Crear Planificación
+				%a.btn.btn-primary#guardar_planificacion.cargar
+					%i.icon.icon-white.icon-ok
+					Guardar
+	%form.form-inline#form-programacion{:action => apoyo_docente_registrar_programacion_seccion_path, :method => "post"}
+		%input{id: "periodo", name: "periodo", type: "hidden", value: @periodo}
+		%input{id: "sede", name: "sede", type: "hidden", value: @sede}
+		%input{ name: "origen", type: "hidden", value: Clase::PLANIFICACION}
+		%input{name: "clase[seccion_id]", type: "hidden", value: "#{@seccion.blank? ? '' : @seccion.id }"}
+		%div#tabla_planificacion
+- if @clases.size > 0
+	
+	%form.informacion-tabulada#edit{:action => mantenedores_edit_programacion_clase_path, :method => "post"}
+		%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+		%fieldset
+			%legend Información de la seccion
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera:
+						%span= @seccion.asignatura_base.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Asignatura:
+						%span= @seccion.asignatura_base.nombre			
+					%div.contenedorElemento.separador
+						%label.etiqueta Jornada:
+						%span= get_name Seccion, "JORNADAS", @seccion.jornada
+					%div.contenedorElemento.separador
+						%label.etiqueta Codigo Asignatura:
+						%span= @seccion.asignatura_base.codigo
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre Profesor:
+						- if @seccion.docente.blank?
+							%span Docente no asignado 
+						- else
+							%span= @seccion.docente.datos_personales.nombre
+
+		%a.not-print.btn.btn-success{:href => apoyo_docente_reprogramacion_clase_path(@seccion.id), id: "loading-example-btn", :data => {"loading-text" => "redireccionando..."}}
+			%i.icon-white.icon-list-alt
+			Ir a reprogramación
+		%button.btn.btn-primary{:type => "submit"}
+			%i.icon.icon-white.icon-ok
+			Guardar edición
+		%table.table.table-striped
+			%thead
+				%tr
+					%th.TxtLft Número
+					%th.TxtLft Fecha Planificada
+					%th.TxtLft Horas
+					%th.TxtLft Origen
+					%th.TxtLft Estado
+					%th.TxtLft Fecha suspensión
+
+			%tbody
+				- @clases.each_with_index do |i,index|
+					%tr
+						%td
+							%input#numInput{:name => "clase[#{i.id}][][numero]", value: "#{i.numero}"}
+						%td
+							%input.span2{id: "datepicker[#{i.id}]",:name => "clase[#{i.id}][][fecha]", :type => "text", :class => "fecha", value: "#{i.fecha_planificada}"}
+						%td= i.horas
+						%td= get_name Clase, "ORIGENES", i.origen
+						%td
+							%select{:name => "clase[#{i.id}][][estado]"}
+								- @estados.each do |estado|
+									%option{:value => "#{Clase.const_get estado}", selected: i.estado.eql?(Clase.const_get estado)}= get_name Clase, "ESTADOS", Clase.const_get(estado)
+						%td
+							%input.span2{id: "datepicker2[#{i.id}]",:name => "clase[#{i.id}][][fecha_suspension]", :type => "text", :class => "fecha", value: "#{i.fecha_suspension}"}
+		
+:css
+	#numInput{
+		padding: 4px;
+		font: 12px "lucida grande",tahoma,verdana,arial,sans-serif !important;
+		-moz-box-sizing: content-box;
+		-webkit-box-sizing: content-box;
+		box-sizing: content-box;
+		color: black !important;
+		height: auto !important;
+		margin: 0 !important;
+		width: 27px;
+	}
+	.oculto{
+		display: none;
+	}
+
+:javascript
+	$('#loading-example-btn').click(function () {
+		$(this).button('loading');
+	});
+	$("#crear_bloques_salas").on("click",function(){
+		/* eliminamos alguna tabla de planificacion anterior*/
+		$('.planificada').remove();
+		$('.semana').remove();
+		$('#acciones').hide();
+		$('#guardar_planificacion').hide();
+		var check = $("input[type='checkbox']:checked").length;
+
+		if(check == ""){
+			alertify.error("seleccione al menos un dia");
+		}else{
+			try {
+					$("#dias_horas").find('.seleccionado').each(function() {
+						var elemento= this;
+						if( elemento.value < 1 || elemento.value == ""){
+							throw "porfavor verifique que ha ingresado cantidad de horas correctas para los dias seleccionados";
+						}						
+					});
+					$('#acciones').show();
+					var val = [];
+					$(':checkbox:checked').each(function(i){
+						val[i] = $(this).val();
+					});
+					var dias = val.length;
+					var $tabla = "";
+					$tabla = "<table class='table table-striped semana'>";
+					$tabla 	+= "<thead> ";
+					$tabla	+=	"<tr>";
+					$tabla	+=		"<th class='TxtLft'>Dia</th>";
+					$tabla	+=		"<th class='TxtLft'> Bloque</th>";
+					$tabla	+=		"<th class='TxtLft'> Sala</th>";
+					$tabla	+= "<tbody>";
+					for(var i=0; i < dias ; i++){
+						var horas = $("input[name='hora["+val[i]+"]']").val();
+						$tabla += "<tr>";
+						if(val[i]== 1){
+							$tabla += "<td>Lunes</td>";
+						}
+						if(val[i]== 2){
+							$tabla += "<td>Martes</td>";
+						}
+						if(val[i]== 3){
+							$tabla += "<td>Miercoles</td>";
+						}
+						if(val[i]== 4){
+							$tabla += "<td>Jueves</td>";
+						}
+						if(val[i]== 5){
+							$tabla += "<td>Viernes</td>";
+						}
+						if(val[i]== 6){
+							$tabla += "<td>Sabado</td>";
+						}
+						$tabla += "<td>";
+							$tabla += "<ul>";
+							for(var j=0; j < horas ; j++){
+								
+								$tabla += "<li>";
+								$tabla += "<select class='select-tabla required bloques-select' name='bloque_horario["+val[i]+"]["+j+"]'>";
+								$tabla += "</select>";
+								$tabla += "</li>";
+								
+							}
+							$tabla += "</ul>";
+						$tabla += "</td>";
+						$tabla += "<td>";
+							$tabla += "<ul>";
+							for(var k=0; k < horas ; k++){
+								$tabla += "<li>";
+								$tabla += "<select class='select-tabla required salas-select' name='sala["+val[i]+"]["+k+"]'>";
+								$tabla += "</select>";
+								$tabla += "</li>";
+							}
+							$tabla += "</ul>";
+						$tabla += "</td>";
+						$tabla += "</tr></tbody>"; 
+					}
+					$("#tabla_horario_sala").html($tabla);	
+				} catch(e) {
+					alertify.error(e );
+				}
+		}
+	});
+
+	$("#crear_clases").on("click", function(){
+		var fecha1 = $('#datepicker1');
+		var fecha2 = $('#datepicker2');
+		try{
+			$("#tabla_horario_sala").find('.bloques-select').each(function() {
+				var elemento= this;
+				if( elemento.value == ""){
+					elemento.focus();
+					throw "Porfavor verifique que ha ingresado todos los bloques horario";
+				}						
+			});
+			$("#tabla_horario_sala").find('.salas-select').each(function() {
+				var elemento= this;
+				if( elemento.value == ""){
+					elemento.focus();
+					throw "Porfavor verifique que ha ingresado todas las salas";
+				}						
+			});
+			var f1 = fecha1.val();
+			var f2 = fecha2.val();
+			console.log(f1);
+			if( f1 == ""){
+				fecha1.focus();
+				throw "Porfavor Ingrese una fecha de inicio";
+			}
+			if(  f2 == ""){
+				fecha2.focus();
+				throw "Porfavor Ingrese una fecha de termino";
+			}
+			if( (new Date(f1).getTime() > new Date(f2).getTime())) {
+				throw "La fecha de termino debe ser mayor a la fecha de inicio";
+			}
+			$('#guardar_planificacion').show();
+			/* capturamos las variables e inicializamos las fechas */
+			var bloque_horario = $("select[name='bloque_horario[1]']").val();
+			var horas = $("input[name='clase[1]']").val();
+			var fecha_inicio = $("input[name='clase[fecha_inicio]']").val();
+			var fecha_termino = $("input[name='clase[fecha_termino]']").val();
+			var numero_horas = $("input[name='clase[numero_horas]']").val();
+			var total = $("input[name='total']").val();
+			var numero_correlativo = parseInt(total);
+			var $dias_clases = $("#form-programacion").find("input:checked");
+			var _fecha_inicio = new Date(fecha_inicio).add(1).days();
+			var _fecha_termino = new Date(fecha_termino).add(1).days();
+			var nueva_fecha = _fecha_inicio;
+			var dias_semana = ["Domingo","lunes","martes","miercoles","jueves","viernes","sabado"]
+
+			/* inicializamos el vector para guardar valores del checkbox */
+			/* guardamos valores del checkbox */
+
+			var val = [];
+			$(':checkbox:checked').each(function(i){
+				val[i] = $(this).val();
+			});
+
+			/* calculamos la cantidad de dias entre las fechas ingresadas */
+
+			var diasDif = _fecha_termino.getTime() - _fecha_inicio.getTime();
+			var dias = Math.round(diasDif/(1000 * 60 * 60 * 24)) + 1;
+			
+			/* creamos la tabla a imprimir */
+
+			var $tabla = "";
+			var clases_semanales = $dias_clases.length;
+			
+			$tabla = "<table class='table table-striped planificada'>";
+			$tabla 	+= "<thead> ";
+			$tabla	+=	"<tr>";
+			$tabla	+=		"<th class='TxtLft'> Número</th>";
+			$tabla	+=		"<th class='TxtLft'> Fecha Planificada</th>";
+			$tabla	+=		"<th class='TxtLft'> Horas</th>";
+			$tabla	+=		"<th class='TxtLft'> bloques</th>";
+			$tabla	+=		"<th class='TxtLft'> Salas</th>";
+			$tabla	+= "<tbody>";
+
+			var cont = 0;
+			/* recorremos la cantidad de dias  para imprimir las fechas */
+			for(var i=0; i < dias ; i++){
+				var dia = nueva_fecha.getDay();
+				var horas = $("input[name='hora["+dia+"]']").val();
+				var dia = String(dia);
+				var result = $.inArray(dia,val);
+				if(result != -1){
+					cont = cont + 1
+					/* numero_clase = i + numero_correlativo + 1; */
+
+					$tabla += "<tr>";
+					$tabla += "<td><input class='span1 required' readonly type='text' name='clases[][numero]' value=" + cont +  " /></td>";
+					$tabla += "<input class='span1 required' type='hidden'  style='display:none' name='clases[][dia]' value=" + dia +  " / >";
+					$tabla += "<td><input class='fecha required' type='text' name='clases[][fecha_planificada]' value=" + nueva_fecha.toString("yyyy-MM-dd") + " /></td>";
+					$tabla += "<td><input class='span1 required' readonly type='number' name='clases[][horas]' value="+horas+" /></td>";
+					$tabla += "<td>";
+					$tabla += "<ul>";
+					for(var j=0; j < horas ; j++){
+						var bloque_valor = $("select[name='bloque_horario["+dia+"]["+j+"]']").val();
+						var bloque_texto = $("select[name='bloque_horario["+dia+"]["+j+"]'] option:selected").text();
+						$tabla += "<li>";
+						$tabla += "<select class='select-tabla required ' readonly name='clases[][bloque_horario]["+j+"]'>";
+						$tabla += "<option value='"+ bloque_valor+"'>"+ bloque_texto +" </option>"
+						$tabla += "</select>";
+						$tabla += "</li>";
+						
+					}
+					$tabla += "</ul>";
+					$tabla += "</td>";
+					$tabla += "<td>";
+					$tabla += "<ul>";
+					for(var k=0; k < horas ; k++){
+						var sala_valor = $("select[name='sala["+dia+"]["+k+"]']").val();
+						var sala_texto = $("select[name='sala["+dia+"]["+k+"]'] option:selected").text();
+						$tabla += "<li>";
+						$tabla += "<select class='select-tabla required ' readonly name='clases[][sala]["+k+"]'>";
+						$tabla += "<option value='"+ sala_valor+"'>"+ sala_texto +" </option>"
+						$tabla += "</select>";
+						$tabla += "</li>";
+						
+					}
+					$tabla += "</ul>";
+					$tabla += "</td>";
+					/*$tabla += "<td><input class='span1' type='text' name='clases[][sala]' value="+sala+" /></td>";*/
+					$tabla += "</tr></tbody>"; 
+					nueva_fecha = _fecha_inicio.add(1).days();
+				}
+				else{
+					nueva_fecha = _fecha_inicio.add(1).days();
+				}
+			}
+
+			/* imprimimos la tabla */  
+
+			$("#tabla_planificacion").html($tabla);
+
+			/* inicicializamos datapicker nuevamente para las tablas creadas */
+
+			$('.fecha').datepicker({ dateFormat: 'yy-mm-dd' });
+
+		} catch(e) {
+			alertify.error(e);
+		}
+		
+	});
+	$('.fecha').datepicker({ dateFormat: 'yy-mm-dd' });
+
+	$("#ingresar_planificacion").on("click",function(){
+		$("#modal_ingresar_planificacion").modal("show");
+	});
+	$(".habilitar_campo").change(function() {
+		$(this).parent().find("select").attr("disabled", ! this.checked);
+		var variable = $(this).parent().find('.dias').is(':enabled');
+		if(variable){
+			$(this).parent().find('.dias').removeClass("seleccionado");
+		}else{
+			$(this).parent().find('.dias').addClass("seleccionado");
+		}
+		
+	
+	});
+	$("#crear_bloques_salas").on("click",function(){
+		var periodo = $("input[name='periodo']").val();
+		var sede = $("input[name='sede']").val();
+		$.ajax({
+			url: "#{ajax_apoyo_docente_buscar_bloques_path}",
+			type: 'POST',
+			data: {periodo : periodo, sede : sede},
+			success: function(data) {
+				var options = "<option value= ''>.: Elija Un Bloque Horario :.</option>";
+				$.each(data.bloques, function(k,v){
+					options = options +  "<option value='" + v.bloque_id + "'>" + v.h_inicio + " - " + v.h_termino + " </option>"
+				});
+				$(".bloques-select").html(options);
+			}
+		});
+		$.ajax({
+			url: "#{ajax_apoyo_docente_buscar_salas_path}",
+			type: 'POST',
+			data: {sede : sede},
+			success: function(data) {
+				var options = "<option value= ''>.: Elija Una Sala :.</option>";
+				$.each(data.salas, function(k,v){
+					options = options +  "<option value='" + v.sala_id + "'>" + v.nombre + " cap [" + v.capacidad + "]  </option>"
+				});
+				$(".salas-select").html(options);
+			}
+		});
+	});
+	$("#guardar_planificacion").click(function(){
+		$( "#form-programacion" ).submit();
+	});
+
+

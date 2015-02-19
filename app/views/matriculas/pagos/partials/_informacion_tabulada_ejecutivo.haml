@@ -1,0 +1,30 @@
+%form.informacion-tabulada
+	%fieldset
+		%legend Antecedentes del ejecutivo y de la caja
+		%ul
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut:
+					%span= @ejecutivo[:datos_personales].rut		
+				%div.contenedorElemento.separador
+					%label.etiqueta Nombre:
+					%span= @ejecutivo[:datos_personales].nombre
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Fecha:
+					%span= @fecha	
+				- @ejecutivo[:rangos_documentos].each do |tipo_documentos, rangos|	
+					%div.contenedorElemento.separador
+						%label.etiqueta= "#{get_name RangoDocumento, 'TIPOS', tipo_documentos}s:"
+						%span= rangos.map{ |rango| "[#{rango.inicio} - #{rango.fin}]" }.join(", ")
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Institución:
+					%span= @institucion_sede.nombre
+
+	:css					
+		@media print{
+			form.informacion-tabulada label.etiqueta { font-size: 7pt !important; }
+			form.informacion-tabulada div.contenedorelemento span { font-size: 7pt !important; margin-left: 0px !important; }
+		}	
+					

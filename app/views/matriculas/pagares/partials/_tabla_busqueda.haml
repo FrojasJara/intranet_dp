@@ -1,0 +1,94 @@
+= datatable_src
+= datatable "pagares"
+
+%table#pagares.table.table-condensed
+	%colgroup
+		%col.numero
+		%col.numero
+		%col.numero
+		%col
+		%col
+		%col
+		%col.monto
+		%col
+		%col
+	%thead
+		%tr
+			%th.txCenter Nº Pag.
+			%th.txCenter Nº Mat.
+			%th.txCenter Nº Plan
+			%th.txLeft Alumno
+			%th.txLeft Carrera
+			%th.txLeft Institución
+			%th.txRight.not-sorting Monto
+			%th.txLeft Estado
+			%th.txLeft Ejecutivo
+	%tbody
+		- @pagares.each do |item|
+			%tr
+				%td.txCenter.dropdown
+					%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+						= item[:pagare].numero
+						%b.caret
+
+					%ul.dropdown-menu
+						%li
+							%a{:href => "#{matriculas_ver_path item[:matricula].id, :anchor => "pagare-#{item[:pagare].id}"}"}
+								%i.icon-zoom-in
+								Ver pagaré
+
+						- if not item[:pagare].url.nil?
+							%li
+								%a{:href => "#{item[:pagare].url}"}
+									%i.icon-download-alt
+									Descargar pagaré
+
+						%li
+							%a{:href => "#{matriculas_pagare_anular_sustituir_path item[:pagare].id}"}
+								%i.icon-trash
+								Anular/sustituir pagaré
+
+						%li.divider
+						%li
+							%a{:href => "#{matriculas_ver_path item[:matricula].id}"}
+								%i.icon-zoom-in
+								Ver matrícula
+	
+				%td.txCenter= item[:matricula].id
+				%td.txCenter= item[:plan_pago].id
+				%td.txLeft
+					%span= item[:usuario_alumno].nombre
+					%span.segunda-linea= item[:usuario_alumno].rut
+				%td.txLeft= item[:plan_estudio].nombre
+				%td.txLeft
+					%span= item[:institucion].nombre
+					%span.segunda-linea= item[:sede].nombre
+				%td.txRight= dinero item[:pagare].monto
+				%td.txLeft= get_name Pagare, "ESTADOS", item[:pagare].estado
+				%td.txLeft= item[:usuario_ejecutivo].nombre
+
+:css
+	col.numero { width: 60px; }
+	col.cuota { width: 50px; }
+	col.monto { width: 85px; }
+	td.dropdown.open ul.dropdown-menu {
+		left: 25px !important;
+		top: 28px !important;
+		text-align: left !important;
+	}
+
+	td span { display: block; }
+	td span.segunda-linea { font-weight: bold; }
+
+	td.dropdown.open ul.dropdown-menu a {
+		margin-right: 0 !important;
+	}
+
+:javascript
+	$(document).ready(function() {
+		$("div.modal form").validate({
+			submitHandler: function(form) {
+				form.submit();
+			}
+		});
+	})

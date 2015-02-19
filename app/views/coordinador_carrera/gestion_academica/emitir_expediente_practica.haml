@@ -1,0 +1,117 @@
+.sectionHeader
+	%h1  Práctica Profesional
+	%div.well
+		%form.form-search#buscar_alumno{:action => coordinador_carrera_emitir_expediente_titulacion_path ,:method => "post"}
+			%input.input-large.search-query.required{type: "text", :placeholder => "Rut Alumno", style: 'height: 28px', :name => "busqueda"}
+			%button.btn.btn-primary{type: "submit"} 
+				%icon.icon-white.icon-search
+				Buscar Alumno
+		= notificaciones
+
+- unless @alumno.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action => coordinador_carrera_emitir_expediente_titulacion_path ,:method => "post"}
+		%fieldset
+			%legend Información del alumno
+			%input{type: "hidden", name: "usuario", value: @usuario.id}
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre_1
+					%div.contenedorElemento.separador
+						%label.etiqueta Email:
+						%span= @usuario.email
+					%div.contenedorElemento.separador
+						%label.etiqueta Domicilio:
+						%span= @usuario.domicilio
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: "alumno_plan_estudio_id"}
+							-# selected =  @alumno_plan_estudio_seleccionado.blank? ? false : true
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => i.id , selected: @alumno_plan_estudio_seleccionado.blank? ? false : i.id == @alumno_plan_estudio_seleccionado.id }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"} 
+							%icon.icon-white.icon-search
+							Consultar
+- unless @alumno_plan_estudio_seleccionado.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action => coordinador_carrera_registrar_trabajo_titulo_path ,:method => "post", class: 'form-horizontal well'}
+		%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+		%input{:type=>"hidden", name: "inscripcion_id", value: @inscripcion.id}
+		%div.well
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Plan Estudios:
+						%span= @alumno_plan_estudio_seleccionado.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Institución:
+						%span= @alumno_plan_estudio_seleccionado.institucion_sede_plan.institucion_sede.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Ingreso al plan de estudios:
+						%span= @alumno_plan_estudio_seleccionado.periodo.nombre
+		%div.well
+			%div.control-group
+				%label.control-label Fecha:
+				%div.controls
+					%input.required.fechas{:type => "text", :name => "practica_profesional[fecha]", :autocomplete => "off"}
+			%div.control-group
+				%label.control-label Nombre:
+				%div.controls
+					%input.required{:type => "text", :style => "text-align: right",name: "practica_profesional[nombre]"}
+			%div.control-group
+				%label.control-label Rol:
+				%div.controls
+					%input.required{:type => "text", :style => "text-align: right",name: "practica_profesional[rol]"}
+
+			%legend Evaluación
+			%table.table.table-striped#alumnos
+				%thead			
+					%tr
+						%th.TxtLft Docente Supervisor
+						%th.TxtLft Nota Final
+						/ %th.BgNP.TxtLft Nota Defensa
+				%tbody
+					%tr
+						%td	
+							%input.required{:name => "docente_practica[][docente]", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", type: "text"}
+						/ %td
+						/ 	%input.TxtNota.required{:type => "text", :name => "comision_examinadora[][nota_exposicion]"}
+						/ %td
+						/ 	%input.TxtNota.required{:type => "text", :name => "comision_examinadora[][nota_defensa]"}
+			%button.btn.btn-large.btn-primary.no-imprimir{type: "submit"}
+				%i.icon.icon-white.icon-ok
+				Guardar
+
+							
+				
+:javascript
+	$(document).ready(function(){
+		$(".form-horizontal").validate({
+			invalidHandler: function(form, validator) {
+				notify_error("Error al enviar información", "Por favor, compruebe que ha ingresado correctamente todos los campos.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		});
+		$(".ajax-typeaheadres").typeahead({ 
+			ajax: {
+				url: "/mantenedores/secciones/typeaheadresp", //ruta al controlador q retorna las personas
+				timeout: 300, //tiempo de espera
+				triggerLength: 2, // a 3 caracteres empieza a buscar
+				method: "get",
+			},
+			items: 16 //cantidad de resultados a traer cada vez
+		});
+	});
+		$(".habilitar_convalidacion").change(function() {
+			$(this).parent().parent().find("input[type='text']").attr("disabled", ! this.checked);
+		
+		});
+		
+		$(".fechas").live("focusin", function(){
+			$(this).datepicker();
+		});

@@ -1,0 +1,40 @@
+.page-Header
+    %h1 Listado Cuotas Con Situación Pagadas
+
+= notificaciones
+
+= form_for :todos, url: cobranzas_morosos_cobranza_externa_listado_cuotas_sitacion_pagadas_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+    %fieldset
+        %legend Listado Cuotas Con Situación Pagadas
+        %select{:name => "institucion", :id => "institucion", :prompt => 'Seleccione institución', class: 'selectInstitucion'}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion[:nombre]
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{class: "modalidad", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL}
+        %select{:name => "sede", :prompt => 'Seleccione sede'}
+            - @sedes.each do |item|
+                %option{:value => item[:id]}= item[:nombre]
+        %br 
+        %br
+        = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+        = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+        = f.submit 'Filtrar'
+
+:javascript
+    $(function(){
+        $('.fecha').datepicker();
+
+        $('form').submit(function(){
+            notify_info('Generando informe, por favor espere...');
+            $('input[type=submit]').attr('disabled', true);
+        });
+
+        $('.selectInstitucion').change(function(){
+            if($('.selectInstitucion .distancia:selected').val() == 1){
+                $('.modalidad').attr({'value' : 2});
+            }
+            else{
+                $('.modalidad').attr({'value' : 1});
+            }
+        });
+    })

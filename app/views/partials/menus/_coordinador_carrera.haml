@@ -1,0 +1,134 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Coordinación de Carrera
+%ul.nav.nav-list
+	%li.nav-header Gestión Académica
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Actas de Notas
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => coordinador_carrera_ver_acta_notas_path} Consultar Actas
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Expedientes de Titulación
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => coordinador_carrera_emitir_expediente_titulacion_path} Emitir Expediente
+			%li
+				%a{:href => coordinador_carrera_consultar_expediente_titulacion_path} Consultar Expedientes
+	
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Validación de Estudios
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => direccion_escuela_convalidacion_estudios_path } 
+					Convalidar Estudios
+			%li
+				%a{:href => direccion_escuela_homologacion_estudios_path } 
+					Homologar Estudios
+			%li
+				%a{:href => coordinador_carrera_ver_acta_convalidacion_path} Ver Acta de Convalidacion			
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Asignaturas
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => abrir_asignaturas_semestre_path } Abrir Asignaturas
+			%li
+				%a{:href => asignaturas_secciones_path } Historial Secciones
+	%li.nav-header Gestión Calificaciones
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Calificaciones
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => coordinador_carrera_ver_planificacion_seccion_path} Planificacion Notas
+			%li
+				%a{:href => coordinador_carrera_secciones_path} Gestion Notas
+			-#%li
+				- #%a{:href => coordinador_carrera_ver_notas_seccion_path} Registrar Notas
+
+
+	%li.nav-header Gestión Alumnos
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Alumnos
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => coordinador_carrera_inscripcion_asignaturas_path} Inscripción de Asignaturas
+			/%li
+			/	%a{:href => buscar_alumno_path} Inscripción Extraordinaria
+			%li
+				%a{:href => coordinador_carrera_pase_semestral_path} Pase Matricula
+			%li
+				%a{:href => coordinador_carrera_alumno_matriculado_por_carrera_path} Alumnos matriculados
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Secciones
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => coordinador_carrera_secciones_path} Ver Secciones
+			%li
+				= link_to 'Modificar Secciones', asignaturas_escuela_path
+			
+			%li
+				%a{:href => coordinador_carrera_estadistica_por_nivel_path} Estadistica por nivel
+			/ %li
+			/ 	%a{:href => "#"} Pase Alumno Trabajador
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Asistencia
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => apoyo_docente_buscar_alumno_path} Resumen Asistencia/Notas Alumno
+				%a{:href => apoyo_docente_ver_asistencia_path} Resumen Asistencia/Notas Carrera
+				%a{:href => apoyo_docente_ver_asistencia_nota_seccion_path} Resumen Asistencia/Notas Seccion 
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-rightd
+	/ 		Ex-Alumnos
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Consultar Ex-alumnos
+
+	/ %li.nav-header Gestión Profesores
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Carga Horaria
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Ingresar Carga Horaria
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Rendimientos Profesores
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Consulta Horas Realizadas
+
+	/ %li.nav-header Gestión Secciones
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Secciones
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Asignar Profesor			
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Horarios Secciones
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Bloques Horarios

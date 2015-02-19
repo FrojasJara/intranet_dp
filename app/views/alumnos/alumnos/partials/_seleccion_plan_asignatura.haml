@@ -1,0 +1,36 @@
+:javascript
+	$(document).ready(function() {
+		$("form.carreras-estudiadas").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+			},
+			submitHandler: function(form) {
+				form.submit()
+			}
+		})
+		var val = $("form.carreras-estudiadas select option[value$='#{@alumno_plan_estudio_id}']").val();
+		$("form.carreras-estudiadas select").val(val);
+	})
+
+%form{:class => "carreras-asignaturas"}
+	%fieldset
+		%legend Selección del plan de estudios
+		%ul
+			%li.ui-helper-clearfix
+				%div.contenedorElemento.separador
+					%label Plan de estudio
+					%select.required{:name => ""}
+						%option 
+							\:: Seleccione un plan de estudios ::
+							- @planes_estudiados[:planes_estudiados].each do |plan|
+								%option{:value => ajax_alumno_obtener_asignaturas_path(@alumno.id, @alumno_plan_estudio_id)}
+									= plan[:plan_estudio].nombre
+
+				%div.contenedorElemento.separador
+					%label Asignatura
+					%select.required{:name => ""}
+						%option 
+							\:: Seleccione una asignatura ::
+
+				%div.contenedorElemento.separador
+					%input.btn.btn-primary{:type => "submit", :style => "margin-top: 19px;", :value => "Consultar"}

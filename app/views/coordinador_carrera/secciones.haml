@@ -1,0 +1,130 @@
+= render "matriculas/matriculas/admision/partials/assets_css"
+.page-header
+    = breadcrumb ["Coordinación de Carrera",  "Secciones"]
+    %h1 Secciones
+
+    = notificaciones    
+    = form_for :filtro, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %select{:name => "sede_id"}
+            %option{value: ""} .: Elija Una Opción :.
+            - @sedes.each do |item|
+                %option{:value => item.id}= item.nombre
+        %select{:name => "plan_estudio_id"}
+            %option{value: ""} .: Elija Una Opción :.
+        %select{name: "periodo_id"}
+            - @periodos.each do |item|
+                %option{value: item.id}= item.nombre
+        = f.submit 'Filtrar'
+
+- unless params[:sede_id].blank?
+    - unless @data.blank?
+        %h3 
+            Periodo: 
+            = @periodo.nombre
+        %table.table.table-striped#secciones
+            %thead
+                %tr
+                    %th.TxtLft ID
+                    %th.TxtLft Estado
+                    %th.TxtLft Número
+                    %th.TxtLft Jornada
+                    %th.TxtLft Cupos
+                    %th.TxtLft Inscritos
+                    %th.TxtLft Plan Estudio
+                    %th.TxtLft Asignatura
+                    %th.TxtLft Profesor
+                    %th Acción
+            %tbody
+                - @data.each do |item|
+                    %tr
+                        %td= item[:seccion_id]
+                        %td= get_name Seccion, :ESTADOS, item[:estado]
+                        %td= item[:numero]
+                        %td= get_name Seccion, :JORNADAS, item[:jornada]
+                        %td= item[:cupos]
+                        %td= item[:alumnos_inscritos]
+                        - if item[:secciones_dictadas].length.eql? 1
+                            - sd = item[:secciones_dictadas].first
+                            %td= sd[:plan_estudio].nombre
+                            %td.dropdown
+                                %a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+                                    = sd[:asignatura].nombre
+                                    %b.caret
+                                %ul.dropdown-menu
+                                    %li
+                                        %a{:href => coordinador_carrera_secciones_ver_path(item[:seccion_id])}
+                                            %i.icon-zoom-in
+                                            Ver lista de clases
+                                    %li 
+                                        %a{:href => coordinador_carrera_estadistica_notas_finales_path(item[:seccion_id])}
+                                            %i.icon-zoom-in
+                                            Ver estadisticas finales
+                                    %li
+                                        %a{:href => coordinador_carrera_ver_notas_seccion_path(item[:seccion_id],@periodo.id)}
+                                            %i.icon-zoom-in
+                                            Ver notas
+                                    %li
+                                        %a{:href => edit_mantenedores_seccione_path(item[:seccion_id])}
+                                            %i.icon-zoom-in
+                                            Editar Sección
+                                    %li
+                                        %a{:href => coordinador_carrera_asistencia_parcial_seccion_path(item[:seccion_id])}
+                                            %i.icon-zoom-in
+                                            Asistencia parcial
+                        - else
+                            %td{colspan: 2}
+                                %ul
+                                    - item[:secciones_dictadas].each do |sd|
+                                        %li
+                                            %span{style: 'color: #888'}
+                                                = sd[:plan_estudio].nombre
+                                            \-
+                                            %td.dropdown
+                                                %a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+                                                    = sd[:asignatura].nombre
+                                                    %b.caret
+                                                %ul.dropdown-menu
+                                                    %li
+                                                        %a{:href => coordinador_carrera_secciones_ver_path(item[:seccion_id])}
+                                                            %i.icon-zoom-in
+                                                            Ver lista de clases
+                                                    %li 
+                                                        %a{:href => coordinador_carrera_estadistica_notas_finales_path(item[:seccion_id])}
+                                                            %i.icon-zoom-in
+                                                            Ver estadisticas finales
+                                                    %li
+                                                        %a{:href => coordinador_carrera_ver_notas_seccion_path(item[:seccion_id],@periodo.id)}
+                                                            %i.icon-zoom-in
+                                                            Ver notas
+                        - if item[:docente].blank?
+                            %td No asignado
+                        - else
+                            %td= item[:docente].datos_personales.nombre_1
+                        %td
+                            %a.btn.btn-info.no-imprimir{href: coordinador_carrera_ver_notas_seccion_path(item[:seccion_id],@periodo.id)}
+                                Notas
+                        /%td 
+                        /%a{:href => coordinador_carrera_ver_planificacion_evaluaciones_path(item[:seccion_id])} 
+                        /Ver Planificación
+        = datatable_src
+        = datatable("secciones") 
+    - else
+        %h4 No hay secciones
+:javascript
+    $(document).ready(function(){
+        $("select[name='sede_id']").change(function(){
+            var sede_id = $(this).val();
+            $.ajax({
+                url: "#{ajax_apoyo_docente_buscar_carreras_path}",
+                type: 'POST',
+                data: {sede_id : sede_id},
+                success: function(data) {
+                    var options = "<option>.: Elija Una Carrera :.</option>";
+                    $.each(data.carreras, function(k,v){
+                        options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + " [Malla " + v.siaa_id_ma + "] </option>"
+                    });
+                    $("select[name='plan_estudio_id']").html(options);
+                }
+            });
+        });
+    });

@@ -1,0 +1,100 @@
+#obtener-libro-asistencia
+	= datatable_src
+	= datatable "libro", {msg_zero: "No se han encontrado alumnos"}
+
+	:css
+
+		#obtener-libro-asistencia th, #obtener-libro-asistencia td { vertical-align: middle !important; }
+
+		td > span {
+			display: block;
+			margin: 0 auto 2px auto;
+			width: 5px;
+			height: 5px;
+		}
+		span.horas, span.porcentaje-horas, span.nombre, span.estado-asignatura { width: auto; height: auto; line-height: normal !important; }
+		span.porcentaje-horas, span.estado-asignatura { font-weight: bold; }
+
+		span.asistida { background-color: green !important; border: 1px solid green !important; }
+		span.ausentada { background-color: red !important; border: 1px solid red !important; }
+		span.justificada { background-color: blue !important; border: 1px solid blue !important; }
+
+		table.table thead th.realizada { background-color: #4A9FFF !important; }
+		td.realizada { background-color: #DFECFF !important; }
+		th.suspendida { background-color:  #ffcccc !important; } 
+		td.suspendida { background-color:  #ffcccc !important; }
+		table.table thead th.planificada { background-color: #DCDCDC !important; color: black !important; }
+
+		@media print {
+			span.asistida { background-color: black !important; border: 1px solid black !important; }
+			span.ausentada { background-color: white !important; border: 1px solid black !important; }
+			span.justificada { background-color: grey !important; border: 1px solid black !important; }
+		}
+
+		col.numero { width: 40px; }
+		col.alumno { width: 250px; }
+		col.asistidas { width: 45px; }
+		col.ausentadas { width: 45px; }
+		col.justificadas { width: 45px; }
+		/*col.clase { width: 50px; }*/
+
+	.page-header
+		%h1 Libro de asistencias
+	
+	= render "docentes/docentes/partials/seleccion_periodo_seccion" if @existe_seccion
+
+	= notificaciones
+
+	- if not @seccion.nil? and @existen_datos
+		= render "docentes/docentes/partials/informacion_tabulada_seccion"
+		%table.table.table-condensed#libro
+			%colgroup
+				%col.numero
+				%col.alumno
+				%col.asistidas
+				%col.ausentadas
+				%col.justificadas
+				- @libro[:clases].each do |item|
+					%col.clase
+
+			%thead
+				%tr
+					%th.txLeft #
+					%th.txLeft Alumno / Estado Asig.
+					%th.txCenter Asi.
+					%th.txCenter Aus.
+					%th.txCenter Jus.
+					- @libro[:clases].each do |item|
+						%th.not-sorting{:class => "#{get_name Clase, 'ESTADOS', item.estado}"}= item.numero
+
+
+			%tbody
+				- @libro[:alumnos].each_with_index do |item, index|
+					%tr
+						%td.txCenter= index + 1
+						%td.txLeft
+							%span.nombre= item[:datos].nombre
+							%span.estado-asignatura= "Asignatura #{get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado}"
+						%td.txCenter
+							%span.horas= item[:inscripcion].horas_asistidas
+							%span.porcentaje-horas= "(#{item[:inscripcion].porcentaje_horas_asistidas.to_i}%)"
+						%td.txCenter
+							%span.horas= item[:inscripcion].horas_ausentadas
+							%span.porcentaje-horas= "(#{item[:inscripcion].porcentaje_horas_ausentadas.to_i}%)"
+						%td.txCenter
+							%span.horas= item[:inscripcion].horas_justificadas
+							%span.porcentaje-horas= "(#{item[:inscripcion].porcentaje_horas_justificadas.to_i}%)"
+						- item[:asistencias].each do |item2|
+							%td.txCenter{:class => "#{get_name Clase, 'ESTADOS', item2[:clase].estado}"}
+								-# Mostramos asistencia de clases realizadas
+								-# Los alumnos que han abandonado, no tiene todos lo registros
+								- if item2[:clase].estado == Clase::REALIZADA and not item2[:asistencia].nil?
+									- item2[:asistencia].horas_asistidas.times do
+										%span.asistida
+									
+									- item2[:asistencia].horas_ausentadas.times do
+										%span.ausentada
+
+									- item2[:asistencia].horas_justificadas.times do
+										%span.justificada
+

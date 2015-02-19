@@ -1,0 +1,56 @@
+%h3 
+    Informe matriculados con inscripción 
+    =@periodo.nombre+" alumnos/apoderados"  
+    - unless @institucion_sede.blank?
+        ="- "+@institucion_sede.nombre
+%br
+
+%table#informe.table.table-condensed
+    %thead
+        %tr
+            %th Nº
+            %th Rut
+            %th Nombres
+            %th Apellidos
+            %th Fecha Matricula
+            %th Carrera
+            %th Jornada
+            %th Domicilio
+            %th Comuna
+            %th Rut Apoderado
+            %th Nombres Apoderado
+            %th Apellidos Apoderado
+            %th Domicilio Apoderado
+            %th Comuna Apoderado
+            %th Deuda Total
+            %th Deuda Actual
+            %th Deuda Incobrable
+    %tbody
+        - if @matriculas.blank? or @matriculas.count.eql? 0
+            %tr
+                %td{colspan: 9} No hay registros
+        - else
+            - @matriculas.each_with_index do |item, index|
+                - usuario, apoderado,matricula, institucion_sede_plan, plan , pendientes, atrasadas = item[:usuario], item[:apoderado], item[:matricula], item[:institucion_sede_plan], item[:plan_estudio], item[:pendientes], item[:atrasadas] 
+                %tr
+                    %td= index + 1
+                    %td= usuario.rut unless usuario.rut.blank?
+                    %td= usuario.nombres unless usuario.nombres.blank?
+                    %td= usuario.apellidos unless usuario.apellidos.blank?
+                    %td= l(matricula.created_at,format: :fecha) unless matricula.created_at.blank?
+                    %td= plan.nombre unless plan.nombre.blank?
+                    %td= get_name(InstitucionSedePlan, :JORNADAS_EFECTIVAS, institucion_sede_plan.jornada) unless institucion_sede_plan.jornada.blank?
+                    %td= usuario.domicilio_completo unless usuario.domicilio_completo.blank?
+                    %td= usuario.comuna.nombre unless usuario.comuna.nombre.blank?
+                    %td= apoderado.rut unless apoderado.rut.blank?
+                    %td= apoderado.nombres unless apoderado.nombres.blank?
+                    %td= apoderado.apellidos unless apoderado.apellidos.blank?
+                    %td= apoderado.domicilio_completo unless apoderado.domicilio_completo.blank?
+                    %td= apoderado.comuna.nombre unless apoderado.comuna.blank?
+                    %td.txRight= pendientes.blank? ? 0 : pendientes.sum(:saldo)
+                    %td.txCenter.txRight= item[:cobrables].blank? ? 0 : item[:cobrables].sum(&:saldo)
+                    %td.txCenter.txRight= item[:incobrables].blank? ? 0 : item[:incobrables].sum(&:saldo)
+
+
+= datatable_src
+= datatable 'informe'

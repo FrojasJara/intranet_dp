@@ -1,0 +1,41 @@
+.page-header
+    %h3 Situaciones
+    %table#lista.table.table-condensed.table-bordered
+        %thead
+            %tr
+                %th # 
+                %th Rut Alumno
+                %th Nombre Alumno
+                %th Fecha Matricula
+                %th Carrera
+                %th Fecha Situación
+                %th Tipo
+                %th Nº Resolución
+                %th Observación
+                %th Sit. Adm./Acad.
+                %th Ejecutivo
+        %tbody
+            - if @situaciones.blank? or @situaciones.count.eql? 0
+                %tr
+                    %td{colspan: 11} No hay registros
+            - else
+                - @situaciones.each_with_index do |situacion,index|
+                    - alumno = situacion.plan_pago.matricula_plan.alumno_plan_estudio.alumno
+                    - plan = situacion.plan_pago.matricula_plan.alumno_plan_estudio
+                    %tr
+                        %td{align: 'middle'}= index + 1
+                        %td= alumno.datos_personales.rut
+                        %td= alumno.datos_personales.primer_nombre+" "+alumno.datos_personales.segundo_nombre+" "+alumno.datos_personales.apellido_paterno+" "+alumno.datos_personales.apellido_materno
+                        %td= (l plan.created_at)[0..10]
+                        %td= plan.plan_estudio.nombre
+                        %td= l situacion.fecha
+                        %td= get_name Situacion, :TIPOS, situacion.tipo, 'Sin definir'
+                        %td= situacion.resolucion
+                        %td= situacion.observacion
+                        %td
+                            = value situacion.tipo_situacion, :nombre
+                            = Alumno::ESTADOS_ACADEMICOS[situacion.estado-1] unless situacion.estado.blank?
+                        %td= value situacion.ejecutivo_matriculas, :nombre
+
+= datatable_src
+= datatable "lista"

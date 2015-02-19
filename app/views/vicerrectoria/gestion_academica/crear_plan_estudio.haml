@@ -1,0 +1,80 @@
+%form.form-horizontal{:action => registrar_plan_estudio_path, :method => "post"}
+	%fieldset
+		%legend Datos Carrera
+		%div.control-group
+			%label.control-label Nombre Carrera
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[nombre]"}
+		%div.control-group
+			%label.control-label Nivel
+			%div.controls
+				%select{:name => "plan_estudio[nivel]"}
+					%option{} :: Elija Un Nivel :.
+					%option{:value => PlanEstudio::PROFESIONAL}Nivel Profesional 
+					%option{:value => PlanEstudio::TECNICO}Nivel Técnica
+					%option{:value => PlanEstudio::MENCION} Nivel Mención
+					%option{:value => PlanEstudio::DIPLOMADO} Nivel Diplomado
+					%option{:value => PlanEstudio::SECUNDARIO} Nivel Secundario
+					%option{:value => PlanEstudio::PREUNIVERSITARIO} Nivel Preuniversitario
+		
+		%div.control-group
+			%label.control-label Tiene Salida Intermedia?
+			%div.controls
+				%input{:type => "checkbox", :name => "plan_estudio[tiene_salida_intermedia]"}
+		
+
+		%div.control-group
+			%label.control-label Duración
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[duracion]"}
+		%div.control-group
+			%label.control-label Semestre Inicio
+			%div.controls
+				%select{:name => "plan_estudio[semestre_inicio]"}
+					%option{} .: Elija un Periodo :.
+					- @periodos.each do |i|
+						%option{:value => i.id } #{i.nombre}
+		%div.control-group
+			%label.control-label Año Inicio
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[anio_inicio]"}
+		%div.control-group
+			%label.control-label Año Fin
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[anio_fin]"}
+
+
+		%div.control-group
+			%label.control-label Título Profesional
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[titulo_profesional]"}
+
+		%div.control-group
+			%label.control-label Título Técnico
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[titulo_tecnico]"}
+
+		%div.control-group
+			%label.control-label Certificado
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[certificado]"}
+		%div.control-group
+			%label.control-label Licenciatura
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[licenciatura]"}
+
+		%div.control-group
+			%label.control-label Estado
+			%div.controls
+				%select{:name => "plan_estudio[estado]"}
+					%option{} :: Elija Un Estado :.
+					%option{:value => PlanEstudio::VIGENTE} Vigente
+					%option{:value => PlanEstudio::VIGENTE} No Vigente
+
+
+		%div.control-group
+			%label.control-label Revisión
+			%div.controls
+				%input{:type => "text", :name => "plan_estudio[revision]"}
+
+	%input.btn.btn-primary{:type =>"submit" , :value => "Guardar Plan Estudio"}

@@ -1,0 +1,96 @@
+.page-header
+    = breadcrumb ["Matrículas", ["Buscar documento de venta", matriculas_documento_venta_path], "Ver"]
+    %h1 Ver Documento de Venta
+
+= notificaciones
+
+- @items.each do |item|
+    %form.informacion-tabulada
+        %legend Información del Documento de Venta
+        %ul
+            %li.ui-helper-clearfix
+                %div.contenedorElemento.separador
+                    %label.etiqueta Estado:
+                    %span= get_name DocumentoVenta, :ESTADOS, item.estado
+                %div.contenedorElemento.separador
+                    %label.etiqueta Tipo:
+                    %span= get_name DocumentoVenta, :TIPOS, item.tipo
+                %div.contenedorElemento.separador
+                    %label.etiqueta Número:
+                    %span= item.numero
+                %div.contenedorElemento.separador
+                    %label.etiqueta Monto:
+                    %span= dinero item.monto
+                %div.contenedorElemento.separador
+                    %label.etiqueta Fecha:
+                    %span= l item.fecha_emision, :format => :fecha
+                %div.contenedorElemento.separador
+                    %label.etiqueta Fecha Ingreso:
+                    %span= l item.created_at
+                %div.contenedorElemento.separador
+                    %label.etiqueta Ejecutivo:
+                    %span= item.ejecutivo_matriculas.datos_personales.nombre_corto
+        %legend Información del Alumno
+        %ul
+            %li.ui-helper-clearfix
+                %div.contenedorElemento.separador
+                    %label.etiqueta Alumno:
+                    %span= item.alumno_plan_estudio.alumno.datos_personales.nombre
+                %div.contenedorElemento.separador
+                    %label.etiqueta Rut:
+                    %span= item.alumno_plan_estudio.blank? ? item.rut : item.alumno_plan_estudio.alumno.datos_personales.rut
+                %div.contenedorElemento.separador
+                    %label.etiqueta Institución:
+                    %span= item.institucion_sede.institucion.nombre
+                %div.contenedorElemento.separador
+                    %label.etiqueta Plan Estudio:
+                    %span= item.alumno_plan_estudio.blank? ? item.carrera : item.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre
+                - unless item.alumno_plan_estudio.blank? || item.plan_pago.blank?
+                    %div.contenedorElemento.separador{style: 'text-align:center'}
+                        %br
+                        = link_to matriculas_pagos_ver_alumno_path(item.alumno_plan_estudio.alumno.datos_personales.rut, item.plan_pago.id), class: 'btn btn-primary' do
+                            %i.icon-search.icon-white
+                            Ver Plan Pago
+                    
+
+                
+    %table.table.table-condensed
+        %thead
+            %tr
+                %th{colspan: 15} Abonos
+            %tr
+                %th Nº
+                %th Monto
+                %th Interés
+                %th Saldo
+                %th Saldo Interés
+                %th Fecha
+                %th Estado
+                %th Numero Documento
+                %th Fecha Documento
+                %th Ingresado
+                %th Medio Pago
+                %th Banco
+                %th Tarjeta
+                %th Tipo
+                %th Ejecutivo
+        - item.abonos.each_with_index do |abono, index|
+            %tbody
+                %tr
+                    %td= index+1
+                    %td= dinero abono.monto
+                    %td= dinero abono.interes
+                    %td= dinero abono.saldo
+                    %td= dinero abono.saldo_interes
+                    %td= l abono.fecha unless abono.fecha.blank?
+                    %td= get_name PagoComprometido, :ESTADOS, abono.estado
+                    %td= abono.numero_documento
+                    %td= abono.fecha_documento
+                    %td= l abono.created_at
+                    %td= value abono.medio_pago, :nombre
+                    %td= value abono.banco, :nombre
+                    %td= value abono.tarjetas_credito, :nombre
+                    %td= value abono.tipo_abono, :nombre
+                    %td= value abono.ejecutivo_matriculas.datos_personales, :nombre_corto
+
+        

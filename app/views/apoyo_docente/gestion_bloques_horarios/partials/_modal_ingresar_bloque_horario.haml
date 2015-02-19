@@ -1,0 +1,40 @@
+%div.modal.hide.fade{id: "modal_nuevo_bloque", tabindex:"-1",role: "dialog", "aria-labelledby"=>"myModalLabel", "aria-hidden"=>"true"}
+	%div.modal-header
+		%button.close{:type => "button", "data-dismiss" => "modal", "aria-hidden" => true}×
+		%h3{id: "myModalLabel"} Ingresar Bloque Horario
+	%div.modal-body
+		%form.form-horizontal#nuevo_bloque{:action => apoyo_docente_registrar_nuevo_bloque_horario_path, :method => "post"}
+
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input.required{:type => "number", :name => "bloque[numero]"}
+
+			%div.control-group
+				%label.control-label Hora Inicio
+				%div.controls
+					%input.required{:type => "text", :name => "bloque[hora_inicio]"}
+			
+			%div.control-group
+				%label.control-label Hora Término
+				%div.controls
+					%input.required{:type => "text", :name => "bloque[hora_termino]"}
+		
+
+	%div.modal-footer
+		%button.btn{"data-dismiss" => "modal", "aria-hidden" => true} Cancelar
+		%button.btn.btn-primary#registrar_nuevo_bloque{} Nuevo Bloque
+  
+:javascript
+	$(document).ready(function(){
+		$("#registrar_nuevo_bloque").on("click", function(){$("#nuevo_bloque").submit();});
+		$("#nuevo_bloque").validate({
+			invalidHandler: function(form, validator) {
+				console.log("aca");
+				notify_info("Nuevo Bloque", "Por favor, compruebe que ha ingresado correctamente la información correspondiente al bloque.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+	});

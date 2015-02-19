@@ -1,0 +1,36 @@
+.page-header
+    %h1
+        Detalle de pagos
+
+= render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+%table.table.table-condensed
+    %thead
+        %tr.txRight
+            %th.txRight ID
+            %th.txRight Fecha
+            %th.txRight Monto
+            %th.txRight Interés
+            %th.txRight Medio
+            %th.txRight Banco
+            %th.txRight Nº Doc
+            %th.txRight Doc Venta
+            %th.txRight Tipo
+            %th Plan Estudio
+            %th.txRight Ejecutivo
+    %tbody
+        - @abonos.each do |abono|
+            %tr
+                %td.txRight= abono.id
+                %td.txRight= l(abono.fecha, format: :fecha) unless abono.fecha.blank?
+                %td.txRight= abono.monto
+                %td.txRight= abono.interes
+                %td.txRight= value abono.medio_pago, :nombre
+                %td.txRight= value abono.banco, :nombre
+                %td.txRight= abono.numero_documento
+                %td.txRight
+                    = get_name DocumentoVenta, :TIPOS, abono.documento_venta.tipo
+                    = link_to abono.documento_venta.numero, matriculas_documento_venta_show_path(abono.documento_venta)
+                %td.txRight= value abono.tipo_abono, :nombre
+                %td= abono.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre if abono.alumno_plan_estudio && abono.alumno_plan_estudio.institucion_sede_plan
+                %td.txRight= abono.ejecutivo_matriculas.datos_personales.nombre_corto

@@ -1,0 +1,76 @@
+%p.header
+	= wicked_pdf_image_tag @institucion.include?("Instituto Profesional") ? 'logoIP1.jpg' : 'logoCFT1.jpg', width: 200
+.page-header
+	%h1="CERTIFICADO REPACTACIÓN DE DEUDA"
+	%p.numero
+		= "Nº #{@situacion.resolucion}"
+
+%p.mt1
+	= "El Departamento de Cobranza certifica que que el señor: #{@alumno.nombres} #{@alumno.apellidos} con rut #{@alumno.rut}, de la carrera #{@plan} ha solicitado repactar deuda equivalente a $#{@suma} correspondiente al año #{@anio}."
+
+%p.nombre
+	= "Al optar a este beneficio asume el compromiso de cancelar al día sus cuotas mensuales."
+
+%p.mt1
+	- unless @situacion.observacion.blank?
+		= "Observación:"
+		= "#{@situacion.observacion}."
+
+
+%p.mt2.firma
+	= "#{@usuario.nombres} #{@usuario.apellidos}"
+%p.firma
+	= "DEPARTAMENTO DE COBRANZA"
+
+%p.fecha
+	= "#{@sede}, "
+	= l Time.now, format: :humana2
+
+:css
+	.page-header { border: none !important; padding: 0 !important; }
+	p {
+		font-size: 14px !important;
+		text-align: justify !important;
+		line-height: 15px !important;
+	}
+	h1 {
+		font-size: 20px !important;
+	}
+	p.header {
+		text-align: center !important;
+		width: 100%;
+		margin-bottom: 40px;
+	}
+	p.numero {
+		text-align: center !important;
+		font-size: 20px !important;
+		width: 100%;
+		margin-bottom: 100px;
+	}
+	p.nombre {
+		font-size: 14px !important;
+		width: 100%;
+		font-weight: bold;	
+		text-transform: uppercase; 
+		margin-top: 30px;
+		margin-bottom: 10px
+	}
+	p.rut{
+		text-align: center !important;
+		font-size: 20px !important;
+		width: 100%;
+	}
+	p.firma {
+		text-align: center !important;
+		font-size: 16px !important;
+		width: 100%;
+	}
+	p.fecha {
+		margin-top: 140px;
+		font-weight: bold;
+	}
+	p.mt1 { margin-top: 30px;}
+	p.mt2 { margin-top: 150px; }
+	span.institucion {
+		text-transform: uppercase; 
+	}

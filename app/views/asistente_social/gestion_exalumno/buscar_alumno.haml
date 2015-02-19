@@ -1,0 +1,38 @@
+.page-header
+	%h1 Ingresar Antecedente Exalumno
+= notificaciones
+- if @alumno_plan_estudios.blank?
+	= render partial: 'partials/buscar_con_rut'
+
+- else
+	%form.informacion-tabulada.form_plan_estudio{:action => "#" ,:method => "get"}
+		%fieldset
+			%legend Información del alumno
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador     	
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: ""}
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => asistente_social_ingresar_antecedente_path(i.id) }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"}
+							%icon.icon-white.icon-search
+							Consultar
+	:javascript
+		$(document).ready(function() {
+			$("form.form_plan_estudio").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+				},
+				submitHandler: function(form) {
+					var url = $('form.form_plan_estudio select').val();
+					location.href = url;
+				}
+			})
+		})

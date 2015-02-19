@@ -1,0 +1,26 @@
+%table.table.table-condensed#lista
+    %thead
+        %tr
+            %th.TxtLft.nombre Período
+            %th.TxtLft.nombre Carrera
+            %th.TxtLft.nombre{style: "width: 70px"} Fecha
+            %th.TxtLft.nombre Tipo
+            %th.TxtLft.nombre Procedencia
+            %th.TxtLft.nombre Observación
+            %th.TxtLft.nombre Usuario
+            %th.TxtLft.nombre Acción
+    %tbody
+        - @bitacoras.each_with_index do |bitacora, index|
+            %tr
+                %td.txLeft.nombre= bitacora.periodo.nombre                
+                %td.txLeft.nombre= bitacora.alumno_plan_estudio.plan_estudio.nombre
+                %td.txLeft.nombre= bitacora.fecha
+                %td.txLeft.nombre= get_name BitacoraCobranza, :TIPOS, bitacora.tipo
+                %td.txLeft.nombre= get_name BitacoraCobranza, :PROCEDENCIAS, bitacora.procedencia
+                %td.txLeft.nombre= bitacora.observacion
+                %td.txLeft.nombre= bitacora.usuario.nombre_corto
+                %td.txLeft.nombre
+                    - if bitacora.usuario.id == @usuario.id
+                        .btn-group
+                            = link_to matriculas_pagos_bitacora_cobranzas_eliminar_path(bitacora.alumno_plan_estudio.id,bitacora.id), class: 'btn btn-primary' do
+                                eliminar

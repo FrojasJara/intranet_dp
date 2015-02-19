@@ -1,0 +1,165 @@
+%p
+	Si el vencimiento de alguna de las cuotas cae en día no hábil, se entenderá para el día habil siguiente. Si el vencimiento se produce entre los días 29 y 31, para los meses que no tienen ese días el vencimiento será el ultimo día hábil del mes respectivo.
+%p
+	Acepto que la imputación completa de los pagos de cada una de las cuotas precedentemente indicadas sea efectuada en forma exclusiva y privativa por el acreedor, o a quien se delegue la administración de cobranza.
+%p
+	La mora o el simple retardo en el pago de una o más de las cuotas antes señaladas darán derecho al #{raw "<span class='mayusculas'>#{@institucion.razon_social}</span>"} para poder hacer exigible de inmediato y anticipadamente el total adeudado indicado en el presente instrumento, en cuyo caso la obligación se considerará de plazo vencido. En tal caso, en conformidad a la ley, la suma adeudada devengará el interés máximo convencional que la ley permita estipular para operaciones de crédito en moneda nacional no reajustable. En caso de cobro judicial, corresponderá al deudor acreditar el pago de las cuotas pactadas.
+%p
+	Libero (liberamos) al tenedor de este pagaré de la obligación de protesto.
+%p
+	Todos los gastos, costas e intereses derivados de este instrumento serán de cargo del deudor, de acuerdo a la ley, así como aquellos ocasionados en la cobranza judicial o extrajudicial.
+%p
+	El pago de esta obligación tiene el carácter de indivisible, pudiendo exigirse a cualquiera de los herederos o sucesores del deudor o deudores. El deudor podrá acticipar su pago. En tal situación, el deudor deberá pagar el capital que se anticipa y los intereses calculados hasta la fecha de pago efectivo.
+%p
+	Autorizo (autorizamos) al #{raw "<span class='mayusculas'>#{@institucion.razon_social}</span>"} para que, bajo la sola firma de uno o más de sus mandatarios o apoderados, suscriba una o mas renovaciones de este pagaré, fijando en este caso, nuevas condiciones, en forma legal, todo lo cual acepto (aceptamos) desde luego, sin reservas, y otorgándole para ello poder irrevocable para suscribir esas renovaciones.
+%p
+	PAGARÉ Para todos los efectos legales, judiciales y de eventual protesto de este documento, fijo domicilio en la ciudad de CONCEPCIÓN y me someto a la jurisdicción de sus tribunales ordinarios.
+
+%ul
+	%li
+		%label Deudor o suscriptor
+		\:
+		%span.mayusculas= @usuario_alumno.nombre
+	%li
+		%label Rut
+		\:
+		%span.mayusculas= @usuario_alumno.rut
+	%li
+		%label Domicilio
+		\:
+		%span.mayusculas= @usuario_alumno.domicilio_completo
+	%li
+		%label Ciudad
+		\:
+		%span.mayusculas= @usuario_alumno.comuna.nombre
+	%li
+		%label Fecha
+		\:
+		%span= l @matricula.created_at, :format => :humana2
+
+.firma.mayusculas Firma suscriptor
+
+%p
+	%span.mayusculas Firmó ante mi, como deudor o suscriptor
+%ul
+	%li
+		%label Don(ña)
+		\:
+		%span.mayusculas= @usuario_alumno.nombre
+	%li
+		%label Rut
+		\:
+		%span.mayusculas= @usuario_alumno.rut
+	%li
+		%label Ciudad
+		\:
+		%span.mayusculas= @usuario_alumno.comuna.nombre
+
+.firma.mayusculas Firma notario
+
+%h2 Aval
+%p
+	Me constituyó en avalista sin limitaciones y en fiador y codeudor solidario de las obligaciones que por este acto ha contraído el suscriptor con el #{raw "<span class='mayusculas'>#{@institucion.razon_social}</span>"}. Declara asimismo, que acepta, desde luego, las prórrogas, renovaciones o modificaciones que pudieran acordarse entre acreedor y deudor, quedando subsistente su responsabilidad solidaria, en el carácter de indivisible, hasta el pago efectivo. La responsabilidad adquirida no se verá, en forma alguna, afectada por otras garantías que se hallen constituidas o que, en adelante, se constituyan como seguridad de las obligaciones objeto de aval. Asismismo, la responsabilidad solidaria mantendrá su plena vigencia aún cuando otras personas tomen, sobre sí, las obligaciones avaladas, en cualquier forma, y aún en el caso que dicha o dichas terceras personas se hagan cargo del activo y del pasivo del deudor introduzcan modificaciones.
+%p
+	Se deja constancia que la obligación del aval tendrá el carácter de indivisible, para todos los efectos legales, y podrá exigirse el cumplimiento total, de esta obligación, indistintamente, a cualquiera de los herederos o sucesores.
+%p
+	Libero al tenedor de este pagaré de la obligación de protesto. El pago de esta obligación solidaria se constituye en carácter de indivisible, y podrá exigirse a cualquiera de los herederos o sucesores del aval, a cualquier título.
+
+%ul
+	%li
+		%label Deudor o suscriptor
+		\:
+		%span.mayusculas= @usuario_apoderado.nombre
+	%li
+		%label Rut
+		\:
+		%span.mayusculas= @usuario_apoderado.rut
+	%li
+		%label Domicilio
+		\:
+		%span.mayusculas= @usuario_apoderado.domicilio_completo
+	%li
+		%label Ciudad
+		\:
+		%span.mayusculas= @usuario_apoderado.comuna.nombre
+	%li
+		%label Fecha
+		\:
+		%span= l @matricula.created_at, :format => :humana2
+
+.firma.mayusculas Firma aval
+
+%p
+	%span.mayusculas Firmó ante mi, como deudor o suscriptor
+%ul
+	%li
+		%label Don(ña)
+		\:
+		%span.mayusculas= @usuario_apoderado.nombre
+	%li
+		%label Rut
+		\:
+		%span.mayusculas= @usuario_apoderado.rut
+	%li
+		%label Ciudad
+		\:
+		%span.mayusculas= @usuario_apoderado.comuna.nombre
+
+.firma.mayusculas Firma notario
+
+%p.estampilla
+	El impuesto de timbres y estampillas que gravan este documento se paga por ingresos mensuales de dinero en tesorería, según D.L 3.47 5 ART 15 Nº 2.
+
+:css
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		margin-bottom: 8px;
+		margin-top: 3px;
+	}
+
+	ul li { margin-bottom: 3px; line-height: 100% !important; }
+	ul li label { width: 200px; margin: 0; display: inline-block; margin-right: 3px; }
+
+	p {
+		font-size: 10px !important;
+		line-height: 11px !important;
+		text-align: justify !important;
+		margin-bottom: 0px;
+	}
+
+	p.estampilla {
+		margin-top: 25px;
+		background-color: #e0e0e0 !important;
+		font-size: 9px !important;
+		padding: 6px;
+	}
+
+	label, .mayusculas, li span { text-transform: uppercase; }
+	.page-header { border: none !important; padding: 0 !important; }
+	.page-header h1 { font-size: 23px; }
+
+	label, span {
+		font-size: 9px !important;
+		line-height: 11px !important;
+	}
+
+	ul li span.mayusculas { line-height: 100% !important; }
+
+	li span { padding-bottom: 1px; width: 250px; display: inline-block; border-bottom: 1px solid black; }
+
+	h2 {
+		font-size: 15px !important;
+		line-height: normal;
+		margin-bottom: 5px;
+	}
+
+	div.firma {
+		/*float: right;*/
+		width: 150px;
+		border-top: 1px solid black;
+		text-align: center;
+		font-size: 9px;
+		margin-left: auto;
+	}

@@ -1,0 +1,57 @@
+#obtener-asignaturas-cursadas
+    :css
+        col.codigo { width: 75px; }
+        col.asignatura { width: 300px; }
+        col.periodo { width: 60px; }
+        col.seccion { width: 60px; }
+        col.estado { width: 100px; }
+        col.nota-final { width: 40px; }
+
+    = render "alumnos/alumnos/partials/assets_estados_asignaturas"
+
+    .page-header
+        %h1 
+            Asignaturas cursadas en el 
+            = @periodo_seleccionado.nombre
+        
+    = render "alumnos/alumnos/partials/seleccion_plan_periodo"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+
+    - if @existen_datos
+        %table.table.table-condensed#asignaturas
+            %colgroup
+                %col.codigo
+                %col.asignatura
+                %col.periodo
+                %col.seccion
+                %col.estado
+                %col.nota-final
+                %col.opciones
+            %thead
+                %tr
+                    %th.txCenter Código
+                    %th.txLeft Asignatura
+                    %th.txCenter Período
+                    %th.txCenter Sección
+                    %th.txLeft Estado
+                    %th.txCenter N. F.
+                    %th.txCenter.not-print
+            %tbody
+                - nombre_periodo = @periodo_seleccionado.nombre
+                - @asignaturas_cursadas.each do |item|      
+                    - estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado             
+                    %tr{:class => estado}
+                        %td.txCenter= item[:asignatura].codigo
+                        %td.txLeft.nombre
+                            %i.icon-ok
+                            %i.icon-remove
+                            %i.icon-ban-circle                            
+                            = item[:asignatura].nombre
+                        %td.txCenter= nombre_periodo
+                        %td.txCenter= item[:seccion].numero
+                        %td.txLeft= get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado
+                        %td.txCenter= item[:inscripcion].nota_final
+                        %td.txCenter.not-print
+
+    - else
+        = notificaciones

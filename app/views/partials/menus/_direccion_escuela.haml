@@ -1,0 +1,47 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Dirección de Escuela
+%ul.nav.nav-list
+	
+			
+
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Expedientes de Titulación
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Emitir Expediente
+	/ 		%li
+	/ 			%a{:href => "#"} Consultar Expedientes
+
+
+	/ %li.nav-header Gestión de Alumnos
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Alumnos
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Inscripción Extraordinaria
+	/ 		%li
+	/ 			%a{:href => "#"} Consultar Alumnos
+	/ 		%li
+	/ 			%a{:href => "#"} Pase Alumno Trabajador
+	/ %li.dropdown
+	/ 	%a{:href => "#", :data => {:toggle => "dropdown"}} 
+	/ 		%i.icon.icon-chevron-right
+	/ 		Ex-Alumnos
+	/ 	%ul.hide.dropdown-menu.inner-list
+	/ 		%li
+	/ 			%a{:href => "#"} Consultar Ex-Alumnos
+
+
+	%li.nav-header Gestión de Asignaturas
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Secciones
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Modificar Secciones', asignaturas_escuela_path

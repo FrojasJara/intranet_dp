@@ -1,0 +1,201 @@
+.page-header
+    - unless @us_alumno.blank?
+        - if params[:matricula_id].blank?
+            = breadcrumb [["Edición Plan", cobranzas_matriculas_edicion_path],"Alumno"]
+        - else
+            = breadcrumb [["Edición Plan", cobranzas_matriculas_edicion_path],["Alumno", cobranzas_matriculas_edicion_path(@us_alumno.rut)],"Plan de Pago"]
+
+    %h1 Edición de Plan de Pagos
+
+= notificaciones
+
+= render :partial => 'partials/buscar_con_rut'
+
+- unless @us_alumno.blank?
+    %br
+    = render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+    = render partial: 'partials/notificaciones/info', locals: {:mensaje => 'Recuerde que este es un proceso irrevesible que cambiará la información financiera y académica del alumno<br />Este proceso no modifica el contrato y pagaré ya generado, son modificaciones post-matricula'}
+    = render partial: 'partials/notificaciones/error', locals: {:mensaje => 'No podrá editar este plan ya que el alumno no es de su sede'} unless @usuario.sede.eql?(@us_alumno.sede)
+
+    %br
+
+    - if params[:matricula_id].blank?
+        %table.table.table-condensed
+            %thead
+                %tr
+                    %th ID
+                    %th Estado
+                    %th Periodo
+                    %th Fecha
+                    %th Ejecutivo
+                    %th
+            %tbody
+                - @datos.each do |item|
+                    - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+                    %tr
+                        %td.txCenter= mat.id
+                        %td.txCenter= get_name MatriculaPlan, :ESTADOS, mat.estado
+                        %td.txCenter.txCenter= periodo.nombre
+                        %td.txCenter= l mat.created_at
+                        %td.txCenter= ejecutivo.nombre_corto
+                        %td.txCenter
+                            - if @usuario.sede.eql?(@us_alumno.sede)
+                                %a.btn.btn-primary{:href => "#{params[:rut]}/#{mat.id}"} 
+                                    %i.icon-white.icon-pencil
+                                    Editar
+    - else
+        - item = @datos.first
+        - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+
+        .page-header
+            %h2 Edición de datos
+            .clearfix
+            %br
+            - planes.each do |pl|
+                - p = pl[:plan]
+                - situaciones = pl[:plan].situaciones
+
+                = simple_form_for :edicion, html: {class: 'form-inline'} do |f|
+                    %h3 Matrícula
+                    %br
+                    = f.simple_fields_for :matricula do |m|
+                        = m.input :id, as: :hidden, input_html: {value: mat.id}
+                        = m.input :estado, collection: for_select(MatriculaPlan, :ESTADOS), selected: mat.estado
+                        = m.input :periodo_id, collection: @periodos, selected: periodo.id
+
+                    .page-header
+                        %h3 Situaciones
+                    %table.table.table-condensed.table-bordered
+                        %thead
+                            %tr
+                                %th.span1 Fecha
+                                %th Tipo
+                                %th Nº Resolución
+                                %th Observación
+                                %th Sit. Adm./Acad.
+                                %th Ejecutivo
+                        %tbody
+                            - situaciones.each do |situacion|
+                                %tr
+                                    %td.span2= l situacion.fecha
+                                    %td.span2= get_name Situacion, :TIPOS, situacion.tipo, 'Sin definir'
+                                    %td.span2= situacion.resolucion
+                                    %td= situacion.observacion
+                                    %td.span2
+                                        = value situacion.tipo_situacion, :nombre
+                                        = Alumno::ESTADOS_ACADEMICOS[situacion.estado-1] unless situacion.estado.blank?
+                                    %td.span2= value situacion.ejecutivo_matriculas, :nombre
+
+                    - unless p.pagares.blank?
+                        - pag = p.pagares(:estado.not => Pagare::ANULADO).last
+                    - unless pag.blank?
+                        %h3="Plan Pago ( Pagaré #{pag.numero} )"
+                    - else 
+                        %h3="Plan Pago"
+                    %br
+                    = f.simple_fields_for "plan[#{p.id}]" do |pf|
+                        = pf.input :estado, collection: for_select(PlanPago, :ESTADOS), selected: p.estado 
+                        = pf.input :tipo, collection: for_select(MatriculaPlan, :TIPOS), selected: p.tipo
+                        = pf.input :periodo_id, collection: @periodos, selected: p.periodo.id
+
+                        %table.table.table-condensed
+                            %thead
+                                %tr
+                                    %th Nº Cuota
+                                    %th Estado
+                                    %th Tipo
+                                    %th Fecha Vencimiento
+                                    %th Centro costos
+                                    %th Monto
+                                    %th Saldo
+                            %tbody
+                                  
+                            - pl[:pagos_comprometidos].each do |pc|
+                                = pf.simple_fields_for  "pago_comprometido[#{pc.id}]", pc do |pcf|
+                                    %tr
+                                        %td.txCenter= pcf.input_field :numero_cuota, class: 'input-mini'
+                                        %td.txCenter= pcf.input_field :estado, collection: for_select(PagoComprometido, :ESTADOS), class: 'input-medium estado'
+                                        %td.txCenter= get_name(PagoComprometido, :TIPOS_CUOTAS, pc.tipo_cuota)
+                                        %td.txCenter= l(pc.fecha_vencimiento) unless pc.nil? || pc.fecha_vencimiento.nil?
+                                        %td.txCenter= pcf.input_field :centro_costo, collection: for_select(PagoComprometido, :CENTROS_COSTOS), class: 'input-small'
+                                        %td.txCenter= dinero pc.monto
+                                        %td.txCenter= dinero pc.saldo
+                                        / %td= pc.inspect
+                        = f.simple_fields_for :situacion_academica do |s|
+                            .well.detalle.span5.academico
+                                .page-header
+                                    %h3 Agregar detalle situación académica
+                                
+                                
+                                %a.btn_academico.btn.btn-primary{href: 'javascript:activar("academico")'}
+                                    %i.icon-white.icon-search
+                                    Agregar
+                                .inputs.hidden    
+                                    = s.input :fecha, input_html: {class: 'fecha'}
+                                    = s.input :numero_resolucion
+                                    .clearfix
+                                    = s.input :estado, collection: for_select(Alumno, :ESTADOS_ACADEMICOS), label: 'Estado académico alumno', :selected => @alumno_plan_estudio.estado
+
+                                    .clearfix
+                                    = s.input :observacion, as: :text, input_html: {rows: 10}
+                                .clearfix
+                        = f.simple_fields_for :situacion_administrativa do |s|
+                            .well.span5.administrativo
+                                .page-header
+                                    %h3 Agregar detalle situación administrativa
+                                %a.btn_academico.btn.btn-primary{href: 'javascript:activar("administrativo")'}
+                                    %i.icon-white.icon-search
+                                    Agregar
+                                .inputs.hidden 
+                                    = s.input :fecha, input_html: {class: 'fecha'}
+                                    = s.input :numero_resolucion
+                                    .clearfix
+                                    = s.input :tipo_situacion, collection: TipoSituacion.all(order: :nombre)
+
+                                    .clearfix
+                                    = s.input :observacion, as: :text, input_html: {rows: 10}
+                                .clearfix
+                            .clearfix
+
+                        = button_tag class: 'btn btn-primary', 'data-confirm' => '¿Está seguro de realizar los cambios?' do
+                            %i.icon-white.icon-edit
+                            Guardar modificaciones
+                        %a.btn-cancelar.btn.btn-warning{href: 'javascript:location.reload()'}
+                            Cancelar modificaciones
+                
+                
+            -# .control-group(style="width: 200px;")
+            -#     %label.control-label{for: "#{subidquery}_monto"} Monto total:
+            -#     .controls.monto.input-prepend{}
+            -#         %span.add-on $
+            -#         %input.input-medium.monto_resumen.monto{id: "#{subidquery}_monto", name: "#{subquery}[monto]", value: pp.acumulado, alt: 'dinero', type: 'text'}
+:css
+    .control-group
+    {
+        float: left;
+        margin-right: 15px;
+    }
+    #edicion_situacion_administrativa_tipo_situacion_chzn { width: 320px !important; }
+    #edicion_situacion_academica_estado_chzn { width: 320px !important; }
+
+:javascript
+    function activar(tipo)
+    {
+        $('.tipo input, .tipo select, .tipo textarea'.replace('tipo', tipo)).removeAttr('disabled');
+        $('.tipo .inputs'.replace('tipo', tipo)).removeClass('hidden');
+        $('.tipo .btn_academico'.replace('tipo', tipo)).remove();
+        //$('button').removeClass('hidden');
+        //$('.btn-cancelar').removeClass('hidden');
+
+        if(tipo == "academico")
+            $('#edicion_situacion_academica_estado').chosen({disabled: false});
+        else
+            $('#edicion_situacion_administrativa_tipo_situacion').chosen({disabled: false});
+        
+
+    }
+
+    $(function(){
+        $('.fecha').datepicker();
+    })

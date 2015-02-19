@@ -1,0 +1,102 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Informes Alumnos 
+
+= render :partial => "vicerrectoria/partials/menu_informes"
+
+#modalInformeSedes.modal.hide
+    %div.modal-header
+        %button.close{:type => "button" , "data-dismiss" => "modal"}x
+        %h3{}Grafico de alumnos
+    %div.modal-body
+        #graficoAlumnosInscritosSedes
+    %div.modal-footer
+        %a.btn{:href => "#", "data-dismiss" => "modal"} Cerrar
+
+= datatable_src
+= datatable("alumnos")                   
+= higthcharts_src
+
+:javascript
+    var chart;
+    $(document).ready(function() {
+    	chart = new Highcharts.Chart({
+    		chart: {
+    			renderTo: 'graficoAlumnosInscritosSedes',
+    			type: 'bar'
+    		},
+    		title: {
+    			text: 'Inscritos por sede'
+    		},
+    		xAxis: {
+    			categories: ['Concepción', 'Nuñoa', 'El bosque', 'Salvador', 'Viña del Mar', 'Chillan']
+    		},
+    		yAxis: {
+    			min: 0,
+    			title: {
+    				text: 'Total Alumnos Matriculados'
+    			}
+    		},
+    		legend: {
+    			backgroundColor: '#FFFFFF',
+    			reversed: true
+    		},
+    		tooltip: {
+    			formatter: function() {
+    				return ''+
+    				this.series.name +': '+ this.y +'';
+    			}
+    		},
+    		plotOptions: {
+    			series: {
+    				stacking: 'normal'
+    			}
+    		},
+    		series: [{
+    			name: 'Educación Parvularia',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Contador Auditor',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Ingeniería en Administración de Empresas',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Ingeniería en Computación e Informática',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Servicio Social',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Plan Especial en Construcción Civil',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Gastronomía',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Técnico en Construcción',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Técnico en Enfermería',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Técnico en Topografía',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Ingeniería en Prevención de Riesgos',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Asistente del Educador de Párvulos',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Asistente del Educador Diferencial',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}, {
+    			name: 'Técnico en Construcción',
+    			data: [#{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)}, #{rand(50)},#{rand(50)}]
+    		}
+    		]
+    	});
+    });

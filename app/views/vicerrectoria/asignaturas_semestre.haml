@@ -1,0 +1,89 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Asignaturas
+%div.well#filtro   
+    %form.form-vertical{:id => 'frmFiltrarCarrera', :method => "post" , :action => asignaturas_semestre_path }
+
+        %div.filtros
+            %label Sede
+            = select("filtro", "sede_id", Sede.all(:fields => [:id, :nombre] ).collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la Sede ::' }, {:class => 'span3'})
+        %div.filtros
+            %label Carreras
+            %select.span3{:id => "carreras_carreras_id", :name => "carreras[carreras_id]"}
+                %option :: Seleccione Una Carrera ::
+            
+        %div.filtros
+            %label Periodo
+            = select("periodo", "periodo_id", @periodos[:todos].collect {|i| [ i.nombre, i.id ] }, {:selected => @periodos[:seleccionado][:id] }, {:style => 'width: 75px;'}) 
+
+            %button.btn.btn-primary Buscar   
+
+%div#resultado
+    %form{:action => abrir_asignaturas_semestre_path, :method =>  "post"}
+        %table.table.table-striped.table-bordered{:id => 'asignaturas'}
+            %thead
+                %tr
+                    %th ID
+                    %th Nombre
+                    %th Número de Secciones
+                    %th Abrir Asignatura
+            %tbody
+                - @items.each do |i|
+                    %tr
+                        %td= i[:id_asignatura]
+                        %td= i[:nombre_asignatura]
+                        %td
+                            %input.input-medium{:type => :number, :min => "#{i[:numero_secciones]}", :max => "5", :name => "asignaturas[][secciones_nuevas]", :value => "#{i[:numero_secciones]}", :disabled => "disabled"}
+                            %input{:type => :hidden, :name => "asignaturas[][id_asignatura]", :value => "#{i[:id_asignatura]}", :disabled => "disabled"}
+                            %input{:type => :hidden, :name => "asignaturas[][numero_secciones]", :value => "#{i[:numero_secciones]}", :disabled => "disabled"}
+                        %td
+                            %input.abrir-seccion{:type => :checkbox}
+
+        %br
+        %div{:class => "form-actions"}
+            %button.btn.btn-primary Abrir Asignaturas
+
+= datatable_src
+= datatable("asignaturas")                   
+:css
+    td input[type="number"]{height: 28px !important; width:60px !important; }
+    .filtros{display: inline-block; margin-bottom: 20px;}
+
+:javascript
+
+    $("input.abrir-seccion").change(function(){
+        var $number = $(this).parent().prev().find("input");
+        $number.attr("disabled", ! this.checked);
+    });
+
+    $("select[name='filtro[sede_id]']").change(function(){
+        var sede_id = $(this).val();
+        $.ajax({
+            url: "#{vicerrectoria_ajax_buscar_carreras_sedes_path}",
+            type: 'POST',
+            data: {sede_id :  sede_id},
+            success: function(data) {
+                var options = ""
+                $.each(data.carreras, function(k,v){
+                    options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + "</option>"
+                });
+                $("#carreras_carreras_id").html(options);
+            }
+        });
+    });
+
+/ %div.well{:style => "margin-bottom:20px"}  
+/     %form.form-vertical{:id => 'frmFiltrarCarrera', :method => "post" , :action => generar_informe_alumnos_path }
+/         %div.filtros
+/             %label Sede
+/             = select("filtro", "sede_id", Sede.all(:fields => [:id, :nombre] ).collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la Sede ::' }, {:class => 'span3'})
+/         %div.filtros    
+/             %label Carreras
+/             = select("filtro", "plan_estudio_id", PlanEstudio.all(:fields => [:id, :nombre], :anio_inicio.gte => 2008, :order => [:nombre.asc]).collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la Carrera ::' }, {:class => 'span3'})
+/         %div.filtros    
+/             %label Estado Alumnos
+/             = select("filtro", "estado_alumno", for_select(Alumno, :ESTADOS_ACADEMICOS,":: Seleccione el estado ::"),{},{:class => "span2"})
+            
+/         %button.btn.btn-primary Filtrar 

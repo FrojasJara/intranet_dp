@@ -1,0 +1,13 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            Control de entrada
+            %span.divider / 
+        %li.active
+            %a{:href => "#"}  
+                Subir archivo
+%div.span10
+    = simple_form_for :upload, url: upload_process_administrador_dedos_path do |f|
+        = f.input :file, as: :file
+        
+        = f.submit 'Subir'

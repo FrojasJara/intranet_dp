@@ -1,0 +1,473 @@
+:css
+	.red{
+		color:red;
+		font-weight: bold;
+	}
+
+- if @existe_matricula and @existen_datos
+	.page-header
+		- plan_vigente = @resumen_planes.select{ |item| item[:plan].estado == PlanPago::VIGENTE }.first
+		- plan_vigente = (not plan_vigente.nil?) ? plan_vigente[:plan] : nil
+		- if not plan_vigente.nil?
+			.botones{:style => "float: right; margin-right: 240px;"}
+				%a.not-print.btn.btn-primary{:href => "#{matriculas_plan_documentos_path @matricula.id}"}
+					%i.icon-white.icon-list-alt
+					Generar/Eliminar documentos
+				%a.not-print.btn.btn-warning{:href => "#{matriculas_editar_path @matricula.id}"}
+					%i.icon-white.icon-edit
+					Editar
+				%a.not-print.btn.btn-info.impresion{:href => "#"}
+					%i.icon-white.icon-print
+					Imprimir
+		%h1 Procedimiento de matriculas
+		= notificaciones
+
+	.items-container
+		.item
+			%label Número
+			%span= @matricula.id
+		.item
+			%label Estado
+			%span= get_name MatriculaPlan, "ESTADOS", @matricula.estado
+		.item
+			%label F. creación
+			%span= fecha_humana @matricula.created_at
+
+		- if not @matricula.fecha_anulacion.nil?
+			.item
+				%label F. anulación
+				%span= fecha_humana @matricula.fecha_anulacion
+
+	-# ALumno
+	.items-container
+		.page-header
+			%h2 1. Datos del alumno
+		.item
+			%label Rut:
+			%span= @usuario_alumno.rut
+		.item
+			%label Nombre:
+			%span= @usuario_alumno.nombre
+		.item
+			%label Email:
+			%span= @usuario_alumno.email
+		.item
+			%label Fecha nacimiento:
+			%span= @usuario_alumno.fecha_nacimiento
+		.item
+			%label Estado civil:
+			%span= get_name Usuario, "ESTADOS_CIVILES", @usuario_alumno.estado_civil
+		.item
+			%label Sexo:
+			%span= get_name Usuario, "SEXOS", @usuario_alumno.sexo
+		.item
+			%label Domicilio:
+			%span= @usuario_alumno.domicilio_completo
+		.item
+			%label Comuna:
+			%span= @usuario_alumno.comuna.nombre
+		.item
+			%label Región:
+			%span= @usuario_alumno.region.nombre
+		.item
+			%label Pais:
+			%span= @usuario_alumno.pais.nombre
+		.item
+			%label Teléfono fijo:
+			%span= @usuario_alumno.telefono_fijo_completo
+		.item
+			%label Teléfono movil:
+			%span= @usuario_alumno.telefono_movil
+		.item
+			%label Documentos:
+			%span
+				%ul
+					- if @alumno.tiene_certificado_nacimiento
+						%li Certificado de Nacimiento
+					- if @alumno.tiene_certificado_titulo
+						%li Certificado de Título Técnico
+					- if @alumno.tiene_licencia_e_media
+						%li Licencia de Enseñanza Media
+		.item
+			%label Institución Ed. de procedencia:
+			%span= get_name Alumno, "EST_EDUCACIONALES", @alumno.establecimiento_educacional
+		.item
+			%label Ingresos a la institución:
+			%span= @alumno.ingresos
+		.item
+			%label Año de ingreso a la institución:
+			%span= @alumno.anio_ingreso
+
+	-# Plan de estudios y montos
+	.items-container
+		.page-header
+			%h2 2. Plan de estudios y montos
+		.item
+			%label Plan de estudios:
+			%span= @plan.nombre_completo
+		.item
+			%label Institución:
+			%span= @institucion_sede_plan.institucion_sede.nombre
+		.item
+			%label Tipo de ingreso:
+			%span= get_name Alumno, "TIPOS_INGRESO", @inscripcion_plan.tipo_ingreso
+		.item
+			%label Periodo de ingreso:
+			%span= @inscripcion_plan.periodo.nombre
+		.item
+			%label Jornada:
+			%span= get_name InstitucionSedePlan, "JORNADAS", @institucion_sede_plan.jornada
+		.item
+			%label Modalidad:
+			%span= get_name InstitucionSedePlan, "MODALIDADES", @institucion_sede_plan.modalidad
+		.item
+			%label Estado:
+			%span= get_name Alumno, "ESTADOS_ACADEMICOS", @inscripcion_plan.estado 
+
+		%ol.plan-pago
+			- @resumen_planes.each do |resumen|
+				- plan 						= resumen[:plan]
+				- pagares 					= resumen[:pagares]
+				- documento_venta 			= resumen[:documento]
+
+				- pagos_contado 			= resumen[:pagos_contado]
+				- cheques 					= resumen[:cheques]
+				- detalle_pagares			= resumen[:detalle_pagares]
+
+				- apoderado 				= plan.apoderado
+				- usuario_apoderado 		= apoderado.datos_personales
+				%li.anchor{:data => {:anchor =>  "plan-#{plan.id}"}}
+					%p 
+						Plan de pago Nº #{plan.id} generado el #{fecha_humana plan.created_at}:
+						%strong{:style => "text-transform: uppercase;"}= get_name PlanPago, "ESTADOS", plan.estado
+
+					%table.table.table-condensed.estrecha{:style => "margin-right: auto !important; margin-left: 0 !important;"}
+						%thead
+							%tr
+								%th.txLeft Tipo
+								%th.txCenter Nivel
+								%th.txRight Matricula
+								%th.txRight Arancel
+								%th.txRight Normativa
+								%th.txRight Descuento
+								%th.txRight Monto Rec.
+								%th.txRight Repactación
+								%th.txRight Arancel total
+								%th.txCenter A. P.
+								%th.txCenter N. P.
+								%th.not-print
+						%tbody
+							%tr
+								%td.txLeft= get_name MatriculaPlan, "TIPOS", plan.tipo
+								%td.txCenter= plan.nivel
+								%td.txRight= dinero plan.matricula
+								%td.txRight= dinero plan.arancel
+								%td.txRight= dinero plan.normativa
+								%td.txRight
+									= dinero plan.descuento_aplicado
+									%span{:style => "display: block; font-style: italic;"}= plan.nombre_descuento
+								%td.txRight= dinero plan.monto_reconocido
+								%td.txRight= dinero plan.repactacion
+								%td.txRight= dinero plan.arancel_total
+								%td.txCenter= plan.asignaturas_propuestas
+								%td.txCenter= plan.normativas_propuestas
+								%td.not-print
+									- if not plan.url_contrato.nil?
+										%a{:href => plan.url_contrato}
+											%i.icon-download
+											Descargar contrato
+									- else
+										(PDF no generado)
+
+					-# Apoderado
+					.items-container{:style => "margin-bottom: 18px;"}
+						.page-header
+							%h2 Datos del apoderado
+						.item
+							%label Rut:
+							%span= usuario_apoderado.rut_humanizado
+						.item
+							%label Nombre:
+							%span= usuario_apoderado.nombre
+						.item
+							%label Email:
+							%span= usuario_apoderado.email
+						.item
+							%label Domicilio:
+							%span= usuario_apoderado.domicilio_completo
+						.item
+							%label Teléfono fijo:
+							%span= usuario_apoderado.telefono_fijo_completo
+						.item
+							%label Teléfono movil:
+							%span= usuario_apoderado.telefono_movil
+						.item
+							%label Comuna:
+							%span= usuario_apoderado.comuna.nombre
+						.item
+							%label Pais:
+							%span= usuario_apoderado.pais.nombre
+						.item
+							%label Documento:
+							%span= get_name Apoderado, "DOCUMENTOS", apoderado.documentos_presentados
+						.item
+							%label El apoderado es alumno:
+							%span= bv apoderado.es_alumno
+				
+
+					- if not pagos_contado.empty?
+						%table.table.table-condensed.estrecha{:style => "margin-right: auto !important; margin-left: 0 !important;"}
+							%caption Resumen de pagos al contado
+							%colgroup
+								%col.monto
+								%col.centro-costo
+								%col.f-pago-realizado
+							%thead
+								%tr
+									%th.txRight Monto
+									%th.txCenter C. costo
+									%th.txLeft F. pago rea.
+							%tbody
+								- pagos_contado.each do |pago|
+									- estado = get_name PagoComprometido, "ESTADOS", pago.estado
+									%tr{:class => estado}								
+										%td.txRight= dinero pago.monto
+										%td.txCenter= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+										%td.txLeft= fecha_humana2 pago.fecha_pago_realizado
+
+					- if not cheques.empty?
+						%table.table.table-condensed.estrecha{:style => "margin-right: auto !important; margin-left: 0 !important;"}
+							%caption Resumen de cheques
+							%colgroup
+								%col.cuota
+								%col.estado
+								%col.monto
+								%col.centro-costo
+								%col.f-vencimiento
+								%col.f-pago-realizado
+								%col.numero-documento
+							%thead
+								%tr
+									%th.txCenter Cuota
+									%th.txLeft Estado
+									%th.txRight Monto
+									%th.txCenter C. costo
+									%th.txLeft F. venc.
+									%th.txLeft F. pago rea.
+									%th.txCenter Nº Serie
+							%tbody
+								- cheques.each do |cheque|
+									- pago = cheque[:pago]
+									- abono = cheque[:abono]
+									- estado = get_name PagoComprometido, "ESTADOS", pago.estado
+									%tr{:class => estado}								
+										%td.txCenter= pago.numero_cuota
+										%td.txLeft= estado
+										%td.txRight= dinero pago.monto
+										%td.txCenter= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+										%td.txLeft= fecha_humana2 pago.fecha_vencimiento
+										%td.txLeft= fecha_humana2 pago.fecha_pago_realizado
+										%td.txCenter= abono.numero_documento
+
+					- if not documento_venta.nil?
+						%table.table.table-condensed.estrecha{:style => "margin-right: auto !important; margin-left: 0 !important;"}
+							%caption Documentos de venta de emitidos
+							%colgroup
+								%col.tipo
+								%col.numero
+								%col.estado
+								%col.fecha-emision
+								%col.fecha-anulacion
+								%col.monto
+							%thead
+								%tr
+									%th.txCenter Tipo
+									%th.txLeft Número
+									%th.txRight Estado
+									%th.txCenter F. emisión
+									%th.txLeft F. anulación
+									%th.txLeft Monto
+							%tbody
+								%tr							
+									%td.txCenter= get_name DocumentoVenta, "TIPOS", documento_venta.tipo
+									%td.txLeft= documento_venta.numero
+									%td.txRight= get_name DocumentoVenta, "ESTADOS", documento_venta.estado
+									%td.txCenter= fecha_humana2 documento_venta.created_at
+									%td.txLeft= fecha_humana2 documento_venta.fecha_anulacion
+									%td.txLeft= dinero documento_venta.monto
+
+					- if not pagares.empty?
+						%table.table.table-condensed.estrecha.pagares{:style => "margin-right: auto !important; margin-left: 0 !important;"}
+							%caption Pagarés emitidos
+							%colgroup
+								%col.numero{:style => "width: 85px;"}
+								%col.estado
+								%col.monto
+								%col.fecha.fecha-emision{:style => "width: 180px;"}
+								%col.fecha.fecha-primera-cuota
+								%col.fecha.fecha-ultima-cuota
+								%col.fecha.fecha-termino-real
+								%col.cuotas-matricula
+								%col.cuotas-arancel
+								%col.cuotas-normativa
+								%col.not-print
+							%thead
+								%tr
+									%th.txCenter Nº
+									%th.txLeft Estado
+									%th.txCenter Monto
+									%th.txLeft F. emisión
+									%th.txLeft F. P. cuota
+									%th.txLeft F. U. cuota
+									%th.txLeft F. T. real
+									%th.txCenter C. M.
+									%th.txCenter C. A.
+									%th.txCenter C. N.
+									%th.not-print
+								%tbody
+									- pagares.each do |pagare|
+										%tr{:class => get_name(Pagare, "ESTADOS", pagare.estado)}
+											%td.txCenter.estado-pagare
+												%i.icon-ban-circle
+												%i.icon-ok
+												= pagare.numero
+											%td.txLeft= get_name Pagare, "ESTADOS", pagare.estado
+											%td.txCenter= dinero pagare.monto
+											%td.txLeft= fecha_humana pagare.created_at
+											%td.txLeft= fecha_humana2 pagare.fecha_inicio
+											%td.txLeft= fecha_humana2 pagare.fecha_termino
+											%td
+											%td.txCenter= pagare.cuotas_matricula
+											%td.txCenter= pagare.cuotas_arancel
+											%td.txCenter= pagare.cuotas_normativa
+											%td.not-print
+												- if pagare.estado == Pagare::VIGENTE && !pagare.url.blank?
+													%a{:href => matriculas_pagare_anular_sustituir_path(pagare.id)}
+														%i.icon-refresh
+														Anular/sustituir
+												- if not pagare.url.nil?
+													%a{:href => pagare.url}
+														%i.icon-download
+														- if pagare.estado == Pagare::VIGENTE
+															Descargar pagaré
+												- else
+													(PDF no generado)
+													
+													%a.btn.btn-primary{href: matriculas_pagare_editar_path(pagare.id)}
+														%i.icon-pencil.icon-white
+														Modificar Plan Pago
+
+					- if not detalle_pagares.empty?
+						- detalle_pagares.each do |detalle|
+							- pagare = detalle[:pagare]
+							- cuotas = detalle[:cuotas]
+							%div.anchor{:data => {:anchor => "pagare-#{pagare.id}"}}
+								%table.pagare.table.table-condensed.estrecha{:style => "margin-right: auto !important; margin-left: 0 !important;", :class => get_name(Pagare, "ESTADOS", pagare.estado)}
+									%caption 
+										%i.icon-ban-circle
+										%i.icon-ok
+										Detalle del pagare Nº #{pagare.numero}
+									%colgroup
+										%col.cuota
+										%col.estado
+										%col.monto
+										%col.centro-costo
+										%col.f-vencimiento
+										%col.f-ultimo-abono
+										%col.total
+									%thead
+										%tr
+											%th.txCenter Cuota
+											%th.txLeft Estado
+											%th.txRight Monto
+											%th.txCenter C. costo
+											%th.txLeft F. venc.
+											%th.txLeft F. ultimo abono
+											%th.txCenter Lugar
+											%th.txCenter Total
+									%tbody
+										- cuotas.each do |cuota|
+											- pagos = cuota[:pagos]
+											- total = cuota[:total]
+											- cantidad_pagos = pagos.size
+											- pagos.each_with_index do |pago, i|
+												- estado, atrasada = estado_cuota_class(pago)
+												- borde_inferior = (i == cantidad_pagos - 1) ? "border-bottom: 1px solid #DDD" : "none"
+												%tr{:class => "#{estado} #{atrasada}", :style => "#{borde_inferior}; #{atrasada}"}
+													%td.txCenter.estado
+														%i.icon-warning-sign
+														%i.icon-ban-circle
+														%i.icon-ok
+														= pago.numero_cuota
+															
+													%td.txLeft= estado
+													%td.txRight= dinero pago.monto
+													%td.txCenter= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+													%td.txLeft= fecha_humana2 pago.fecha_vencimiento
+													%td.txLeft= fecha_humana2 pago.fecha_ultimo_abono
+													- if pago.tiene_cobranza?(pago.id)
+														%td.txCenter.red= get_name(Cobranza,:TIPOS,pago.cobranza.tipo)
+													- else
+														%td.txCenter= "CARTERA"
+													- if i == 0
+														%td.total.txCenter{:rowspan => cantidad_pagos}= dinero total
+					- unless plan.blank?
+						%a.not-print.btn.btn-primary{:href => matriculas_pagos_ver_alumno_path(@usuario_alumno.rut, plan.id)}
+							%i.icon-white.icon-list-alt
+							Realizar pagos
+	:css
+		table.pagare td.total { font-weight: bold; }
+		table.pagare td { border-top: none !important; }
+		table caption { 
+			font-weight: bold;
+			text-align: left;
+			margin-bottom: 5px; 
+		}
+		ol.plan-pago {
+			padding-left: 20px;
+			list-style-type: decimal;
+			margin-bottom: 5px;
+			margin-top: 10px
+		}
+		col.fecha { width: 75px; }
+		ol.plan-pago p {
+			font-size: 12px;
+		}
+		ol.plan-pago div.items-container div.page-header h2 {
+			font-size: 15px;
+		}
+		@media print {
+			div.items-container div.item { width: 280px; }
+			div.item label { font-size: 9px !important; }
+			div.item span {  font-size: 9px !important; margin-left: 150px !important; }
+			div.items-container div.page-header { border: 0 !important; padding: 0 !important; }
+			div.items-container div.page-header h2 { font-size: 14px !important; border: 1px solid black; border-style: solid none; }
+			div.items-container div.page-header h3 { font-size: 11px !important; }
+			table.pagares td.estado-pagare > i, table.pagare caption i { display: none; }
+		}
+		table.pagares td.estado-pagare > i, table.pagare caption i { display: none; }
+		table.pagares tr.#{get_name(Pagare, "ESTADOS", Pagare::VIGENTE)} td.estado-pagare i.icon-ok,
+		table.pagare.#{get_name(Pagare, "ESTADOS", Pagare::VIGENTE)} caption i.icon-ok { 
+			display: inline-block; 
+		}
+		table.pagares tr.#{get_name(Pagare, "ESTADOS", Pagare::ANULADO)} td.estado-pagare i.icon-ban-circle,
+		table.pagare.#{get_name(Pagare, "ESTADOS", Pagare::ANULADO)} caption i.icon-ban-circle { 
+			display: inline-block; 
+		}
+		table.pagares tr.#{get_name(Pagare, "ESTADOS", Pagare::VIGENTE)} td { font-weight: bold; }
+		table.pagares tr { background-color: transparent !important; }
+		table.pagares tr.#{get_name(Pagare, "ESTADOS", Pagare::ANULADO)} td { color: #808080; }
+		table.pagare td.estado i { display: none; }
+		table.pagare tr.#{get_name PagoComprometido, "ESTADOS", PagoComprometido::PAGADO} { background-color: #D0FFCA; }
+		table.pagare tr.#{get_name PagoComprometido, "ESTADOS", PagoComprometido::COMPROMETIDO} { background-color: #DFECFF; }
+		table.pagare tr.atrasada { background-color: #FBEED5; }
+		table.pagare tr.atrasada i.icon-warning-sign { display: inline-block; }
+		table.pagare tr.atrasada i.icon-chevron-right { display: none !important; }
+		table.pagare tr.#{get_name PagoComprometido, "ESTADOS", PagoComprometido::PAGADO}  i.icon-ok { display: inline-block; }
+		table.pagare tr.#{get_name PagoComprometido, "ESTADOS", PagoComprometido::ANULADO} { background-color: transparent; }
+		table.pagare tr.#{get_name(PagoComprometido, "ESTADOS", PagoComprometido::ANULADO)} td { color: #808080; }
+		table.pagare tr.#{get_name(PagoComprometido, "ESTADOS", PagoComprometido::ANULADO)} td.estado i.icon-ban-circle { display: inline-block; }
+
+- else
+	%h1 Procedimiento de matriculas
+	= notificaciones

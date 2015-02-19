@@ -1,0 +1,8 @@
+= simple_form_for @item, :url => @item.new? ? administrador_instituciones_path : administrador_institucione_path(@item)  do |f|
+
+    = f.input :rut
+    = f.input :nombre
+    = f.input :razon_social
+
+    %br
+    = f.submit 'Save', :class => 'aSubmit aS_ok right'

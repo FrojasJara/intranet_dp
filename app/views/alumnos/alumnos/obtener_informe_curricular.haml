@@ -1,0 +1,144 @@
+%div#informe-curricular
+	= datatable_src
+	= datatable "asignaturas"
+
+	:css
+		col.semestre    { width: 30px }
+		col.codigo 		{ width: 80px }
+		col.asignatura  { width: 450px}
+		col.nota        { width: 50px }
+		col.periodo     { width: 30px}
+		col.historial   { width: 80px }
+		span.periodo    { font-style: italic; }
+		span.estado     { font-weight: bold; }
+		#informe-curricular ol {
+			list-style: decimal;
+		}
+
+		
+		
+	= render "alumnos/alumnos/partials/assets_estados_asignaturas"
+
+	.page-header
+		%h1 Informe curricular
+	= render "alumnos/alumnos/partials/seleccion_plan"
+
+	- if not @informe_curricular.empty?
+		= render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+
+		%table.table.table-condensed#asignaturas
+			%colgroup
+				%col.semestre
+				%col.codigo
+				%col.asignatura
+				%col.nota
+				%col.periodo
+				%col.historial
+			%thead
+				%tr
+					%th.txLeft.nombre
+						Semestre
+					%th.txLeft.nombre
+						Código
+					%th.txLeft.nombre
+						Asignatura
+					%th.txLeft.nombre
+						Nota
+					%th.txLeft.nombre
+						Periodo
+					%th.txLeft.nombre
+						Historial
+			%tbody
+				- @informe_curricular.each do |item|
+					- estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado
+					- item[:inscripciones].each do |inscripcion|
+						- if inscripcion[:estado].estado ==2
+							%tr{:class => "Aprobada"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre	
+								%td.txLeft
+									%span.estado= "Aprobada"			
+						- if inscripcion[:estado].estado ==3
+							%tr{:class => "Reprobada"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre
+								%td.txLeft
+									%span.estado= "Reprobada"
+						- if inscripcion[:estado].estado ==1
+							%tr{:class => "Inscrita"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre
+								%td.txLeft
+									%span.estado= "Inscrita"
+						- if inscripcion[:estado].estado ==4
+							%tr{:class => "Convalidada"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre	
+								%td.txLeft
+									%span.estado= "Convalidada"
+						- if inscripcion[:estado].estado ==6
+							%tr{:class => "Abandonada"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre	
+								%td.txLeft
+									%span.estado= "Abandonada"
+						- if inscripcion[:estado].estado ==5
+							%tr{:class => "Homologada"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.nombre
+									%i.icon-ok
+									%i.icon-remove
+									%i.icon-ban-circle
+									= item[:asignatura].nombre
+								%td.txLeft
+									%span.nota= inscripcion[:estado].nota_final
+								%td.txLeft	
+									%span.periodo= inscripcion[:periodo].nombre	
+								%td.txLeft
+									%span.estado= "Homologada"

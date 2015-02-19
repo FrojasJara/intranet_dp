@@ -1,0 +1,25 @@
+%html
+    %head
+        %title
+    %body
+        %p 
+            = @user.nombres.upcase+" "+@user.apellidos.upcase
+            %br
+            = @user.rut.upcase
+            %br
+            %br
+            Junto con saludarlo(a) recuerdo a usted que a la fecha mantiene una deuda con la institución que asciende a 
+            - suma = 0
+            - @saldos.each do |saldo|
+                - suma += saldo 
+            %strong='$'+suma.to_s+" más intereses y gastos de cobranza externa. "
+            Le informamos que deuda fue informada a Dicom a través de la empresa de cobranza externa AGNICOL LTDA.
+        %p= 'Atentos en resolver las dificultades que han motivado su actual estado de deserción a su proceso académico '+@matricula.periodo.nombre+', para definir su continuidad o interrupción de estudios, favor de contactarse con nosotros y de esta forma dependiendo de su asistencia sólo cancelar parte de la deuda.'
+        %p Saluda cordialmente
+        %p
+            %strong{style: 'float:left;width:100%;text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO DE COBRANZA
+                %br
+                ='e-mail '+@usuario.email

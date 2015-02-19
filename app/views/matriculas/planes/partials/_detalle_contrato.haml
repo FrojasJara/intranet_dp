@@ -1,0 +1,188 @@
+%div.valores
+	%table.table.table-condensed.estrecha
+		%caption Valores totales
+		%thead
+			%tr
+				%th.txLeft Concepto
+				%th.txCenter Año
+				%th.txCenter Valor
+		%tbody
+			%tr
+				%td.txLeft Matrícula
+				%td.txCenter= @periodo.nombre
+				%td.txRight= dinero @plan.matricula
+			%tr
+				%td.txLeft Arancel
+				%td.txCenter= @periodo.anio
+				%td.txRight= dinero @plan.arancel
+
+	- if @plan.descuento_aplicado > 0
+		%table.table.table-condensed.estrecha
+			%caption Desglose
+			%thead
+				%tr
+					%th.txLeft Concepto
+					%th.txCenter Año
+					%th.txCenter Valor
+			%tbody
+				%tr
+					%td.txLeft Arancel
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.arancel
+					
+				- if @plan.descuento_aplicado > 0
+					%tr
+						%td.txLeft= @plan.nombre_descuento
+						%td.txCenter= @periodo.anio
+						%td.txRight= dinero @plan.descuento_aplicado
+				- if @plan.monto_reconocido > 0	
+					%tr
+						%td.txLeft Monto reconocido
+						%td.txCenter= @periodo.anio
+						%td.txRight= dinero @plan.monto_reconocido
+				- if @plan.normativa > 0	
+					%tr
+						%td.txLeft Normativa
+						%td.txCenter= @periodo.anio
+						%td.txRight= dinero @plan.normativa
+				- if @plan.repactacion > 0	
+					%tr
+						%td.txLeft Repactación
+						%td.txCenter= @periodo.anio
+						%td.txRight= dinero @plan.repactacion
+				%tr
+					%td.txLeft Arancel total
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.arancel_total
+
+- pagos_contado = @detalle_plan[:pagos_contado]
+- cheques 		= @detalle_plan[:cheques]
+- pagares 		= @detalle_plan[:pagares]
+- documentos 	= @detalle_plan[:documentos]
+
+- if not documentos.empty? or not pagares.empty?
+	%p
+		Cuyos compromisos monetarios son los siguientes:
+
+.detalle
+	- if not pagos_contado.empty?
+		%table.table.table-condensed.estrecha.montos-pagados
+			%caption
+				Pagos contado
+			%thead
+				%tr
+					%th Monto
+					%th C. C.
+					%th Medio de pago
+					%th Fecha Pago
+					%th.txCenter Nro. Depos/Trans
+					%th Banco
+					%th T. Crédito
+			%tbody
+				- pagos_contado.each do |item|
+					- pago = item[:pago]
+					- abono = item[:abono]
+					- medio_pago = item[:medio_pago]
+					- banco = item[:banco]
+					- t_credito = item[:t_credito]
+					%tr
+						%td= dinero pago.monto
+						%td= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+						%td= medio_pago.nombre
+						%td= fecha_humana2 pago.fecha_pago_realizado
+						%td.txCenter= abono.numero_documento
+						%td= banco
+						%td= t_credito
+
+	- if not cheques.empty?
+		%table.table.table-condensed.estrecha.montos-comprometidos
+			%caption Pagos con cheques
+			%thead
+				%tr
+					%th.txCenter N. cuota
+					%th Monto
+					%th C. C.
+					%th F. vencimiento
+					%th.txCenter Nro. Cheque
+					%th Banco
+			%tbody
+				- cheques.each do |item|
+					- pago = item[:pago]
+					- abono = item[:abono]
+					- banco = item[:banco]
+					%tr
+						%td.txCenter= pago.numero_cuota
+						%td= dinero pago.monto
+						%td= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+						%td= fecha_humana2 pago.fecha_vencimiento
+						%td.txCenter= abono.numero_documento
+						%td= banco.nombre
+
+	- if not pagares.empty?
+		- pagares.each do |item|
+			- pagare = item[:pagare]
+			- cuotas = item[:cuotas]
+			%table.table.table-condensed.estrecha.montos-comprometidos.pagare
+				%caption Pagare Nº #{pagare.numero} creado el #{fecha_humana pagare.created_at}
+				%thead
+					%tr
+						%th.txCenter N. cuota
+						%th Monto
+						%th C. C.
+						%th F. vencimiento
+						%th.txCenter Total
+				%tbody
+					- cuotas.each do |item|
+						- pagos = item[:pagos]
+						- total = item[:total]
+						- cantidad_pagos = pagos.size
+						- pagos.each_with_index do |pago, i|
+							- borde_inferior = (i == cantidad_pagos - 1) ? "1pt solid gray !important" : "none"
+							%tr{:style => "border-bottom: #{borde_inferior};"}
+								%td.txCenter= pago.numero_cuota
+								%td.txRight= dinero pago.monto
+								%td.txCenter= get_name PagoComprometido, "CENTROS_COSTOS", pago.centro_costo
+								%td.txLeft= fecha_humana2 pago.fecha_vencimiento
+								- if i == 0
+									%td.total.txCenter{:rowspan => cantidad_pagos, :style => "vertical-align: middle;"}= dinero total
+
+	- if not documentos.empty?
+		- documentos.each do |documento|
+			%table.table.table-condensed.estrecha.documentos{:style => "margin-bottom: 0 !important;"}
+				%caption Documentos de venta emitidos
+				%thead
+					%tr
+						%th.txCenter N. Doc.
+						%th Tipo
+						%th Estado
+						%th F. Emisión
+						%th.txCenter Monto
+				%tbody
+					%tr
+						%td.txCenter= documento.numero
+						%td= get_name DocumentoVenta, "TIPOS", documento.tipo
+						%td= get_name DocumentoVenta, "ESTADOS", documento.estado
+						%td= fecha_humana2 documento.fecha_emision
+						%td.txCenter= dinero documento.monto
+
+
+
+	- if @plan.descuento_aplicado > 0
+		%p.descuento
+			Alumno con descuento de #{dinero @plan.descuento_aplicado}, correspondiente a 
+			= "#{@plan.nombre_descuento} "
+			, el cual será anulado en caso que no cumpla con la reglamentación vigente de beneficios, becas y descuentos.
+
+.firmas
+	%span.alumno Alumno
+	%span.apoderado Apoderado
+	%p.rector
+		%span Luis Beltrán Troncoso
+		- if @institucion.tipo == Institucion::IP or @institucion.tipo == Institucion::CFT
+			%span= @institucion.razon_social
+		- else
+			%span= @institucion.nombre
+			%span= @ip.razon_social
+
+	= wicked_pdf_image_tag("firma_digital.jpg", :width => "100")
+	%p.ejecutivo Ejecutivo(a): #{@usuario.nombre}

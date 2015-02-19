@@ -1,0 +1,99 @@
+.modal.fade.hide{:id => "nueva_asignatura", :style => "width: 500px"}	
+	.modal-header
+		%button.close{:data => {:dismiss => "modal"}}
+			x
+		%h3
+			%span= @asignatura.nombre
+	.modal-body
+		%form.form-horizontal{id: "seccion", :action => registrar_nueva_seccion_path, :method => "post"}
+			%input.required{:type => "hidden", :name => "seccion[asignatura_id]", :value => @asignatura.id}
+			%input.required{:type => "hidden", :name => "seccion[periodo_id]", :value => periodo_en_curso[:id]}
+
+			%div.control-group
+				%label.control-label Institución
+				%div.controls
+					%select.required{:name => "seccion[institucion_sede_id]"}
+						%option{:value => ""} .: Debe Elegir una Sede :.
+						- @instituciones.each do |i|
+							%option{:value => i.id} #{i.nombre}
+
+			%div.control-group
+				%label.control-label Modalidad
+				%div.controls
+					%select.required{:name => "seccion[modalidad]"}
+						%option{:value => ""} .: Debe elegir Modalidad :.
+						%option{:value => InstitucionSedePlan::PRESENCIAL} Modalidad Presencial
+						%option{:value => InstitucionSedePlan::DISTANCIA} Modalidad Distancia
+
+
+			%div.control-group
+				%label.control-label Jornada
+				%div.controls
+					%select.required{:name => "seccion[jornada]"}
+						%option{:value => ""} .: Debe elegir Jornada :.
+						%option{:value => Seccion::DIURNA} Jornada Diurna
+						%option{:value => Seccion::VESPERTINA} Jornada Vespertina
+						%option{:value => Seccion::TARDE} Jornada Tarde
+						%option{:value => Seccion::DISTANCIA} Jornada Distancia
+
+
+			%div.control-group
+				%label.control-label Cupos
+				%div.controls
+					%input.required{:type => "text", :name => "seccion[cupos]"}
+			
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input.required{:type => "text", :name => "seccion[numero]",onkeypress: "return validarn(event)"}
+			%div.control-group
+				%label{:class => "control-label"} Docente
+				%div.controls
+					%input{:name => "docente_id", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", type: "text"}
+			%div.control-group
+			%div.acciones
+				%button.btn.btn-default{:data => {:dismiss => "modal"}}
+					Cancelar
+				%button.btn.btn-primary.cargar{id: "enviar"}
+					%icon.icon-white.icon-search
+					Guardar Seccion
+:css
+	div.modal-backdrop {
+		background-color: #808080 !important;
+	}
+	div.fade{
+		border-radius: 7px !important;
+	}
+:javascript
+	$(document).ready(function(){
+		$("#seccion").validate({
+			invalidHandler: function(form, validator) {
+				alertify.error("Por favor, compruebe que ha ingresado correctamente la información.");
+				setTimeout($.unblockUI, 300);
+			},
+			submitHandler: function(form) {
+				form.submit();
+				$('#nueva_asignatura').modal('toggle');
+				alertify.success("Enviando", "Por favor, Espere mientras la seccion es ingresada");
+			}
+		});
+		$(".ajax-typeaheadres").typeahead({ 
+			ajax: {
+				url: "/mantenedores/secciones/typeaheadresp", //ruta al controlador q retorna las personas
+				timeout: 300, //tiempo de espera
+				triggerLength: 2, // a 3 caracteres empieza a buscar
+				method: "get",
+			},
+			items: 16 //cantidad de resultados a traer cada vez
+		});
+	});
+	function validarn(e) { // 1
+	    tecla = (document.all) ? e.keyCode : e.which; // 2
+	    if (tecla==8) return true; // 3
+			if (tecla==9) return true; // 3
+			if (tecla==11) return true; // 3
+	    patron = /[123456789]/; // 4
+	 
+	    te = String.fromCharCode(tecla); // 5
+	    return patron.test(te); // 6
+	}

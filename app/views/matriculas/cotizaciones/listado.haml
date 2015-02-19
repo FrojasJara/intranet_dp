@@ -1,0 +1,76 @@
+.page-header
+    %h1= "COTIZACIONES REALIZADAS "+get_name(Cotizacion,:TIPOS, @tipo).upcase+" "+@periodo.nombre
+    %h3
+        = get_name(Institucion,:TIPOS,@institucion_id).upcase
+        = get_name(Sede,:SEDES,@sede_id).upcase
+        = get_name(InstitucionSedePlan,:MODALIDADES,@modalidad.to_i).upcase
+        = " - "+@carrera_nombre.to_s.upcase
+
+%form{method: 'post', action: matriculas_cotizaciones_envio_mails_listado_path, id: 'form'}
+    %table#example.table
+        %thead
+            %tr
+                %th.txLeft #
+                %th.txCenter 
+                    %input{type: 'checkbox', id: 'input_principal'}
+                %th.txLeft Rut
+                %th.txLeft Nombres
+                %th.txLeft Apellidos
+                %th.txLeft Fecha
+                %th.txLeft Carrera
+                %th.txLeft Periodo
+                %th.txLeft Teléfono/Móvil
+                %th.txLeft E-Mail
+                %th.txLeft Tipo
+                %th.txLeft Ejecutivo
+                %th.txLeft Acciones
+
+        %tbody
+            - @items.each_with_index do |i,index|
+                %tr
+                    %td= index+1
+                    %td
+                        - unless i.email.blank?
+                            - email_regex = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
+                            - if(i.email =~ email_regex)
+                                %input{type: 'checkbox', class: 'checkbock', name: 'cotizaciones[]', value: i.id, class: 'inputListado'}       
+                    %td= i.rut
+                    %td= i.nombre unless i.nombre.blank?
+                    %td= i.apellido unless i.apellido.blank?
+                    %td= i.created_at.to_s[0..9]
+                    %td= i.institucion_sede_plan.plan_estudio.nombre
+                    %td= i.institucion_sede_plan.periodo.nombre
+                    - unless i.telefono_fijo.blank?
+                        - unless i.telefono_movil.blank?
+                            %td
+                                = i.telefono_fijo
+                                %br
+                                =i.telefono_movil
+                        - else
+                            %td= i.telefono_fijo
+                    - else 
+                        %td= i.telefono_movil unless i.telefono_movil.blank?
+                    %td= i.email unless i.email.blank?
+                    %td= get_name(Cotizacion,:TIPOS,i.tipo) unless i.tipo.blank?
+                    %td= i.ejecutivo_matriculas.nombre
+                    %td= link_to "Ver consulta", show_matriculas_cotizaciones_path(i.id)
+
+    
+    %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+    %input{type: 'submit',class: 'btn btn-danger', value: 'Enviar Mails'}
+
+                 
+
+:javascript
+    $(document).ready(function() {
+        $('#input_principal').change(function(){
+            if($(this).is(":checked")) {
+                $(':input').attr({"checked" : true});
+            }
+            else {
+                $(':input').attr({"checked" : false});
+            }
+        });
+
+        $('.inputListado').parent().parent().removeClass('filaRed');
+    });

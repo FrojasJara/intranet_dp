@@ -1,0 +1,10 @@
+.page-header
+	%h1 Búsqueda de procesos de matrículas
+
+= render "matriculas/matriculas/partials/formulario_busqueda"
+
+= notificaciones
+
+- if not @matriculas.nil?
+	= render "matriculas/matriculas/partials/tabla_busqueda"
+

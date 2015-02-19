@@ -1,0 +1,29 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Planes de Estudio Vigentes
+#planes-estudios
+	%a.btn.btn-primary{:href => "#agregar_asignatura", :data => {:toggle => "modal"}}
+		%i.icon-white.icon-edit
+		Abrir sección
+	= render partial: "vicerrectoria/gestion_academica/partials/modal_asignatura"
+	%table.table.table-striped.table-bordered#carreras	
+		%colgroup  
+		%thead
+			%tr
+				%th Código
+				%th Nombre
+				%th Semestre
+		%tbody
+			- @asignaturas.each do |i|
+				%tr
+					%td= i.codigo
+					%td= i.nombre
+					%td= i.semestre
+	%br
+	%br
+	
+
+= datatable_src
+= datatable("carreras")                   

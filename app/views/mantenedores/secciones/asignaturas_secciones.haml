@@ -1,0 +1,73 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Asignaturas
+%div.well    
+    %form.form-vertical{:id => 'frmFiltrarCarrera',:method => "post", :action => asignaturas_secciones_path }
+        %div.filtros
+            %label Sede
+            = select("filtro", "sede_id", InstitucionSede.all(:institucion_id => 1).collect {|i| [ i.nombre, i.id ]}, {:include_blank => ':: Seleccione la Sede ::' }, {:class => 'span3'})
+
+        %div.filtros
+            %label Carreras
+            %select.span3{:id => "carreras_carreras_id", :name => "carreras[carreras_id]"}
+                %option :: Seleccione Una Carrera ::
+            / = select("carreras", "carreras_id", @planes_estudios.collect {|i| [ i.titulo_profesional, i.id ] }, {:include_blank => ':: Seleccione la Carrera ::' , :selected => @plan_estudio_id }, {:class => 'span3'})  
+
+        %div.filtros    
+            %label Periodo
+            %select.required{:name => "periodo[periodo_id]"}
+                %option{value: ""} .: Elija Periodo :.
+                - Periodo.all(:fields => [:id], :order => [:anio.desc, :semestre.desc]).each do |i|
+                    %option{value: i.id}= i.nombre
+
+            %button.btn.btn-primary Buscar  
+- unless @items.blank?
+
+    %table.table.table-striped.table-bordered{:id => 'asignaturas'}
+        %thead
+            %tr
+                %th ID
+                %th Semestre
+                %th Nombre Asignatura
+                %th Nº de secciones
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i[:id_asignatura]
+                    %td= i[:semestre]
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                            = i[:nombre_asignatura]
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => detalle_asignatura_secciones_path(i[:id_asignatura],@periodo.id)}
+                                    %i.icon-list-alt
+                                    Secciones    
+                    %td= i[:numero_secciones]                        
+= datatable_src 
+= datatable("asignaturas")
+                  
+:css
+    td .dropdown-menu { left: 58px !important; top: 34px !important; }
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important; }
+    .filtros{display: inline-block; margin-bottom: 20px;}
+:javascript
+    $("select[name='filtro[sede_id]']").change(function(){
+        var sede_id = $(this).val();
+        $.ajax({
+            url: "#{ajax_vicerrectoria_buscar_carreras_path}",
+            type: 'POST',
+            data: {sede_id : sede_id},
+            success: function(data) {
+                var options = ""
+                $.each(data.carreras, function(k,v){
+                    options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + "</option>"
+                });
+                $("#carreras_carreras_id").html(options);
+            }
+        });
+    });
+

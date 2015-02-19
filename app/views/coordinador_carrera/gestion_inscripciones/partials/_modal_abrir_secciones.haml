@@ -1,0 +1,53 @@
+%div.modal.hide.fade{id: "modal_abrir_seccion", tabindex:"-1",role: "dialog", "aria-labelledby"=>"myModalLabel", "aria-hidden"=>"true"}
+	%div.modal-header
+		%button.close{:type => "button", "data-dismiss" => "modal", "aria-hidden" => true}×
+		%h3{id: "myModalLabel"} Abrir Sección
+	%div.modal-body
+		%form.form-horizontal#crear_seccion{:action => coordinador_carrera_registrar_nueva_seccion_path, :method => "post"}
+			%input{type:"hidden", :name => "seccion[asignatura_id]"}
+			%input{type:"hidden", :name => "alumno_id", :value => alumno_id}
+			%input{:type => "hidden", :name => "seccion[periodo_id]", :value => periodo_en_curso[:id]}
+			%div.control-group
+				%label.control-label Institución
+				%div.controls
+					%select.required{:name => "seccion[institucion_sede_id]"}
+						%option{value: ""} .: Debe Elegir una Sede :.
+						- @instituciones.each do |i|
+							%option{:value => i.id} #{i.nombre}
+			%div.control-group
+				%label.control-label Jornada
+				%div.controls
+					%select.required{:name => "seccion[jornada]"}
+						%option{:value => ""} .: Debe elegir Jornada :.
+						%option{:value => InstitucionSedePlan::DIURNA} Jornada Diurna
+						%option{:value => InstitucionSedePlan::VESPERTINA} Jornada Vespertina
+						%option{:value => 0} Distancia
+			%div.control-group
+				%label.control-label Cupos
+				%div.controls
+					%input.required{:type => "number", :name => "seccion[cupos]", :min => 40, :value => 40}
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input.required{:type => "number", :name => "seccion[numero]", :min => 1, :value => 1}
+
+	%div.modal-footer
+		%button.btn{"data-dismiss" => "modal", "aria-hidden" => true} Cancelar
+		%button.btn.btn-primary#registrar_nueva_seccion{} Abrir Sección
+  
+:javascript
+	$(document).ready(function(){
+		$("#registrar_nueva_seccion").on("click", function(){
+			$("#crear_seccion").submit();
+		});
+		$("#crear_seccion").validate({
+
+			invalidHandler: function(form, validator) {
+				notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+	});
+	

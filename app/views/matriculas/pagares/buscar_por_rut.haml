@@ -1,0 +1,9 @@
+.page-header
+	%h1 Búsqueda de pagarés
+
+= render "matriculas/pagares/partials/formulario_busqueda"
+= notificaciones
+
+- if @existen_datos
+	= render "matriculas/pagares/partials/tabla_busqueda"
+

@@ -1,0 +1,43 @@
+- required = {:input_html => {:required => true}}
+- config = required
+- config[:input_html][:class] = 'input-xxlarge'
+- largo_class = {:class => 'input-xxlarge'}
+
+= simple_form_for :certificado, url: (@item.new? ? matriculas_certificados_generar_path : matriculas_certificados_editar_path(params[:rut], params[:id])), html: {id: "form-gratuito", class: 'form-inline'} do |f|
+	= f.input :plan_estudio, {collection: @matriculas.map{|x| ["#{x[:plan_estudio].nombre}, #{x[:periodo].nombre}", x[:alumno_plan_estudio].id]}, prompt: 'Seleccione el plan de estudio'}.merge(required).merge({selected: @item.new? ? 0 : @item.alumno_plan_estudio_id})
+
+	- if @alumno_plan_estudios.last.estado == Alumno::REGULAR
+		= f.input :certificado, {collection: TipoAbono.all(tipo:TipoAbono::CERTIFICADOS).map{|x| [x.nombre, x.id]}, prompt: 'Seleccione el certificado'}.merge(required).merge({selected: @item.new? ? 0 : @item.tipo_abono_id})
+	- else
+		= f.input :certificado, {collection: TipoAbono.all(tipo:TipoAbono::CERTIFICADOS,:slug.not => 'certificado-alumno-regular').map{|x| [x.nombre, x.id]}, prompt: 'Seleccione el certificado'}.merge(required).merge({selected: @item.new? ? 0 : @item.tipo_abono_id})
+	%br
+	- if completo
+		= f.input :presentado_en, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.lugar))
+		= f.input :para_tramite, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.observacion))
+		= f.input :cursa_el, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.cursa))
+		= f.input :observacion, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.observacion2))
+		= f.input :linea_1, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.linea1))
+		= f.input :linea_2, :input_html => largo_class.merge(value: (@item.new? ? '' : @item.linea2))
+	%input{:value => 0, required: true,type: 'hidden',min: 0, name: 'certificado[monto]'}
+		
+	%br
+	= f.submit 'Generar', class: 'btn btn-primary'
+
+:javascript
+	$(function(){
+		$("#form-gratuito").validate({
+			invalidHandler: function(form, validator) {notify_error("Atención", "Hay datos que no ha completado.")
+			}, 
+			submitHandler: function(form) {
+				
+				notify_loader("Generando certificado....", "Por favor espere.");
+
+				form.submit();
+			}
+		});
+
+		if(#{completo} == true)	
+			$("[name='certificado[plan_estudio]'], [name='certificado[certificado]'], [name='certificado[tipo_documento]'], [name='certificado[numero_documento]'], [name='certificado[monto]'], [name='certificado[medio_pago]']").each(function(){$(this).attr('disabled', 'disabled');
+			});
+
+	});

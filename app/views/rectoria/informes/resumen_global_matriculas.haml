@@ -1,0 +1,251 @@
+= render "matriculas/matriculas/admision/partials/assets_css"
+.page-header
+    - unless @periodo
+        %h1 Informes de Matrículas
+    - else
+        - if @p_f_i.blank? and @p_f_t.blank?
+            %h1="Informe de matrículas #{@periodo.nombre}"
+        - elsif @p_f_i.blank?
+            %h1="Informe de matrículas #{@periodo.nombre} hasta #{@p_f_t}"
+        - elsif @p_f_t.blank?
+            %h1="Informe de matrículas #{@periodo.nombre} desde #{@p_f_i}"
+        - else
+            %h1="Informe de matrículas #{@periodo.nombre} ( #{@p_f_i} - #{@p_f_t} )"
+
+
+ 
+%form.form-inline.informacion-tabulada#form_fechas{:method => "post", :action => resumen_global_matriculas_path}   
+    %fieldset
+        %select.required{:name => "filtro[periodo_id]"}
+            - Periodo.all(:fields => [:id], order: [:anio.desc,:semestre.desc]).each do |p|
+                %option{:value => p.id}= p.nombre      
+        %input.fecha.required{type:"text", :name => "filtro[fecha_inicio]",  placeholder: 'Fecha de inicio'}
+        %input.fecha.required{type:"text",:name => "filtro[fecha_termino]",  placeholder: 'Fecha de termino'}
+        %input.btn.btn-primary.cargar{:type=> "submit",value: "Filtrar"}
+        %br
+
+:css
+    .tabla-encabezado-contenedor{background-color:#DE4945; }
+    .tabla{border: 2px solid #EEE; background-color: #DE4945 !important;}
+    .tabla-encabezado{font-weight: bold;background-color: #DE4945 !important;display: inline-block;font-size: 11px;width: 160px;color: white;text-align: left !important;padding: 3px 6px;}
+    .tabla-encabezado-sede{}
+    .tabla-encabezado-instituciones{width: 250px;}
+    .tabla-encabezado-carreras{width: 312px; text-align: center;}
+    .tabla-encabezado-nuevos{width: 70px;}
+    .tabla-encabezado-antiguos{width: 70px;}
+    .tabla-encabezado-total{width: 106px; text-align: center;}
+    
+
+    .subtotales-instituciones{margin-left: 322px;margin-top: -18px;}
+    .total-subtotales-instituciones{display: inline-block;width: 90px;text-align: left; font-size: 14px;font-weight: bold; color:white;}
+    
+    .contenedor-sedes{border-left: 2px solid whitesmoke; border-top: 2px solid silver;}
+    .sedes{background: white;}
+    .instituciones{display: inline-block; border-top: 2px solid silver}
+
+    /*.total{display:inline-block;margin-left: 70px; font-weight: bold;}*/
+    .subtotal{border-top: 2px solid silver;margin-bottom: 5px; background-color: silver;}
+    .grupo-carreras{margin-left: 250px;margin-top: -18px;}
+    .totales-matriculas{margin-left: 255px; margin-top: -17px;}
+    .detalle-instituciones{margin-left: 168px;margin-top: -18px; border-left: 2px solid whitesmoke;}
+    li.carreras { padding: 2px; }
+    li.carreras:nth-child(even) { background: whiteSmoke; }
+    li.carreras > span { display: inline-block; }
+    span.nombre-carrera { width: 328px; }
+    span.total-nuevos { width: 80px; text-align: center; }
+    span.total-antiguos { width: 80px; text-align: center; }
+    span.total-nuevos-antiguos { width: 80px; text-align: center; }
+
+.botones{:style => "float: right;"}
+    %a.not-print.btn.btn-info.impresion{:href => "#"}
+        %i.icon-white.icon-print.fa.fa-at
+        Imprimir
+.clearfix
+%br
+- unless @mapeo.blank?
+    %span= "Emision #{l Time.now, format: :humana2}"
+%ul.tabla-encabezado-contenedor.ulPrint
+    %li.tabla-encabezado.tabla-encabezado-sede Sedes
+    %li.tabla-encabezado.tabla-encabezado-instituciones Instituciones
+    %li.tabla-encabezado.tabla-encabezado-carreras.carreras Carreras
+    %li.tabla-encabezado.tabla-encabezado-nuevos{:style => "text-align: left !important;"} Nuevos
+    %li.tabla-encabezado.tabla-encabezado-antiguos{:style => "text-align: left !important;"} Antiguos
+    %li.tabla-encabezado.tabla-encabezado-total{:style => "text-align: left !important; width: 70px;"} Total
+
+- unless @mapeo.blank?
+    - totales = []
+    - @mapeo.each do |sede|
+        - #%ul.contenedor-sedes.ulPrint{style: "page-break-after:always;"}
+        - totales_sede = []
+        %ul.contenedor-sedes.ulPrint
+            %li.sedes
+                %strong   
+                    = sede[:nombre]
+                %ul.detalle-instituciones
+                    - sede[:instituciones].each do |i|
+                        
+                        - subtotal_nuevos_presenciales = 0 ; 
+                        - subtotal_antiguos_presenciales = 0 ; 
+                        - subtotal_nuevos_antiguos_presenciales = 0
+                        - subtotal_nuevos_distancia = 0 ; 
+                        - subtotal_antiguos_distancia = 0 ; 
+                        - subtotal_nuevos_antiguos_distancia = 0
+
+                        - if i[:carreras_presenciales].count > 0
+                            %li.instituciones{style: "width:100%"}
+                                - if i[:institucion_id].to_i == Institucion::IP
+                                    = i[:nombre]+" Presencial" 
+                                - else
+                                    = i[:nombre]
+                                %ul.grupo-carreras
+                                    - i[:carreras_presenciales].each do |ca|
+                                        - ca.last.each do |i2|
+                                            - subtotal_nuevos_presenciales += i2[:total_nuevos]
+                                            - subtotal_antiguos_presenciales += i2[:total_antiguos]
+
+                                        - sum1 = 0
+                                        - sum2 = 0
+
+                                        - ca.last.each do |ca2|
+                                            - if ca2[:total_nuevos] > 0 || ca2[:total_antiguos] > 0
+                                                - sum1 += ca2[:total_nuevos]
+                                                - sum2 += ca2[:total_antiguos] 
+                                        
+                                        %li.carreras.no-imprimir
+                                            %span.nombre-carrera= ca.first
+                                            %span.total-nuevos= sum1
+                                            %span.total-antiguos= sum2
+                                            - total = sum1+sum2 
+                                            %span.total-nuevos-antiguos= "#{total}"
+
+                                    - subtotal_nuevos_antiguos_presenciales = subtotal_nuevos_presenciales + subtotal_antiguos_presenciales
+                                    - totales << {:total_nuevos => subtotal_nuevos_presenciales, :total_antiguos => subtotal_antiguos_presenciales, :total_total => subtotal_nuevos_antiguos_presenciales}
+                                    - totales_sede << {:total_nuevos => subtotal_nuevos_presenciales, :total_antiguos => subtotal_antiguos_presenciales, :total_total => subtotal_nuevos_antiguos_presenciales}
+                                    %li.subtotal 
+                                        :css
+                                            .ttal-titulo{width:362px;}
+                                            .ttal-sub-nuevos{width:82px;}
+                                            .ttal-sub-antiguos{width:82px;}
+                                            .ttal-sub-antiguos{width:82px;}
+                                            .ttal-sub-total{width:82px;}
+                                        %span.total-subtotales-instituciones.ttal-titulo Subtotal
+                                        %span.total-subtotales-instituciones.ttal-sub-nuevos= "#{subtotal_nuevos_presenciales}"
+                                        %span.total-subtotales-instituciones.ttal-sub-antiguos= "#{subtotal_antiguos_presenciales}"
+                                        %span.total-subtotales-instituciones.ttal-sub-total= "#{subtotal_nuevos_antiguos_presenciales}"
+                        - if i[:carreras_distancia].count > 0
+                            %li.instituciones{style: "width:100%"}    
+                                - if i[:institucion_id].to_i == Institucion::IP
+                                    = i[:nombre]+" Distancia" 
+                                - else
+                                    = i[:nombre]
+                                %ul.grupo-carreras   
+                                    - i[:carreras_distancia].each do |ca|
+                                        - ca.last.each do |i2|
+                                            - subtotal_nuevos_distancia += i2[:total_nuevos]
+                                            - subtotal_antiguos_distancia += i2[:total_antiguos]
+
+                                        - sum1 = 0
+                                        - sum2 = 0
+
+                                        - ca.last.each do |ca2|
+                                            - if ca2[:total_nuevos] > 0 || ca2[:total_antiguos] > 0
+                                                - sum1 += ca2[:total_nuevos]
+                                                - sum2 += ca2[:total_antiguos] 
+                                        
+                                        %li.carreras.no-imprimir
+                                            %span.nombre-carrera= ca.first
+                                            %span.total-nuevos= sum1
+                                            %span.total-antiguos= sum2
+                                            - total = sum1+sum2 
+                                            %span.total-nuevos-antiguos= "#{total}"
+
+                                    - subtotal_nuevos_antiguos_distancia = subtotal_nuevos_distancia + subtotal_antiguos_distancia
+                                    - totales << {:total_nuevos => subtotal_nuevos_distancia, :total_antiguos => subtotal_antiguos_distancia, :total_total => subtotal_nuevos_antiguos_distancia}
+                                    - totales_sede << {:total_nuevos => subtotal_nuevos_distancia, :total_antiguos => subtotal_antiguos_distancia, :total_total => subtotal_nuevos_antiguos_distancia}
+                                    %li.subtotal 
+                                        :css
+                                            .ttal-titulo{width:362px;}
+                                            .ttal-sub-nuevos{width:82px;}
+                                            .ttal-sub-antiguos{width:82px;}
+                                            .ttal-sub-antiguos{width:82px;}
+                                            .ttal-sub-total{width:82px;}
+                                        %span.total-subtotales-instituciones.ttal-titulo Subtotal
+                                        %span.total-subtotales-instituciones.ttal-sub-nuevos= "#{subtotal_nuevos_distancia}"
+                                        %span.total-subtotales-instituciones.ttal-sub-antiguos= "#{subtotal_antiguos_distancia}"
+                                        %span.total-subtotales-instituciones.ttal-sub-total= "#{subtotal_nuevos_antiguos_distancia}" 
+        %ul.f-tabla-totales-sede-contenedor.ulPrint2
+            %li.f-tabla-totales-titulo= "Totales #{sede[:nombre]}"
+            %li.f-tabla-totales-nuevos= totales_sede.map{|x| x[:total_nuevos]}.inject(:+) unless totales_sede.blank?
+            %li.f-tabla-totales-antiguos= totales_sede.map{|x| x[:total_antiguos]}.inject(:+) unless totales_sede.blank?
+            %li.f-tabla-totales-finales= totales_sede.map{|x| x[:total_total]}.inject(:+) unless totales_sede.blank?
+        %br
+= datatable_src
+= datatable 'informe'
+
+:css
+    ul.f-tabla-totales-contenedor{background: silver;font-size: 16px; font-weight: bold; width: 100%; border-top: 3px solid rgb(20, 71, 134);}
+    ul.f-tabla-totales-sede-contenedor{background: silver;font-size: 12px; font-weight: bold; width: 100%; border-top: 3px solid rgb(20, 71, 134);}
+    li.f-tabla-totales-titulo {width:775px; display: inline-block;}
+    li.f-tabla-totales-nuevos{width:80px;display: inline-block;}
+    li.f-tabla-totales-antiguos{width:80px; display: inline-block;}
+    li.f-tabla-totales-finales{width:80px; display: inline-block;}
+
+%ul.f-tabla-totales-contenedor.ulPrint2
+    %li.f-tabla-totales-titulo Totales
+    %li.f-tabla-totales-nuevos= totales.map{|x| x[:total_nuevos]}.inject(:+) unless totales.blank?
+    %li.f-tabla-totales-antiguos= totales.map{|x| x[:total_antiguos]}.inject(:+) unless totales.blank?
+    %li.f-tabla-totales-finales= totales.map{|x| x[:total_total]}.inject(:+) unless totales.blank?
+
+:css
+    .table-bordered td {border-left: 1px solid #ddd;}
+    #resumen{margin-top: 120px;}
+
+    @media print {
+        @page {size: landscape}
+        .subtotal{border-top: 2px solid silver;margin-bottom: 0px; background-color: silver;}
+        .page-header{
+            margin-bottom : 1px !important;
+        }
+
+        .ulPrint{
+            font-size: 10px !important;
+        }
+        .ulPrint .subtotal span{
+            font-size: 10px !important;
+        }
+        .ulPrint .subtotal span.ttal-sub-antiguos{
+            width:80px;
+        }
+        .ulPrint .subtotal span.ttal-sub-total{
+            width:70px;
+        }
+        .ulPrint .detalle-instituciones{margin-left: 65px;}
+        .ulPrint .grupo-carreras{margin-left: 200px;}
+        .ulPrint2 li.f-tabla-totales-titulo {width:620px;}
+
+        .ulPrint .tabla-encabezado-sede{width: 60px;}
+        .ulPrint .tabla-encabezado-instituciones{width: 250px;}
+        .ulPrint .tabla-encabezado-carreras{width: 260px; text-align: center;}
+        .ulPrint .tabla-encabezado-nuevos{width: 70px;}
+        .ulPrint .tabla-encabezado-antiguos{width: 70px;}
+        .ulPrint .tabla-encabezado-total{width: 80px; text-align: center;}
+        .carreras{ visibility: hidden;}
+        .instituciones { width:100%;}
+    }
+
+:javascript
+    $(function(){
+        $('.fecha').datepicker();
+
+        $('.breadcrumb').addClass('no-imprimir');
+
+        $("#form_fechas").validate({
+            invalidHandler: function(form, validator) {
+                alertify.error("Ver Filtro, compruebe que ha ingresado la información necesaria.");
+                setTimeout($.unblockUI, 300);
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        })
+    });

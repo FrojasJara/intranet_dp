@@ -1,0 +1,41 @@
+= form_for @item, { :url => @item.new? ? mantenedores_carreras_path : mantenedores_carrera_path(@item), :html => {:class => "form-horizontal"} }   do |f|
+    %fieldset
+        %legend Datos Carrera
+        %div.control-group
+            = f.label :nombre, :class => "control-label"
+            %div.controls
+                = f.text_field :nombre
+        %div.control-group
+            = f.label :nivel, :class => "control-label"
+            %div.controls
+                = f.select :nivel, for_select(PlanEstudio, :NIVELES)
+        %div.control-group
+            = f.label :tiene_salida_intermedia?, :class => "control-label"
+            %div.controls
+                = f.check_box :tiene_salida_intermedia
+        %div.control-group    
+            = f.label :duracion, :class => "control-label"
+            %div.controls
+                = f.text_field :duracion
+        %div.control-group
+            = f.label :titulo_profesional, :class => "control-label"
+            %div.controls
+                = f.text_field :titulo_profesional
+        %div.control-group
+            = f.label :titulo_tecnico, :class => "control-label"
+            %div.controls
+                = f.text_field :titulo_tecnico
+        %div.control-group
+            = f.label :licenciatura, :class => "control-label"
+            %div.controls
+                = f.text_field :licenciatura
+        %div.control-group
+            = f.label :escuela, :class => "control-label"
+            %div.controls
+                = f.select :escuela_id,  Escuela::obtener_todas(%w[id nombre]).collect{|i| [ i.nombre, i.id]}
+        %div.control-grou
+            -#= f.label :alumno_nuevo_paga_matricula?, :class => "control-label"
+            %div.controls
+                - #= f.check_box :alumno_nuevo_paga_matricula
+
+    = f.submit 'Enviar', :class => 'btn btn-primary'

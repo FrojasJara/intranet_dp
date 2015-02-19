@@ -1,0 +1,25 @@
+= simple_form_for @item do |f|
+    %fieldset
+        = f.input :rut, required: true
+        = f.input :email
+        -#= f.input :password
+        = f.input :primer_nombre
+        = f.input :segundo_nombre
+        = f.input :apellido_paterno
+        = f.input :apellido_materno
+        = f.input :fecha_nacimiento
+        = f.input :estado_civil, collection: for_select(Usuario, :ESTADOS_CIVILES), include_blank: false
+        = f.input :sexo, collection: for_select(Usuario, :SEXOS), include_blank: false
+        = f.input :domicilio
+        = f.input :villa_poblacion
+        = f.input :codigo_area_telefono
+        = f.input :telefono_fijo
+        = f.input :telefono_movil
+        = f.input :establecimiento_educacional, collection: for_select(Usuario, :ESTABLECIMIENTOS), include_blank: false
+        = f.input :tipo, collection: for_select(Usuario, :TIPOS), include_blank: false
+
+        = f.input :region_id,  collection: Region.all.map {|i| [i.nombre, i.id]}
+        = f.input :comuna_id,  collection: Comuna.all.map {|i| [i.nombre, i.id]}
+        = f.input :pais_id,    collection: Pais.all.map   {|i| [i.nombre, i.id]}
+
+    = f.submit 'Enviar', :class => 'btn btn-primary'

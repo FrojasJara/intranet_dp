@@ -1,0 +1,157 @@
+#descuentos
+	.page-header
+		%h2 Cálculo del arancel
+
+	.page-header
+		%h3 Matrícula
+	.control-group{:style => "margin-right: 30px;"}
+		%label.control-label (*) Nivel
+		.controls
+			%input.positivo.required.input-small{:type => "text", :name => "plan_pago[nivel]", :style => "text-align: right", :maxlength => 1}
+	.page-header
+		%h3 Descuentos
+	.control-group{:style => "vertical-align: middle; margin-top: 5px;"}
+		.controls
+			%label.checkbox
+				%input.pago-contado.pg{:type => "checkbox", :disabled => "disabled"} Arancel pago contado
+	%br
+	.control-group
+		%label.control-label (*) Beca, beneficio o descuento
+		.controls
+			%select.span4.r1.required{:name => "plan_pago[descuento_id]", :disabled => "disabled"}
+				%option{:value => "", :selected => "selected"} :: Seleccione un descuento ::
+				- @descuentos.each do |tipo, descuentos|
+					%optgroup{:label => "#{get_name Descuento, 'TIPOS', tipo}"}
+						- descuentos.each do |descuento|
+							%option{:value => "#{descuento.id}", :data => {:porcentaje => "#{descuento.porcentaje}"}}= descuento.nombre+" "+descuento.porcentaje.to_s+"%"
+	.control-group
+		%label.control-label{style: "margin-bottom:0"} Descuento aplicado
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.p1.descuento-aplicado.input-xlarge{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled", :name => "plan_pago[descuento_aplicado]"}
+	%br
+	.control-group
+		%label.control-label Arancel
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.p1.arancel-total.input-xlarge{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	%br
+	.control-group
+		%label.control-label (*) Repactación
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.digits.p1.repactacion.input-xlarge{:type => "text", :value => "0", :style => "text-align: right", :disabled => "disabled", :name => "plan_pago[repactacion]"}
+	%br
+	.control-group
+		%label.control-label (*) Monto reconocido
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.digits.p1.reconocimiento.input-xlarge{:type => "text", :value => "0", :style => "text-align: right", :disabled => "disabled", :name => "plan_pago[monto_reconocido]"}
+
+	.control-group
+		%label.control-label (*) Descripción del monto reconocido
+		.controls{:style => "width: 305px;"}
+			%textarea{:style => "width: 100%; resize: none;", :name => "plan_pago[descripcion_monto_reconocido]", :disabled => "disabled"}
+	%br
+	%button.btn.w1.btn-success.calcular-descuentos{:type => "submit"}
+		%i.icon-white.icon-list-alt
+		Calcular
+	%br
+	%br
+	%input.p1.descuento-aplicado{:type => "hidden", :name => "plan_pago[descuento_aplicado]"}
+	%input.p1.arancel-total{:type => "hidden", :id => "arancel-total"}
+	%input.p1.arancel-final{:type => "hidden", :name => "plan_pago[arancel_total]"}
+
+:css
+	#descuentos .control-group { vertical-align: top !important; }
+:javascript
+	$(document).ready(function() {
+		var $contenedor_descuento = $("#descuentos");
+		var $contenedor_plan = $("#plan-estudio");
+		var contenido_inicial_descuento = $contenedor_descuento.html();
+
+		$contenedor_descuento.on("change", "select[name='plan_pago[descuento_id]']", function() {
+			var valor = $(this).val();
+			var arancel = parseInt( $contenedor_descuento.find("input.arancel").val() );
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+			
+			/*
+			*	|descuento aplicado, arancel total|
+			*/
+			var $p1 = $contenedor_descuento.find(":input.p1");
+
+			if( valor ) {
+				var porcentaje =  parseInt($(this).find("option:selected").attr("data-porcentaje"));
+				var $arancel_total = $contenedor_descuento.find("input.arancel-total");
+				var $descuento_aplicado = $contenedor_descuento.find("input.descuento-aplicado");
+				var descuento_aplicado = (arancel*porcentaje)/100;
+
+				$descuento_aplicado.val(descuento_aplicado);
+				var arancel_total = arancel - descuento_aplicado;
+				$arancel_total.val(arancel_total);
+				
+				mascaraDinero();
+			} else {
+				$p1.val("0");
+			}
+		})
+
+		$contenedor_descuento.on("change", ":checkbox.pago-contado", function() {
+			
+			var checkeado = this.checked;
+			var $descuento = $contenedor_descuento.find("select[name='plan_pago[descuento_id]']");
+			var $descuento_aplicado = $contenedor_descuento.find("input[name='plan_pago[descuento_aplicado]']");
+			$descuento.val("").attr("disabled", checkeado);
+			$descuento_aplicado.val(0).attr("disabled");
+
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+
+			var $arancel_total = $contenedor_descuento.find("input.arancel-total");
+			var $descuento_aplicado = $contenedor_descuento.find("input.descuento-aplicado");
+			
+			if( checkeado ) {
+				var arancel_contado = parseInt($contenedor_descuento.find("input.arancel-contado").val());
+				var arancel = parseInt($contenedor_descuento.find("input.arancel").val());
+				
+				$arancel_total.val(arancel_contado);
+
+			} else {
+				$arancel_total.val(0);
+				$descuento_aplicado.val(0);
+			}
+
+		})
+
+		$contenedor_descuento.on("click", "button.calcular-descuentos", function(e) {
+			e.preventDefault();
+
+			var $arancel_total = $contenedor_descuento.find("input#arancel-total");
+			var $arancel_final = $contenedor_descuento.find("input.arancel-final");
+
+			var $reconocimiento = $contenedor_descuento.find("input[name='plan_pago[monto_reconocido]']");
+			var $repactacion = $contenedor_descuento.find("input[name='plan_pago[repactacion]']");
+
+			var arancel_total = parseInt($arancel_total.val());
+			var reconocimiento = parseInt($reconocimiento.val());
+			var repactacion = parseInt($repactacion.val());
+
+			if (arancel_total >= 0 && reconocimiento >= 0 && repactacion >= 0 && reconocimiento <= arancel_total){
+
+				var arancel_final = arancel_total - reconocimiento + repactacion;
+
+				$arancel_final.val(arancel_final);
+
+				habilitar_plan_pago_arancel(arancel_final);
+				habilitar_plan_pago_matricula( $contenedor_plan.find("input:hidden.matricula").val() );
+			} else {
+				alertify.error("Los valores ingresados no son validos.");
+				console.log(arancel_total+" "+reconocimiento+" "+repactacion);
+				return;
+			}
+		});
+		
+
+	})
+

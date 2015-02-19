@@ -1,0 +1,51 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active 
+			%a{:href => "#"}= @data[:carrera]
+%h2= "Instituciones Imparten #{@data[:carrera]} en periodo #{@data[:periodo_actual]}"
+#planes-estudios
+	%table.table.table-striped.table-bordered
+		%colgroup  
+
+		%thead
+			%tr
+				%th ID
+				%th Nombre
+				%th Modalidad
+				%th Jornada
+				%th Institución
+		%tbody
+			- @actuales.each do |i|
+				%tr
+					%td= i[:id]
+					%td= i[:carrera]
+					%td= get_name InstitucionSedePlan,"MODALIDADES", i[:modalidad]
+					%td= get_name InstitucionSedePlan, "JORNADAS", i[:jornada]
+					%td= i[:sede]
+%h2= "Instituciones Imparten #{@data[:carrera]} en periodo #{@data[:periodo_proximo]}"
+#planes-estudios
+	%form{}
+		%table.table.table-striped.table-bordered#instituciones
+			%colgroup  
+
+			%thead
+				%tr
+					%th ID
+					%th Nombre
+					%th Modalidad
+					%th Jornada
+					%th Institución
+			%tbody
+				- @proximos.each do |i|
+					%tr
+						%td= i[:id]
+						%td= i[:carrera]
+						%td= get_name InstitucionSedePlan,"MODALIDADES", i[:modalidad]
+						%td= get_name InstitucionSedePlan, "JORNADAS", i[:jornada]
+						%td= i[:sede]
+		- #%br
+		- #%br
+		- #%input.btn.btn-primary{type:"submit", value:"Guardar Cambios"}
+= datatable_src
+= datatable("instituciones")                   
+

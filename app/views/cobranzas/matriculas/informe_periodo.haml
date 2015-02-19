@@ -1,0 +1,66 @@
+%h3 
+    Informe matriculas con inscripción
+    =@periodo.nombre
+    - unless @institucion_sede.blank?
+        ="- "+@institucion_sede.nombre
+    - else
+        ="- Todas las Sedes"
+%br
+    %table#informe.table.table-condensed
+        %thead
+            %tr
+                %th Nº
+                %th Rut
+                %th Nombres
+                %th Apellidos
+                %th Fecha de Matrícula
+                %th Año de Ingreso
+                %th Carrera
+                %th Modalidad
+                %th Asignaturas Inscritas
+                %th Nº Asignaturas inscritas
+                %th Nivel
+                %th Deuda total
+                %th Deuda actual
+                %th Deuda incobrable
+        %tbody
+            - if @matriculas.blank? or @matriculas.count.eql? 0
+                %tr
+                    %td{colspan: 11} No hay registros
+            - else
+                - @matriculas.each_with_index do |item, index|
+                    - usuario, matricula, alumno_plan_estudio, plan_estudio, inscripciones = item[:usuario], item[:matricula], item[:alumno_plan_estudio], item[:plan_estudio], item[:inscripciones]
+                
+                    %tr
+                        %td.txCenter= index + 1
+                        %td.txCenter= usuario.rut
+                        %td.txCenter= usuario.nombres
+                        %td.txCenter= usuario.apellidos
+                        %td.txCenter= l matricula.created_at, format: :fecha
+                        %td.txCenter= alumno_plan_estudio.anio_ingreso
+                        %td.txCenter= plan_estudio.nombre
+                        %td.txCenter= get_name InstitucionSedePlan, :MODALIDADES, item[:institucion_sede_plan].modalidad
+                        %td.txCenter= inscripciones.blank? ? 'No' : 'Si'
+                        %td.txCenter= inscripciones.length
+                        %td.txCenter 
+                            - if inscripciones.blank? 
+                                - unless item[:plan_pago].blank?
+                                    - unless item[:plan_pago].nivel.blank?
+                                        = (item[:plan_pago].nivel)
+                                    - else
+                                        = "-"
+                                - else
+                                    = "-"
+                            - else
+                                - unless item[:plan_pago].blank?
+                                    - unless item[:plan_pago].nivel.blank?
+                                        = (item[:plan_pago].nivel - 1)
+                                    - else
+                                        = "-"
+                                - else
+                                    = "-"
+                        %td.txCenter.txRight= item[:pendientes].blank? ? 0 : item[:pendientes].sum(&:saldo)
+                        %td.txCenter.txRight= item[:cobrables].blank? ? 0 : item[:cobrables].sum(&:saldo)
+                        %td.txCenter.txRight= item[:incobrables].blank? ? 0 : item[:incobrables].sum(&:saldo)
+= datatable_src
+= datatable 'informe'

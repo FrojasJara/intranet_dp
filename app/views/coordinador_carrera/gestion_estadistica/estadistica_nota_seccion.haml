@@ -1,0 +1,121 @@
+%script{:type => "text/javascript",
+        :src  => "https://www.google.com/jsapi"}
+.sectionHeader
+	%h1  Estadisticas Notas Sección
+
+	%div.solo-imprimir{style: "display:block !important; border:none !important; border-radius: 0px !important; margin-bottom: 10px !important;margin-top:  20px !important;"}
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Sección:
+							%span= @seccion.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Asignatura:
+							%span= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura.codigo
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre Asignatura:
+							%span= @asignatura.semestre
+						%div.contenedorElemento.separador
+							%label.etiqueta Cantidad de alumnos:
+							%span= @seccion.alumnos_inscritos
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%li.ui-helper-clearfix.cuatro-columnas
+		%a.btn.btn-large.btn-primary.no-imprimir.impresion
+			%i.icon.icon-white.icon.icon-print
+			Imprimir
+- @planificaciones.each do |p|
+	%tr
+	- estadistica = p.estadisticas_evaluacion
+	- estadistica.each do |e|
+		%table.table.table-striped#asignaturas
+			%thead
+				%tr
+					%th.TxtLft{colspan: 5}="Fecha evaluación: #{p.fecha_comprometida}; Ponderacion: #{p.ponderacion_porcentual}"
+				%tr.no-imprimir
+					%th.TxtLft{colspan: 5}
+						%a{:style =>"color:white;",:href=>"#estadisticas_#{p.id}",:data => {:toggle => "modal"}}
+							%i.icon.icon-white.icon.icon-print
+							Ver Grafico /
+						%div{id: 'png'}
+				%tr
+					%th.TxtLft Rango
+					%th.TxtLft Frecuencia Absoluta
+					%th.TxtLft Estadistica
+					%th.TxtLft Valor 
+			%tbody
+				%tr
+					%td 1 - 2
+					%td= e[:f1]
+					%td Minima
+					%td= e[:minima].round(1)
+				%tr
+					%td 2 - 3
+					%td= e[:f2]
+					%td Maxima
+					%td= e[:maxima].round(1)
+				%tr
+					%td 3 - 4
+					%td= e[:f3]
+					%td Promedio
+					%td= e[:promedio].round(1)
+				%tr
+					%td 4 - 5
+					%td= e[:f4]
+					%td Mediana
+					%td= e[:mediana]
+				%tr
+					%td 5 - 6
+					%td= e[:f5]
+					%td Moda
+					%td= e[:moda]
+				%tr
+					%td 6 - 7
+					%td= e[:f6]
+					%td
+					%td
+		
+		.modal.fade{:style=>" width: 900px; height: 550px; margin-left:-440px;",:id => "estadisticas_#{p.id}",:tabindex=>"-1",:role=>"dialog", :aria=>{:labelledby=>"myLargeModalLabel",:hidden=>"true"}}
+			%div{:id => "#modal_grafico#{p.id}" , :style =>"width: 900px; height: 500px;"}
+		:javascript
+			google.load("visualization", "1", {packages:["corechart"]});
+			google.setOnLoadCallback(drawChart);
+			function drawChart() {
+				var data = google.visualization.arrayToDataTable([
+					['Task', 'Hours per Day'],
+			        ['rango 1-2',#{e[:f1]}],
+					['rango 2-3',#{e[:f2]}],
+					['rango 3-4',#{e[:f3]}],
+					['rango 4-5',#{e[:f4]}],
+					['rango 5-6',#{e[:f5]}],
+					['rango 6-7',#{e[:f6]}]
+				]);
+
+				var options = {
+					title: 'Evaluación del #{p.fecha_comprometida}',
+					is3D: true,
+				};
+				var chart_div = document.getElementById('estadisticas_#{p.id}');
+				var chart = new google.visualization.PieChart(chart_div);
+				google.visualization.events.addListener(chart, 'ready', function () {
+					chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+					console.log(chart_div.innerHTML);					
+					document.getElementById('png').outerHTML = '<a href="' + chart.getImageURI() + '" style="color:white;">Version Imprimible</a>';
+				});
+				
+				chart.draw(data, options);
+			}
+

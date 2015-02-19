@@ -1,0 +1,95 @@
+%h3 
+	Informe de matriculas 
+	= @p_f_i
+	= " - #{@p_f_t}" unless @p_f_t.blank?
+
+%table#lista.table.table-condensed
+	%thead
+		%tr
+			%th Nº
+			%th Rut
+			%th Nombres
+			%th Apellidos
+			%th Jornada
+			%th Carrera
+			%th Nivel
+			%th Tipo
+			%th Becas y beneficios
+			%th Descuentos
+			%th Ejecutivo Matrículas
+			%th Comuna
+			%th Nº Matrícula
+			%th Valor descontado
+			%th Valor final (M+A)
+			%th Valor Cuota
+			%th Nº Cuotas
+			%th Sede
+			%th Licencia
+			%th CI Alu
+			%th CI Apo
+			%th Cert Nac
+			%th Acr Dom
+			%th Acr Rent
+			%th FIH Acad
+	%tbody
+		- if @matricula_planes.blank? or @matricula_planes.count.eql? 0
+			%tr
+				%td{colspan: 25} No hay registros
+		- else
+			- @matricula_planes.each_with_index do |item, index|
+				- alumno_plan_estudio = item.alumno_plan_estudio
+				- institucion_sede_plan = alumno_plan_estudio.institucion_sede_plan
+				- plan_estudio = institucion_sede_plan.plan_estudio
+				- alumno = alumno_plan_estudio.alumno
+				- usuario_alumno = alumno.datos_personales
+				- ejecutivo_matriculas = item.ejecutivo_matriculas
+				- ejecutivo = ejecutivo_matriculas.class == String ? ejecutivo_matriculas : ejecutivo_matriculas.datos_personales.nombre_corto
+				- plan_pago = item.planes_pago.last
+				- beca = plan_pago.blank? ? nil : plan_pago.descuento(tipo: [Descuento::BENEFICIO, Descuento::BECA])
+				- descuento = plan_pago.blank? ? nil : plan_pago.descuento(tipo: Descuento::DESCUENTO)
+				- valor_cuota = plan_pago.blank? ? '' : (plan_pago.pagos_comprometidos.count > 1 ? plan_pago.pagos_comprometidos.max(:monto) : '')
+				- periodo = item.periodo_id.to_i
+				- inscripciones = item.alumno_plan_estudio.links_secciones_inscritas(fields: [:id, :alumno_plan_estudio_id], :seccion_dictada => { seccion: {:periodo_id =>  periodo} })
+				%tr
+					%td= index + 1
+					%td= usuario_alumno.rut
+					%td= usuario_alumno.nombres
+					%td= usuario_alumno.apellidos
+					%td= get_name InstitucionSedePlan, :JORNADAS, institucion_sede_plan.jornada
+					%td= plan_estudio.nombre
+					%td
+						- if inscripciones.blank? 
+							- unless item[:plan_pago].blank?
+								- unless plan_pago.nivel.blank?
+									= plan_pago.nivel
+								- else
+									= "-"
+							- else
+								- "-"
+						- else 
+							- unless item[:plan_pago].blank?
+								- unless plan_pago.nivel.blank?
+									= (plan_pago.nivel - 1)
+								- else
+									= "-"
+							- else
+								- "-"
+					%td= alumno_plan_estudio.matricula_plan.count.eql?(1) ? "NUEVO" : "ANTIGUO"
+					%td= value beca, :nombre
+					%td= value descuento, :nombre
+					%td= ejecutivo
+					%td= value usuario_alumno.comuna, :nombre
+					%td= item.id
+					%td= plan_pago.descuento_aplicado unless plan_pago.blank?
+					%td= plan_pago.arancel_total + plan_pago.matricula  unless plan_pago.blank?
+					%td= valor_cuota
+					%td= plan_pago.pagos_comprometidos(:estado.not => PagoComprometido::ANULADO).count unless valor_cuota.blank?
+					%td= value institucion_sede_plan.institucion_sede.sede, :nombre
+					%td= 'X' if alumno.tiene_licencia_e_media
+					%td
+					%td
+					%td= 'X' if alumno.tiene_certificado_nacimiento
+
+= datatable_src
+= datatable "lista"
+

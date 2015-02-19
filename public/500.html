@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset='utf-8'> 
+    <title>Sistema Organización Educacional Diego Portales</title>
+    <link href="/stylesheets/reset.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/bootstrap-responsive.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/assets/application.css?body=1" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/assets/login.css?body=1" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/assets/jquery.js?body=1" type="text/javascript"></script>
+    <script src="/assets/jquery_ujs.js?body=1" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class='navbar navbar-fixed-top'>
+      <div class='navbar-inner'>
+        <div class='container-fluid'>
+          <a class='btn btn-navbar' data-target='.nav-collapse' data-toogle='collpse'>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+          </a>
+          <a class='brand' href='#'>
+            <img src='/images/dportales.png'>
+            <span>
+              Organización Educacional
+            </span>
+            <span>
+              DIEGO PORTALES
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class='container-fluid'>
+      <div class='row-fluid'>
+        
+        <div id='login'>
+          <h1>Ocurrió un problema</h1>
+
+          <form id="login-form">
+              Estimado usuario, ocurrió un problema con la sección a la cual intentaba acceder. <br />
+              Esto fue notificado al equipo de desarrollo, por lo que se corregirá a la brevedad.
+              <br />
+              <br />
+              <a href="#" class="back btn btn-primary">Volver a la página anterior</a>
+          </form>
+         </div>
+      <script type="text/javascript">
+        $(document).ready(function(){
+            $('a.back').click(function(){
+                parent.history.back();
+                return false;
+            });
+        });
+      </script>
+
+      </div>
+    </div>
+  </body>
+</html>

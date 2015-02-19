@@ -1,0 +1,123 @@
+.sectionHeader
+	%h1  Planificación Evaluaciones Sección
+
+%div.well
+	- url_metodo = coordinador_carrera_ver_planificacion_seccion_path 
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => url_metodo, :texto_boton => "Ver", :filtro => @filtro}
+
+
+= notificaciones
+- unless @seccion.blank?
+	%div.informe-acta-notas
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Rut Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.rut	
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Asignatura:
+							%span= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura.codigo
+						
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%li.ui-helper-clearfix.cuatro-columnas	
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Carrera:
+							%span= @asignatura.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre Asignatura:
+							%span= @asignatura.semestre	
+	- unless  @notas_planificadas.size > 0 
+		%div.alert.fade.in
+			%button.close{type: "button","data-dismiss" =>  "alert"} ×
+			%p Aún no se han programado notas para esta sección.
+	-else
+		%div#respuesta
+		%table.table.table-striped
+			%thead
+				%tr
+					%th.TxtLft Número
+					%th.TxtLft Nombre
+					%th.TxtLft Tipo
+					%th.TxtLft Fecha
+					%th.TxtLft Ponderación
+					%th.TxtLft Acción
+			%tbody
+				- @notas_planificadas.each do |i|
+					%tr{:class => "#{i.id}"}
+						%td= i.numero
+						%td= i.nombre_nota
+						%td= i.tipo_nota
+						%td= i.fecha_comprometida
+						%td= i.ponderacion
+						%td
+							%input{type: "hidden", name: "planificacion", value: i.id}
+							%a.btn.btn-mini.btn-danger{ :class => "eliminar",:href => "#"}
+								%i.icon-white.icon-minus-sign
+								Quitar
+		= render partial: "coordinador_carrera/gestion_notas/partials/modal_editar_planificacion", locals: {asignatura: @asignatura}
+		%a.btn.btn-primary{:href => "#editar_planificacion", :data => {:toggle => "modal"}}
+			%i.icon-white.icon-edit
+			Editar 
+	= render partial: "coordinador_carrera/gestion_notas/partials/modal_nueva_planificacion", locals: {asignatura: @asignatura}
+	%a.btn.btn-success{:href => "#nueva_planificacion", :data => {:toggle => "modal"}}
+		%i.icon-white.icon-edit
+		Agregar 
+:javascript
+	function resetalertify () {
+		alertify.set({
+			labels : {
+				ok     : "Aceptar",
+				cancel : "Cancelar"
+			},
+			delay : 7000,
+			buttonReverse : false,
+			buttonFocus   : "ok"
+		});
+	}
+	$(".eliminar").on("click", function(){
+		var planificacion_id = $(this).prev().val();
+		resetalertify();
+		alertify.confirm("Esta seguro. Se eliminaran todas las notas correspondientes a esta planificación", function (e) {
+			if (e) {
+				$.ajax({
+					url: "#{ajax_coordinador_carrera_eliminar_planificacion_path}",
+					type: 'POST',
+					data: {planificacion_id :  planificacion_id},
+					error: function(){
+						alertify.error("No se pudo eliminar la planificacion intentelo mas tarde");
+					},
+					success: function(data) {
+
+						if(data.status){
+							alertify.success("<strong>Se ha eliminado la planificacion exitosamente.</strong>");
+							$id = data.planificacion;
+							$("."+ $id ).remove();
+						}else{
+							alertify.error(data.mensaje);
+						}
+					}
+				});
+
+			} else {
+				alertify.error("<strong>Acción Cancelada</strong>");
+			}
+		}, "Default Value");
+	});
+

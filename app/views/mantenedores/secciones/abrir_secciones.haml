@@ -1,0 +1,85 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            %a{:href => "#"}  
+                Asignatura
+                %span.divider /
+        %li
+            %a{:href => "#"}  
+                = @asignatura.nombre
+                %span.divider /
+        %li.active
+            %a{:href => "#"}  
+                Abrir Secciones 
+%div.span10
+    = notificaciones
+%div.span10    
+    %form{:id => 'frmAbrirSecciones', :method => "post"}
+        %fieldset
+            %legend 
+                Seccion
+            %label 
+                Cupos
+                %input{:type => "text", :name => "seccion[cupos]"}
+            %label 
+                Numero
+                %input{:type => "text", :name => "seccion[numero]"}
+            %label
+                Estado
+                = select("seccion", "estado", for_select(Seccion, :ESTADOS), {:prompt => ":: Seleccione el estado de la sección ::"}, {:class => 'span3'} ) 
+            %label
+                Docente
+                = select("seccion", "docente_id", Usuario.all(:tipo => Usuario::DOCENTE).map {|i| [ i.primer_nombre << "  #{i.apellido_paterno}" <<  " #{i.apellido_materno}", i.docente.id ] }, {:include_blank => ':: Seleccione un Docente ::' }, {:class => 'span3'})
+            %div{:class => "form-actions"}
+                %button.btn.btn-primary Abrir Sección  
+
+
+%div.span10{:style => "margin-top:20px"}
+    %table.table.table-striped.table-bordered{:id => 'asignaturaSecciones'}
+        %thead
+            %tr
+                %th ID
+                %th Periodo
+                %th Numero
+                %th Cupos
+                %th Propuestos
+                %th Inscritos
+                %th Estado
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i.id
+                    %td 
+                        = i.periodo.nombre
+                    %td
+                        = i.numero 
+                    %td
+                        = i.cupos
+                    %td
+                        = i.propuestos
+                    %td
+                        = i.inscritos 
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                            = get_name Seccion, :ESTADOS, i.estado
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => "abrir_secciones_path(i[:idAsignatura])"}
+                                    %i.icon-user
+                                    Inscribir Alumnos
+                            %li
+                                %a{:href => "detalle_asignatura_secciones_path(i[:idAsignatura])"}
+                                    %i.icon-resize-full
+                                    Fusionar
+                            %li.divider
+                            %li
+                                %a{:href => "editar_seccion_path(i[:idAsignatura])"}
+                                    %i.icon-pencil
+                                    Editar                             
+/= datatables
+= render(:partial => "partials/datatables/datatable", :locals => {:nombreTabla => "asignaturaSecciones" })
+:css
+    table.table thead th{color:#333 !important;}
+    td .dropdown-menu { left: 58px !important; top: 34px !important; }
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important; }

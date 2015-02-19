@@ -1,0 +1,20 @@
+%html
+    %head
+        %meta{"http-equiv" => "Content-Type", :content => "text/html; charset=UTF-8"}
+        %title Sistema Organización Educacional Diego Portales mmm
+        
+        = wicked_pdf_stylesheet_link_tag "reset"
+        = wicked_pdf_stylesheet_link_tag "bootstrap"
+        = wicked_pdf_stylesheet_link_tag "bootstrap-responsive"
+        = wicked_pdf_stylesheet_link_tag "pdf"
+
+        = csrf_meta_tags
+
+    %body{:data => {:spy => "scroll", :target => ".fixed-header"}}
+        .container-fluid
+            .row-fluid
+                .span9
+                    .row-fluid
+                        .logo-img
+                            = wicked_pdf_image_tag "logo_sin_membrete.jpg"
+                        = yield

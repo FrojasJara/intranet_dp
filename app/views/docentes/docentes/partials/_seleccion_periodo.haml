@@ -1,0 +1,30 @@
+:javascript
+	$(document).ready(function() {
+		$("form.periodos-habiles").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+			},
+			submitHandler: function(form) {
+				var url = $(form).find("select.required").val();
+				$(form).attr("action", url)
+				location.href = url
+			}
+		})
+		var val = $("form.periodos-habiles select option[value$='#{@periodo_seleccionado.id}']").val();
+		$("form.periodos-habiles select").val(val);
+	})
+
+= form_tag "#", :class => "periodos-habiles", :method => "get" do
+	%fieldset
+		%legend Selección del período
+		%ul
+			%li.ui-helper-clearfix
+				%div.contenedorElemento.separador
+					%label Período
+					%select.required{:name => ""}
+						%option{:value => ""} :: Seleccione un período ::
+						- @periodos.each do |p|
+							%option{:value => "#{current_url @usuario.id, p.id}"}= p.nombre
+					
+				%div.contenedorElemento.separador
+					%input.btn.btn-primary{:type => "submit", :value => "Consultar", :style => "margin-top: 19px;"}

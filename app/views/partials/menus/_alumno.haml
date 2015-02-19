@@ -1,0 +1,45 @@
+%h2 Alumno
+%ul.nav.nav-list
+    / %li.nav-header Gestión académica
+    / %li{:class => controller_is?('alumnos') && action_is?("generar_inscripcion_asignaturas") ? 'active' : '' }
+    /     = link_to "Inscripción de asignaturas", alumno_generar_inscripcion_asignaturas_path(current_user[:id])
+    / /
+    /     %li{:class => controller_is?('alumnos') && action_is?("obtener_asignaturas_abandonables") ? 'active' : '' }
+    /         = link_to "Abandono de asignaturas", alumno_obtener_asignaturas_abandonables_path(current_user[:id])
+        
+    %li.nav-header Consultas   
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} Avance curricular
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{alumno_obtener_informe_curricular_path(current_user[:id])}"} Informe
+            %li
+                %a{:href => "#{alumno_obtener_malla_curricular_path(current_user[:id])}"} Malla
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} Historial
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{alumno_obtener_asignaturas_cursadas_path(current_user[:id])}"} Asignaturas cursadas
+            %li
+                %a{:href => "#{alumno_obtener_asignaturas_abandonadas_path(current_user[:id])}"} Asignaturas abandonadas
+            %li
+                %a{:href => "#{alumno_obtener_calificaciones_path(current_user[:id])}"} Calificaciones
+            %li
+                %a{:href => "#{alumno_obtener_asistencias_path(current_user[:id])}"} Asistencias
+            %li.divider
+            %li
+                %a{:href => "#{alumno_obtener_matriculas_path(current_user[:id])}"} Matrículas y planes de pago
+            %li.divider
+            %li
+                %a{:href => "#{alumno_obtener_trabajos_path(current_user[:id])}"} Alumno trabajador
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}}= "Período actual #{periodo_en_curso[:nombre]}"
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => "#{alumno_obtener_asignaturas_inscritas_path(current_user[:id])}"} Asignaturas inscritas
+            %li
+                %a{:href => "#{alumno_obtener_horario_path(current_user[:id])}"} Horario      
+
+    %li.nav-header Biblioteca 
+    %li{:class => controller_is?('biblioteca') && action_is?("lista_libros_sedes") ? 'active' : '' }
+        = link_to 'Consultar Biblioteca', lista_libros_sedes_path

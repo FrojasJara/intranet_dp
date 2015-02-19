@@ -1,0 +1,87 @@
+%div.span10
+%form#seccion{action: mantenedores_secciones_edit_path, method: "post",:class => "form-horizontal"}
+    %fieldset
+        %legend Sección 
+        %input{type: "hidden", name: "id", value: @item.id}
+        %div.control-group
+            %label{:class => "control-label"} Cupos
+            %div.controls
+                %input.required.numInput{:type => "text", name: "cupos",value: @item.cupos}
+        %div.control-group
+            %label{:class => "control-label"} Numero
+            %div.controls
+                %input.required.numInput{:type => "text", name: "numero",value:@item.numero}
+        %div.control-group
+            %label{:class => "control-label"} Estado
+            %div.controls
+                %select{:name => "estado"}
+                    - @estados.each do |estado|
+                        %option{:value => "#{Seccion.const_get estado}", selected: @item.estado.eql?(Seccion.const_get estado)}= get_name Seccion, "ESTADOS", Seccion.const_get(estado)
+        %div.control-group
+            %label{:class => "control-label"} Jornada
+            %div.controls
+                %select{:type => "text", :name => "jornada"}
+                    - @jornadas.each do |jornada|
+                        %option{:value => "#{Seccion.const_get jornada}", :selected => @item.jornada.eql?(Seccion.const_get jornada)}= get_name Seccion, "JORNADAS", Seccion.const_get(jornada)
+        %div.control-group
+            %label{:class => "control-label"} Docente
+            %div.controls
+                -if @item.docente.blank?
+                    %input.docenteInput{:name => "docente_id", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off"}
+                -else
+                    %input.docenteInput{:name => "docente_id", :class => "ajax-typeaheadres", :id => "res", :placeholder=>"Añadir Un Docente...", :autocomplete => "off", :value => @item.docente.datos_personales.nombre + " | " +@item.docente.datos_personales.rut}
+        -#= f.input :arancel
+        -#= f.input :duracion
+        -#= f.input :titulo_profesional
+        -#= f.input :titulo_tecnico
+        -#= f.input :licenciatura
+        -#= f.input :alumno_nuevo_paga_matricula, :as => :boolean
+        %div.form-actions
+            %button.btn.btn-primary{type: "submit"}
+                Guardar
+:css
+    .docenteInput{
+        padding: 4px;
+        font: 12px "lucida grande",tahoma,verdana,arial,sans-serif !important;
+        -moz-box-sizing: content-box;
+        -webkit-box-sizing: content-box;
+        box-sizing: content-box;
+        color: black !important;
+        height: auto !important;
+        margin: 0 !important;
+        width: 300px;
+    }
+    .numInput{
+        padding: 4px;
+        font: 12px "lucida grande",tahoma,verdana,arial,sans-serif !important;
+        -moz-box-sizing: content-box;
+        -webkit-box-sizing: content-box;
+        box-sizing: content-box;
+        color: black !important;
+        height: auto !important;
+        margin: 0 !important;
+        width: 25px;
+    }
+:javascript
+    $(document).ready(function(){
+    $("#seccion").validate({
+        invalidHandler: function(form, validator) {
+            notify_error("Error en la Modificaciòn", "Por favor, compruebe que ha ingresado correctamente la información.");
+        },
+        submitHandler: function(form) {
+            if( confirm("¿Está seguro que desea Guardar la Modificación?") ) {
+                notify_info("Espere un momento", "Por favor, Espere mientras se resgistra la modificación Gracias");
+                form.submit();
+            }
+        }
+    });
+    $(".ajax-typeaheadres").typeahead({ 
+        ajax: {
+            url: "/mantenedores/secciones/typeaheadresp", //ruta al controlador q retorna las personas
+            timeout: 300, //tiempo de espera
+            triggerLength: 2, // a 3 caracteres empieza a buscar
+            method: "get",
+        },
+        items: 16 //cantidad de resultados a traer cada vez
+    });
+    });

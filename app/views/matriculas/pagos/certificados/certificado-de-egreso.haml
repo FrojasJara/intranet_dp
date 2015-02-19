@@ -1,0 +1,102 @@
+%p.header
+	= wicked_pdf_image_tag @institucion.nombre.include?("Instituto Profesional") ? 'logoIP1.jpg' : 'logoCFT1.jpg', width: 200
+.page-header
+	%h1 CERTIFICADO DE EGRESO
+	%p.numero
+		= @certificado.numero
+
+%p.mt1
+	- if @institucion_sede.sede.id == Sede::CONCEPCION 
+		= @vicerrector.sexo == Usuario::FEMENINO ? 'La Vicerrectora Académica del' : 'El Vicerrector del'	
+	- else
+		= @vicerrector.sexo == Usuario::FEMENINO ? 'La Directora del' : 'El Director del'
+
+	%span.institucion= "#{@institucion.razon_social.gsub("Ltda.", "")}, "
+	certifica que:
+
+%p.nombre
+	= @us_alumno.nombres
+	= @us_alumno.apellidos
+%p.rut	
+	= "#{@us_alumno.rut} "
+%p.mt1
+	Fue alumno en la carrera
+	%span.institucion= "#{@plan_estudio.nombre}, "
+	obtuvo la calidad de Alumno Egresado durante
+	= @periodo_semestre == 1 ? 'Primer semestre del' : 'Segundo semestre del'
+	= "#{@periodo}."
+%p.mt1
+	Se extiende el presente certificado a petición 
+	= @us_alumno.sexo == Usuario::FEMENINO ? ' de la interesada ' : ' del interesado '
+	para ser presentado como Antecedente Curricular.
+
+%p.mt1
+	- unless @certificado.observacion2.blank?
+		Observación:
+		= "#{@certificado.observacion2}."
+- unless @certificado.linea1.blank?
+	%p= "#{@certificado.linea1}."
+- unless @certificado.linea2.blank?
+	%p= "#{@certificado.linea2}."
+
+
+%p.mt2.firma
+	= "#{@vicerrector.nombres} #{@vicerrector.apellidos}"
+%p.firma
+	- if @institucion_sede.sede.id == Sede::CONCEPCION 
+		= @vicerrector.sexo == Usuario::FEMENINO ? 'VICERRETORA ACEDEMICA' : 'VICERRECTOR ACADEMICO'	
+	- else
+		= @vicerrector.sexo == Usuario::FEMENINO ? 'DIRECTORA DE SEDE' : 'DIRECTOR DE SEDE'
+
+%p.fecha
+	= "#{@institucion_sede.sede.ciudad}, "
+	= l Time.now, format: :humana2
+:css
+	.page-header { border: none !important; padding: 0 !important; }
+	p {
+		font-size: 14px !important;
+		text-align: justify !important;
+		line-height: 15px !important;
+	}
+	h1 {
+		font-size: 20px !important;
+	}
+	p.header {
+		text-align: center !important;
+		width: 100%;
+		margin-bottom: 40px;
+	}
+	p.numero {
+		text-align: center !important;
+		font-size: 20px !important;
+		width: 100%;
+		margin-bottom: 100px;
+	}
+	p.nombre {
+		text-align: center !important;
+		font-size: 18px !important;
+		width: 100%;
+		font-weight: bold;	
+		text-transform: uppercase; 
+		margin-top: 30px;
+		margin-bottom: 10px
+	}
+	p.rut{
+		text-align: center !important;
+		font-size: 20px !important;
+		width: 100%;
+	}
+	p.firma {
+		text-align: center !important;
+		font-size: 16px !important;
+		width: 100%;
+	}
+	p.fecha {
+		margin-top: 150px;
+		font-weight: bold;
+	}
+	p.mt1 { margin-top: 30px;}
+	p.mt2 { margin-top: 150px; }
+	span.institucion {
+		text-transform: uppercase; 
+	}

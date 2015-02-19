@@ -1,0 +1,12 @@
+%div#login
+	%h1 Bienvenidos al sistema de gestión Diego Portales
+	= form_for :usuario, :html => {:id => "login-form"} do |f|
+		%ul
+			%li
+				= f.label :rut
+				= f.text_field :rut
+			%li
+				= f.label :password, 'Contraseña'
+				= f.password_field :password
+			%li
+				= f.submit 'Iniciar sesión', {:class => "btn btn-primary"}

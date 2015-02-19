@@ -1,0 +1,210 @@
+:css
+    .control-group{
+        float: left;
+        margin-right: 15px;
+    }
+    .no-mostrar{
+    	display: none;
+    }
+    #cobranza-externa label{
+    	font-weight: bold;
+    }
+    .control-group{
+    	width: 100%;
+    }
+    .red{
+        color:red;
+        font-weight: bold;
+    }
+
+.page-header
+    = breadcrumb ["Cobranzas", "Morosos", "Cobranza Externa", "Ingreso"]
+    %h1 Ingreso Cobranza Externa
+
+= notificaciones
+
+= render :partial => 'partials/buscar_con_rut'
+
+- unless @us_alumno.blank?
+    %br
+    = render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+    = render partial: 'partials/notificaciones/error', locals: {:mensaje => 'No podrá ingresar cobranza externa a esta matrícula ya que el alumno no es de su sede'} unless @usuario.sede.eql?(@us_alumno.sede)
+
+    %br
+
+    - if params[:matricula_id].blank?
+        %table.table.table-condensed
+            %thead
+                %tr
+                    %th ID
+                    %th Estado
+                    %th Periodo
+                    %th Fecha
+                    %th Ejecutivo
+                    %th
+                    %th
+            %tbody
+                - @datos.each do |item|
+                    - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+                    %tr
+                        %td.txCenter= mat.id
+                        %td.txCenter= get_name MatriculaPlan, :ESTADOS, mat.estado
+                        %td.txCenter= periodo.nombre
+                        %td.txCenter= l mat.created_at
+                        %td.txCenter= ejecutivo.nombre_corto
+                        %td.txCenter
+                            - if @usuario.sede.eql?(@us_alumno.sede)
+                                %a.btn.btn-success{:href => "#{params[:rut]}/#{mat.id}"} 
+                                    %i.icon-white.icon-plus-sign
+                                    Cobranza Externa
+    - else
+        - item = @datos.first
+        - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+
+        %form.informacion-tabulada
+            %fieldset
+                %h3 Matricula
+                %ul
+                    %li.ui-helper-clearfix
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Estado:
+                            %span=  MatriculaPlan::ESTADOS[mat.estado-1] unless mat.estado.blank?
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Periodo:
+                            %span= periodo.nombre 
+        %br
+        - planes.each do |pl|
+            - p = pl[:plan]
+            - situaciones = pl[:plan].situaciones
+            
+            .page-header
+                %h3 Situaciones
+            %table.table.table-condensed
+                %thead
+                    %tr
+                        %th.span1 Fecha
+                        %th Tipo
+                        %th Nº Resolución
+                        %th Observación
+                        %th Sit. Adm./Acad.
+                        %th Ejecutivo
+                %tbody
+                    - situaciones.each do |situacion|
+                        %tr
+                            %td.txCenter= l situacion.fecha
+                            %td.txCenter= get_name Situacion, :TIPOS, situacion.tipo, 'Sin definir'
+                            %td.txCenter= situacion.resolucion
+                            %td= situacion.observacion
+                            %td.txCenter
+                                = value situacion.tipo_situacion, :nombre
+                                = Alumno::ESTADOS_ACADEMICOS[situacion.estado-1] unless situacion.estado.blank?
+                            %td.txCenter= value situacion.ejecutivo_matriculas, :nombre
+
+            %form.informacion-tabulada
+                %fieldset
+                    %h3 Plan Pago
+                    %ul
+                        %li.ui-helper-clearfix
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Tipo:
+                                %span= MatriculaPlan::TIPOS[p.tipo-1] unless p.tipo.blank?
+                            - unless p.pagares.blank?
+                                - p.pagares.each do |pag|
+                                    %div.contenedorElemento.separador
+                                        %label.etiqueta Número Pagaré
+                                        %span= pag.numero
+                            %br 
+            %table.table.table-condensed
+                %thead
+                    %tr
+                        %th Nº Cuota
+                        %th Estado
+                        %th Tipo
+                        %th Fecha Vencimiento
+                        %th Prorroga
+                        %th Centro costos
+                        %th Monto
+                        %th Saldo
+                        %th Lugar
+                        %th 
+                %tbody
+              
+                - pl[:pagos_comprometidos].each do |pc|
+                    %tr{id: "#{pc.id}",class: 'pago-comprometido'}
+                        %td.txCenter= pc.numero_cuota
+                        %td.txCenter= get_name(PagoComprometido, :ESTADOS, pc.estado) 
+                        %td.txCenter= get_name(PagoComprometido, :TIPOS_CUOTAS, pc.tipo_cuota)
+                        %td.txCenter= l(pc.fecha_vencimiento) unless pc.nil? || pc.fecha_vencimiento.nil?
+                        %td.txCenter= l(pc.fecha_vencimiento_con_prorroga) unless pc.nil? || pc.fecha_vencimiento_con_prorroga.nil? || pc.prorrogas.blank?
+                        %td.txCenter= get_name(PagoComprometido, :CENTROS_COSTOS, pc.centro_costo)
+                        %td.txCenter= dinero pc.monto
+                        %td.txCenter= dinero pc.saldo 
+                        - if pc.tiene_cobranza?(pc.id)
+                            %td.txCenter.red= get_name(Cobranza,:TIPOS,pc.cobranza.tipo)
+                        - else
+                            %td.txCenter= "CARTERA"
+                        %td.txCenter
+                            - if @usuario.sede.eql?(@us_alumno.sede) && pc.estado != PagoComprometido::PAGADO && pc.estado != PagoComprometido::ANULADO && pc.tiene_cobranza?(pc.id) == false && pc.saldo == pc.monto
+                                %a.btn.btn-success{class: 'cobranza-externa-add'}
+                                    %i.icon-white.icon-plus-sign
+                                    Cobranza Externa
+                                %a.btn.btn-warning{class: 'cobranza-externa-remove no-mostrar'}
+                                    %i.icon-white.icon-minus-sign
+                                    Cobranza Externa
+                            - elsif @usuario.sede.eql?(@us_alumno.sede) && pc.tiene_cobranza?(pc.id) == true
+                                %a.btn.btn-danger{id: 'cobranza-externa-eliminar', href: cobranzas_morosos_cobranza_externa_eliminar_path(pc.id)}
+                                    %i.icon-white.icon-minus-sign
+                                    Eliminar Cobranza
+                                %a.btn.btn-danger{id: 'cobranza-externa-eliminar2',class: 'invisible',disabled: true}
+                                    %i.icon-white.icon-minus-sign
+                                    Eliminar Cobranza
+
+            %form{id: 'cobranza-externa',class: 'well form-horizontal no-mostrar', method: 'post', action: cobranzas_morosos_cobranza_externa_guardar_path}
+                %fieldset
+                    %input{type: 'hidden', id: 'pago-comprometido-id', value: '',name: 'pago-comprometido-id'}
+                    %input{type: 'hidden', id: 'matricula', value: mat.id, name: 'mat'}
+                    %div{class: 'page-header'}
+                        %legend Seleccione el tipo de cobranza
+                    %div{class: 'control-group'}
+                        %select.required{:name => "tipo", :id => "tipo", :prompt => 'Seleccione tipo cobranza', class: 'selectTipo'}
+                            - for_select(Cobranza,:TIPOS).each do |c|
+                                %option{value: c[1]}= c[0]
+                        %span.add-on
+                            %i.icon-white.icon-plus-sign
+                        %input.btn.btn-success{type: 'submit', value: 'Enviar'}
+                                
+:javascript
+
+    $(document).ready(function(){
+        
+        $('.fecha').datepicker();
+
+        $('.cobranza-externa-add').click(function(){
+        	$('.cobranza-externa-add').addClass("no-mostrar");
+        	$('.cobranza-externa-remove').removeClass("no-mostrar");
+
+        	$('.pago-comprometido').addClass("no-mostrar");
+        	$(this).parent().parent().removeClass("no-mostrar");
+        	$('#cobranza-externa').removeClass("no-mostrar");
+
+        	$('#pago-comprometido-id').val(
+        		$(this).parent().parent().attr('id')
+        	);
+        });
+
+        $('.cobranza-externa-remove').click(function(){
+        	$('.cobranza-externa-remove').addClass("no-mostrar");
+        	$('.cobranza-externa-add').removeClass("no-mostrar");
+
+        	$('.pago-comprometido').removeClass("no-mostrar");
+        	$('#cobranza-externa').addClass("no-mostrar");
+
+        	$('#pago-comprometido-id').val('');
+        });
+
+        $('#cobranza-externa-eliminar').click(function(){
+            $(this).addClass('invisible');
+            $('#cobranza-externa-eliminar2').removeClass('invisible');
+        });
+    })

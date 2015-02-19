@@ -1,0 +1,344 @@
+.sectionHeader
+	%h1.no-imprimir Expediente de Titulación
+	%h1.leyenda EXPEDIENTE DE TITULACIÓN
+	%div.well
+		%form.form-search#buscar_alumno{:action => coordinador_carrera_consultar_expediente_titulacion_path ,:method => "post"}
+			%input.input-large.search-query.required{type: "text", :placeholder => "Rut Alumno", style: 'height: 28px', :name => "busqueda"}
+			%button.btn.btn-primary{type: "submit"} 
+				%icon.icon-white.icon-search
+				Buscar Alumno
+= notificaciones
+
+- unless @alumno.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action => coordinador_carrera_consultar_expediente_titulacion_path ,:method => "post"}
+		%fieldset
+			%legend Información del alumno
+			%input{type: "hidden", name: "usuario", value: @usuario.id}
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas	
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Email:
+						%span= @usuario.email
+					%div.contenedorElemento.separador
+						%label.etiqueta Domicilio:
+						%span= @usuario.domicilio
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: "alumno_plan_estudio_id"}
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => i.id , selected: @alumno_plan_estudio_seleccionado.blank? ? false : i.id == @alumno_plan_estudio_seleccionado.id }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"} 
+							%icon.icon-white.icon-search
+							Consultar
+- unless @trabajo_titulo.blank?
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información 
+			%ul.ui-helper-clearfix.ul-informacion
+				%li.ui-helper-clearfix.cuatro-columnas	
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre_1	
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut
+					%div.contenedorElemento.separador
+						%label.etiqueta Institución
+						%span= @alumno_plan_estudio.institucion_sede
+				%li.ui-helper-clearfix.cuatro-columnas	
+					%div.contenedorElemento.separador
+						%label.etiqueta Fecha:
+						%span= @trabajo_titulo.fecha
+					%div.contenedorElemento.separador
+						%label.etiqueta Rol:
+						%span= @trabajo_titulo.rol
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera
+						%span= @alumno_plan_estudio.plan_estudio.nombre
+					- if @intermedio
+						%div.contenedorElemento.separador
+							%label.etiqueta
+							%span= "(Salida intermedia de #{@alumno_plan_estudio.plan_estudio.titulo_tecnico})"
+					
+			
+		%a.not-print.btn.btn-info.impresion{:href => "#"}
+			%i.icon-white.icon-print
+			Imprimir
+		%a.not-print.btn.btn-success{:href =>coordinador_carrera_emitir_acta_examen_path(@trabajo_titulo.id)}
+			%i.icon-white.icon-print
+			Acta Examen
+		%a.not-print.btn.btn-success{:href => coordinador_carrera_emitir_acta_final_path(@trabajo_titulo.id)}
+			%i.icon-white.icon-print
+			Acta Final 
+		%a.not-print.btn.btn-success{:href => coordinador_carrera_avance_curricular_path(@alumno_plan_estudio.id), id: "loading-example-btn", :data => {"loading-text" => "Generando ..."}}
+			%i.icon-white.icon-list-alt
+			Avance Curricular
+		%a.not-print.btn.btn-success{:href => mantenedores_expedientes_titulacion_editar_path(@trabajo_titulo.id), id: "loading-example-btn", :data => {"loading-text" => "buscando ..."}}
+			%i.icon-white.icon-list-alt
+			Edición Expediente
+
+		%div.div-separador
+			%legend Trabajo de Título
+			%legend.leyenda{:style => "font-weight:bold;"} TRABAJO DE TÍTULO
+			%table.table.table-striped#alumnos
+				%thead
+					%tr.no-border
+						%td Nombre:
+						%td{:style => "text-align : justify;"}= "#{@trabajo_titulo.nombre.mb_chars}"
+			%table.table.table-striped#alumnos
+				%thead
+					%tr	
+						%th.TxtLft.do-guia Docente Guía
+						%th.TxtLft
+						%th.TxtLft Firma
+					- suma = 0.0
+					- @docentes.each do |d|
+						- suma = d.nota + suma
+						- if d.tipo == 1
+							%tr
+								%td.do-guia
+									%span Nombre
+								%td	
+									%span= d.docente.datos_personales.nombre_1
+								%td
+									%span 
+								
+					- nota_final = suma / 2 
+				%tr
+					%td.final NOTA FINAL 
+					%td= nota_final.round(1)
+					%td 
+					
+		%div.div-separador					
+			%legend Examen de Título
+			%legend.leyenda{:style => "font-weight:bold;"} EXAMEN DE TÍTULO
+			%table.table.table-striped#alumnos
+				%thead			
+					%tr
+						%th.TxtLft Comisión Examinadora
+						%th.TxtLft
+						%th.TxtLft Firma
+					- exp = 0.0
+					- defe = 0.0
+					- cont = 0
+					- @comisiones.each do |c|
+						%tr.espacio-firma
+							%td	
+								%span= c.docente.datos_personales.nombre_1
+							%td
+								%span
+							%td
+								%span
+						- exp = c.nota_expocision + exp
+						- defe = c.nota_defensa + defe
+						- cont = cont + 1
+					- expo  = exp /cont
+					- defen = defe /cont
+					- final = (expo + defen)/2  
+			%table.table.table-striped#alumnos	
+				%td.final NOTA FINAL
+				%td= final.round(1)
+				%td
+	%div.div-separador			
+		%div.nota{:style => "text-align : justify;"}
+			%p
+			Déjase constancia que el alumno(a) 
+			= @usuario.nombre_2 
+			ha cumplido	satisfactoriamente los requisitos y reglamentos establecidos para obtener el título de
+			= @intermedio  ? "#{@alumno_plan_estudio.plan_estudio.titulo_tecnico.mb_chars.upcase} ": "#{@alumno_plan_estudio.plan_estudio.titulo_profesional.mb_chars.upcase}"
+			en 
+			= "#{@usuario.sede.ciudad},"
+			= "#{l @trabajo_titulo.fecha, format: :humana2}."
+	%div.firmas-expediente
+		%div.firma-acta-convalidacion-left{style: 'margin-bottom: 105px;'}
+			- if @usuario.sede.id == 1
+				%p _____________________________
+				%h1
+					= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE ESCUELA' : 'DIRECTOR DE ESCUELA'
+			- else 
+				%p ___________________________
+				%h1
+					= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE SEDE' : 'DIRECTOR DE SEDE'
+
+		%div.firma-acta-convalidacion-right{style: 'margin-bottom: 105px;'}
+			%p ___________________________________
+			%h1
+				= @vicerrector.sexo == Usuario::FEMENINO ? 'VICERRECTORA ACADÉMICA' : 'VICERRECTOR ACADÉMICO'
+
+	%div.saltopagina
+		%div.sectionHeader
+			%h1.titulo CONCENTRACIÓN DE NOTAS
+			= render "alumnos/alumnos/partials/assets_estados_asignaturas"
+			%tbody
+				= render "alumnos/alumnos/partials/assets_estados_asignaturas"
+				%table.table.table-condensed#asignaturas
+					%colgroup
+						%col.semestre
+						%col.codigo
+						%col.asignatura
+						%col.nota
+						%col.periodo
+						%col.historial
+					%thead
+						%tr
+							%th.txCenter
+								Semestre
+							%th.txCenter
+								Código
+							%th.txLeft
+								Asignatura
+							%th.txCenter
+								Nota
+							%th.txCenter
+								Período
+							%th.txLeft
+								Historial
+					%tbody
+						- cant = @data.size
+						- @data.each do |item|
+							- estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado
+							- item[:inscripciones].each do |inscripcion|
+								%tr{:class => "#{get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado}"}
+									%td.txCenter= item[:asignatura].semestre
+									%td.txCenter= item[:asignatura].codigo
+									%td.txLeft
+										= item[:asignatura].nombre
+									%td.txCenter
+										%span= inscripcion[:estado].nota_final
+									%td.txCenter
+										%span= inscripcion[:periodo].nombre
+									%td.txLeft
+										%span= get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado 
+
+
+		%div.solo-imprimir.firma-avance
+			%p ___________________________________
+			%h1
+				= @vicerrector.sexo == Usuario::FEMENINO ? 'VICERRECTORA ACADÉMICA' : 'VICERRECTOR ACADÉMICO'
+	= datatable_src
+	= datatable "asignaturas"
+:css
+	.div-separador{
+		margin-top: 20px;
+	}
+	p.firma {
+		margin-left: 200px;
+	}
+	p.importante {
+		font-size: 13px;
+		padding: 3px;
+		border-bottom: 1px solid red;
+		border-top: 1px solid red;
+		line-height: 130%;
+		margin-top: 7px;
+	}
+	label.trabajo { 
+		font-weight: bold; 
+		display: inline !important;
+		text-transform: none;
+		font-size: 12px !important;
+		line-height: normal !important;
+	}
+	td.final{
+		width: 200px;
+	}
+	.final{ 
+		font-weight: bold;
+		display: inline !important;
+		text-transform: none;
+		font-size: 11pt !important;
+		margin: 0;
+		line-height: normal !important;
+	}
+	.leyenda{ display: none !important; }
+	.nota{ display: none; }
+	.table.table thead th do-guia{
+		max-width: 100px !important;
+	}
+	@media print {
+		.leyenda { 
+			display: block !important;
+			font-size: 15px; 
+			background-color: #EEE;
+			width: auto;
+			padding: 5px;
+			line-height: 1.2em;
+			margin-bottom: 0 !important;
+		}
+		table.table thead tr.no-border{
+			border: none !important;
+		}
+		table.table tbody tr{
+			border-bottom: none !important;
+		}
+		tr .espacio-firma{
+			padding-top: 7px;
+			padding-bottom: 7px; 
+		}
+		form.informacion-tabulada div.div-separador table td{
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		}
+		form.informacion-tabulada div.div-separador table td span{
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		}
+		div.firma-avance p{
+			width: 100%;
+			text-align: center;
+		}
+		div.firma-avance h1{
+			width: 100%;
+			text-align: center;
+			font-size: 11pt !important;
+		}
+		.div-separador{
+			margin-top: 30px;
+		}
+		div.firmas-expediente{
+			margin-top: 45px;
+		}
+		form.informacion-tabulada > table {
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		}
+		form.informacion-tabulada{
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+
+		}
+		form.informacion-tabulada > fieldset > ul > li { 
+			width: 50% !important;
+		}
+		form.informacion-tabulada div.contenedorelemento span { 
+			margin-left: 90px !important; 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		} 
+		form.informacion-tabulada div.contenedorelemento etiqueta { 
+			margin-left: 90px !important; 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		}
+		form.informacion-tabulada div.contenedorelemento etiqueta { 
+			margin-rigth: 0px !important; 
+		}
+		.nota{
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;
+		}
+		table.table tbody td, table.table thead th {
+			
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 8pt !important;
+		}
+		.ul-informacion{
+			width: 100% !important;
+		}
+	}

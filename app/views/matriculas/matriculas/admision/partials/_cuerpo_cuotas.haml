@@ -1,0 +1,109 @@
+
+.cuerpo.medio-2
+	.control-group
+		%label.control-label Cuotas
+		.controls
+			%select.d1.cuotas.required.span2.k1.n1{:disabled => "disabled", :name => "cuotas_#{centro_costo}"}
+
+				%option{:value => "", :selected => "selected", :cuotas => "0"} :: Seleccione una cantidad de cuotas ::
+				- forma_cuotas.each do |forma|
+					%option.ros{:value => "#{forma.id}", :data => {:interes => "#{forma.interes}", :cuotas => "#{forma.numero_cuotas}"}}= forma.nombre
+	
+	.control-group
+		%label.control-label Fecha inicio (aaaa/mm/dd)
+		.controls
+			%input.d1.required.k1.fecha-minima.f-primera-cuota.input-medium.n1.vn{:type => "date", :name => "fecha_inicio_#{centro_costo}", :disabled => "disabled"}
+	.control-group
+		%label.control-label Nº 1era. cuota
+		.controls
+			%input.d1.required.k1.n1.numero-primera-cuota.input-mini.v0{:type => "number", :min => "1", :value => "1", :step => "1", :disabled => "disabled"}
+	.control-group
+		%label.control-label Cheques
+		.controls
+			%input.d1.required.k1.cuotas-cheques.input-mini.v0{:type => "number", :min => "0", :value => "0", :step => "1", :disabled => "disabled"}
+	.control-group
+		%label.control-label C. Pagaré
+		.controls
+			%input.d1.required.k1.cuotas-pagare.input-mini.v0{:type => "number", :min => "0", :value => "0", :step => "1", :disabled => "disabled"}
+	.control-group
+		%label.control-label Pagaré
+		.controls
+			%input.d1.k1.pagare.cambiar-nombre.input-small.required.vn{:type => "text", :name => "numero_pagare_#{centro_costo}", :data => {"nombre-real" => "pagares[][numero]"}, :disabled => "disabled"}
+
+
+	.control-group
+		%label.control-label Orden (Cheques seguidos de cuotas pagaré o viceversa)
+		.controls
+			%label.radio.inline
+				%input.n1.k1.seleccion-cuota.required.d1{:type => "radio", :checked => "checked", :value => "cheque", :name => "orden", :disabled => "disabled"} Cheque
+			%label.radio.inline
+				%input.n1.k1.seleccion-cuota.required.d1{:type => "radio", :value => "pagare", :name => "orden", :disabled => "disabled"} Pagaré
+	%br
+	%a.generar-cuotas.btn{:href => "#", :style => "width: 100px; margin: 0 auto 10px 0;"}
+		%i.icon.icon-list-alt
+		Crear plan
+
+	%a.modificar-contenido{:href => "#", :style => "display: inline-block; margin-top: -10px; vertical-align: middle;"}
+		%i.icon-refresh
+		Modificar información
+
+	.cuotas{:style => "display: none;"}
+		.control-group
+			%label.control-label Factor de interes
+			.controls.input-prepend.interes
+				%input.input-medium.interes{:type => "text", :disabled => "disabled"}				
+		.control-group{:style => "width: 190px;"}
+			%label.control-label Monto total
+			.controls.input-prepend.monto-total
+				%span.add-on $
+				%input.monto-documentado-con-interes.input-medium{:type => "text", :disabled => "disabled", :alt => "dinero"}
+		%table.table.table-condensed.cuotas.estrecha
+			%colgroup
+				%col.cuota
+				%col.monto
+				%col.f-vencimiento
+				%col.serie
+				%col.banco
+				%col.documento-venta
+			%thead
+				%tr
+					%th.txCenter Cuota
+					%th.txRight Monto
+					%th.txCenter F. Vencim.
+					%th.txCenter
+					%th.txCenter
+					%th.txCenter
+			%tbody
+				%tr{:style => "display: none;"}
+					%td.txCenter
+						%input.d1.mo{:type => "hidden", :name => "pagos_comprometidos[][monto]", :disabled => "disabled"}
+						%input.d1.mo.saldo{:type => "hidden", :name => "pagos_comprometidos[][saldo]", :disabled => "disabled"}
+						%input.d1{:type => "hidden", :name => "pagos_comprometidos[][ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id, :disabled => "disabled"}
+						%input.d1.required.digits.cambiar-nombre.numero-cuota{:type => "text", :data => {"nombre-real" => "pagos_comprometidos[][numero_cuota]"}, :style => "width: 30px;", :maxlength => 2, :disabled => "disabled"}
+						%input.d1{:type => "hidden", :name => "pagos_comprometidos[][centro_costo]", :value => "#{centro_costo}", :disabled => "disabled"}
+						%input.tipo-cuota.d1{:type => "hidden", :name => "pagos_comprometidos[][tipo_cuota]", :disabled => "disabled"}
+						%input.d1{:type => "hidden", :name => "pagos_comprometidos[][estado]", :value => "#{PagoComprometido::COMPROMETIDO}", :disabled => "disabled"}
+						%input.a1.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id, :disabled => "disabled"}
+						%input.a1.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][estado]", :value => "#{PagoComprometido::COMPROMETIDO}", :disabled => "disabled"}
+						%input.a1.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][medio_pago_id]", :value => "2", :disabled => "disabled"}
+						%input.a1.d1.sdv.mo{:type => "hidden", :name => "pagos_comprometidos[][abono][monto]", :disabled => "disabled"}
+						%input.a1.d1.mo.saldo{:type => "hidden", :name => "pagos_comprometidos[][abono][saldo]", :disabled => "disabled"}
+					%td.txRight
+						%input.input-medium.monto.mo{:type => "text", :alt => "dinero", :disabled => "disabled", :style => "width: 90px"}
+					%td.txCenter
+						%input.d1.required.fecha.cambiar-nombre.input-medium.f-vencimiento.fecha-valida-cuota{:type => "text", :data => {"nombre-real" => "pagos_comprometidos[][fecha_vencimiento]"}, :disabled => "disabled", :style => "width: 90px"}
+					%td
+					%td
+					%td
+
+		- if centro_costo == PagoComprometido::ARANCEL
+			%input.cuotas.d1.y1{:name => "pagares[][cuotas_arancel]", :type => "hidden", :disabled => "disabled"}
+
+		- if centro_costo == PagoComprometido::MATRICULA
+			%input.cuotas.d1.y1{:name => "pagares[][cuotas_matricula]", :type => "hidden", :disabled => "disabled"}
+
+		- if centro_costo == PagoComprometido::NORMATIVA
+			%input.cuotas.d1.y1{:name => "pagares[][cuotas_normativa]", :type => "hidden", :disabled => "disabled"}
+
+		%input.d1.y1{:name => "pagares[][ejecutivo_matriculas_id]", :type => "hidden", :disabled => "disabled", :value => @ejecutivo_matriculas.id}
+	%input.d1.required.n1{:type => "hidden", :name => "plan-cuotas-generado-#{centro_costo}", :class => "plan-cuotas-generado-#{centro_costo}", :disabled => "disabled"}

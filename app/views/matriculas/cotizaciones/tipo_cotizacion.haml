@@ -1,0 +1,14 @@
+= form_tag "#{new_matriculas_cotizacion_path}", :method => "post", :class => "cotizacion" do
+
+    .page-header
+        %h1 Seleccione tipo de cotización
+
+    .matricula-nuevo.contenedor-matricula
+        #datos-personales-postulante
+            .control-group
+                .controls
+                    %select.required{name: "tipo"}
+                        - for_select(Cotizacion,:TIPOS).each do |c|
+                            %option{:value => c[1]}= c[0].upcase
+
+                    %input.btn.btn-primary{type: 'submit',value: 'Seleccionar'}

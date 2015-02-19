@@ -1,0 +1,86 @@
+= breadcrumb [ ['Docentes', mantenedores_docentes_path], [@usuario.rut, mantenedores_docente_path(@usuario.id)], 'Generar Contrato'  ]
+.page-header
+    %h1 Generar Contrato
+
+= notificaciones
+.well
+    %h3 Agregar nuevo contrato
+    %br
+    
+    = simple_form_for :contrato, url: mantenedores_docente_contrato_save_path(@docente.id),  html: {class: 'form-inline'} do |f|
+        .control-group{style: 'float: left; margin-right: 10px'}
+            .control-label
+                %label{for: 'fecha_inicio'} Fecha Inicio:
+            .controls
+                %input#fecha_inicio.datepicker{name: 'contrato[fecha_inicio]', type: 'text'}
+        .control-group{style: 'float: left; margin-right: 10px'}
+            .control-label
+                %label{for: 'fecha_termino'} Fecha Termino:
+            .controls
+                %input#fecha_termino.datepicker{name: 'contrato[fecha_termino]', type: 'text'}
+        .control-group{style: 'float: left; margin-right: 10px'}
+            .control-label
+                %label{for: 'valor_hora'} Valor Hora:
+            .controls
+                %input#empresa_trabaja{name: 'contrato[valor_hora]', type: 'text'}
+        .control-group{style: 'float: left; margin-right: 10px'}
+            .control-label
+                %label{for: 'empresa_trabaja'} Empresa que Trabaja:
+            .controls
+                %input#empresa_trabaja{name: 'contrato[empresa_trabaja]', type: 'text'}
+        .control-group{style: 'float: left; margin-right: 10px'}
+            .control-label
+                %label{for: 'institucion_sede_id'} Institución Sede:
+            .controls
+                %select{name: 'contrato[institucion_sede_id]'}
+                    - InstitucionSede.obtener_nombres_para_select.each do |i|
+                        %option{value: i[0]}= i[1]
+        = f.hidden_field :docente_id, value: @docente.id
+        .clearfix
+        %br
+        
+        %button.btn.btn-primary{type: 'submit'} 
+            %i.icon-white.icon-plus
+            Agregar contrato
+        .clearfix
+
+%p
+    %a.btn.btn-warning{:href => edit_mantenedores_docente_path(@usuario.id)}
+        %i.icon-white.icon-pencil
+        Editar datos personales
+%br
+
+
+%table#lista.table.table-condensed
+    %thead
+        %tr
+            %th ID
+            %th Fecha Inicio
+            %th Fecha Término
+            %th Valor Hora
+            %th Empresa que trabaja
+            %th Institución
+            %th Sede
+            %th Imprimir
+    %tbody
+        - @contratos.each do |i|
+            %tr
+                %td= i.id
+                %td= l i.fecha_inicio
+                %td= l i.fecha_termino
+                %td= dinero i.valor_hora
+                %td= i.empresa_trabaja
+                %td= i.institucion_sede.institucion.nombre
+                %td= i.institucion_sede.sede.nombre
+                %td.txCenter
+                    = link_to "Prestación", mantenedores_docente_contrato_prestacion_path(params[:docente_id], i.id), class: 'btn btn-success'
+                    = link_to "Solicitud", mantenedores_docente_contrato_solicitud_path(params[:docente_id], i.id), class: 'btn btn-success'
+
+
+= datatable_src
+= datatable 'lista'
+
+:javascript
+    $(function(){
+        $('.datepicker').datepicker();
+    })

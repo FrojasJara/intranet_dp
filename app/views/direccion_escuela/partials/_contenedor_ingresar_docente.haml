@@ -1,0 +1,135 @@
+:css
+	.bloque_formulario .control-group{display:inline-block;}
+
+%div#contenedor_ingresar_docente{style:"display:none;"}
+	%div.bloque_formulario
+		%h2 Información Docente
+		%form#form-ingresar-docente
+			%fieldset
+				%legend	Información Personal
+				%div.control-group
+					%label.control-label R.U.T
+					%div.controls
+						%input.rut.required{type: "text", :name => "docente[rut]"}
+				%div.control-group
+					%label.control-label Primer Nombre
+					%div.controls
+						%input.required{:type => "text", :name => "docente[primer_nombre]"}
+				%div.control-group
+					%label.control-label Segundo Nombre
+					%div.controls
+						%input.required{:type => "text", :name => "docente[segundo_nombre]"}
+				%div.control-group
+					%label.control-label Apellido Paterno
+					%div.controls
+						%input.required{:type => "text", :name => "docente[apellido_paterno]"}
+				%div.control-group
+					%label.control-label Apellido Materno
+					%div.controls
+						%input.required{:type => "text", :name => "docente[apellido_materno]"}
+				%div.control-group
+					%label.control-label Fecha de Nac.
+					%div.controls
+						%input.required.fechas{type: "text", :name => "docente[fecha_nacimiento]"}
+				%div.control-group
+					%label.control-label Estado Civil
+					%div.controls
+						%select{name: "docente[estado_civil]"}
+							%option{value: ""} .: Estado Civil :.
+							%option{value: Usuario::SOLTERO} Soltero
+							%option{value: Usuario::CASADO} Casado
+							%option{value: Usuario::VIUDO} Viudo
+							%option{value: Usuario::DIVORCIADO} Divorciado
+							%option{value: Usuario::SEPARADO} Separado
+						
+				%div.control-group
+					%label.control-label Profesión
+					%div.controls
+						%input.required{type: "text", :name => "docente[profesion]"}
+			%fieldset		
+				%legend	Información de Contacto
+				%div.control-group
+					%label.control-label Domicilio
+					%div.controls
+						%input.span4.required{type: "text", :name => "docente[domicilio]"}
+				%div.control-group
+					%label.control-label Región
+					%div.controls
+						%select.span3.required{:name => "docente[region_id]"}
+							%option{value: ""} .: Región :.
+							- Region.all.each do |i|
+								%option{value: i.id}= i.nombre 
+				%div.control-group
+					%label.control-label Comuna
+					%div.controls
+						%select.span3.required{:name => "docente[comuna_id]"}
+							%option{value: ""} .: Comunas :.
+
+				%div.control-group
+					%label.control-label Telefono Fijo
+					%div.controls
+						%input.required{type: "text", :name => "docente[telefono_fijo]"}
+				%div.control-group
+					%label.control-label Email
+					%div.controls
+						%input.required{type: "text", :name => "docente[email]"}
+
+	%div.modal-footer
+		%button.btn#btn_cancelar_ingreso_docente Cancelar
+		%button.btn.btn-primary#btn-ingresar-nuevo-docente{type: "submit"} Guardar
+
+
+:javascript
+	$(document).ready(function(){
+		$("#btn-ingresar-nuevo-docente").on("click", function(){
+			$("#form-ingresar-docente").submit();
+		});
+		
+		$("#form-ingresar-docente").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Ingresar Docente", "<strong>Recuerde!</strong> Ingresar toda la información del usuario, revise atentamente que toda la información este correcta.");
+				},
+				submitHandler: function(form) {
+					//form.preventDefault();
+
+					var values = $("#form-ingresar-docente").serialize();
+					$.post(
+						"#{ajax_direccion_escuela_ingresar_docente_nuevo_path}", 
+						values,
+						function(data){
+							if(data.status)
+							{
+								notify_success("Guardar Docente!", "<strong>Éxito!</strong> " + data.mensaje );
+
+							}
+							else
+							{
+								notify_error("Error!", "<strong>Problema!</strong> " + data.mensaje );
+								console.log(data);
+							}
+						}, 
+						"json"
+					);
+			}
+		});
+		/*Actualiza el combo comunas segun region */
+		$("select[name='docente[region_id]']").change(function(){
+			var region_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_direccion_escuela_buscar_comunas_path}",
+				type: 'POST',
+				data: {region_id :  region_id},
+				success: function(data) {
+					var options = "<option>.: Comunas :.</option>";
+					$.each(data.comunas, function(k,v){
+						options = options +  "<option value='" + v.comuna_id + "'>" + v.nombre + " </option>"
+					});
+					$("select[name='docente[comuna_id]']").html(options);
+				}
+			});
+		});
+
+		$(".fechas").datepicker({ changeYear: true, changeMonth: true,  yearRange: '1945:1997' });
+	});
+	
+

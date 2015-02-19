@@ -1,0 +1,102 @@
+.sectionHeader
+	%h1 Buscar Alumno
+	%h2
+		= "Periodo - #{Periodo::en_curso.nombre}"
+%div.well
+	%form.form-search#buscar_alumno{:action => "#",:method => "post"}
+		%select.span4{:name => :plan_estudio}
+			- @alumno_plan_estudios.each do |i|
+				- selected = (!@alumno_plan_estudio.nil? and (@alumno_plan_estudio.id) == i.id ? true : false)
+				%option{:value => i.id, :selected => selected}= "#{i.plan_estudio.nombre} - Malla: #{i.plan_estudio.siaa_id_ma} [#{i.plan_estudio.anio_inicio}-#{i.plan_estudio.anio_fin}]"
+
+		%button.btn.btn-primary{type: "submit"} 
+			%icon.icon-white.icon-search
+			Ver Asistencia
+
+= notificaciones
+- unless @alumno_plan_estudio.blank?
+
+	%a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+		%i.icon-white.icon-print
+		Imprimir
+	%a.btn.btn-success{:style => "margin-top: 1px;", :href => "#{matriculas_pagos_bitacora_cobranzas_path @alumno_plan_estudio.id}"}
+		%i.icon-white.icon-edit
+		Bitacora 
+
+	%div.solo-imprimir{style: "display:block !important; border:none !important; border-radius: 0px !important; margin-bottom: 10px !important;margin-top:  20px !important;"}
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información del alumno
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Rut:
+							%span= @alumno_plan_estudio.alumno.datos_personales.rut			
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre:
+							%span= @alumno_plan_estudio.alumno.datos_personales.nombre					
+						%div.contenedorElemento.separador
+							%label.etiqueta Plan Estudios:
+							%span= @alumno_plan_estudio.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Institución:
+							%span= @alumno_plan_estudio.institucion_sede_plan.institucion_sede.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso al plan de estudios:
+							%span= @alumno_plan_estudio.periodo.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso a la institución:
+							%span= @alumno_plan_estudio.alumno.anio_ingreso
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento
+							%label.etiqueta Jornada:
+							%span= get_name InstitucionSedePlan, :JORNADAS, @alumno_plan_estudio.institucion_sede_plan.jornada
+						%div.contenedorElemento
+							%label.etiqueta Modalidad:
+							%span= get_name InstitucionSedePlan, :MODALIDADES, @alumno_plan_estudio.institucion_sede_plan.modalidad
+						%div.contenedorElemento.separador
+							%label.etiqueta Estado:
+							%span= get_name Alumno, :ESTADOS_ACADEMICOS, @alumno_plan_estudio.estado
+						%div.contenedorElemento.separador
+							%label.etiqueta Número Ingresos:
+							%span= @alumno_plan_estudio.alumno.ingresos
+						%div.contenedorElemento
+							%label.etiqueta Semestre que cursa:
+							%span= @alumno_plan_estudio.semestre
+	
+- if @secciones_inscritas.size > 0
+	%table.table.table-striped#asignaturas
+		%thead
+			%tr
+				%th.TxtLft{colspan: 3} Información Asignatura (A= % Asistencia /  I= % Inasistencia)
+				%th.TxtLft{colspan: "#{@total_planificaciones + 4}"} Evaluciones
+
+			%tr
+				%th.TxtLft Asignatura
+				%th.TxtLft % A
+				%th.TxtLft % I
+				- 0..@total_planificaciones.times do |i|
+					%th.TxtLft= "E-#{i+1}"
+				%th.TxtLft NP
+				%th.TxtLft NE
+				%th.TxtLft NRep.
+				%th.TxtLft NF
+		%tbody
+			- @secciones_inscritas.each do |i|
+				%tr
+					%td= i.asignatura.nombre
+					%td= i.porcentaje_horas_asistidas
+					%td= i.porcentaje_horas_ausentadas
+					-  if i.calificaciones_parciales.size <= @total_planificaciones
+						-  i.calificaciones_parciales.each do |i|
+							%td= i.calificacion
+						- tmp = @total_planificaciones - i.calificaciones_parciales.size
+						- 0..tmp.times do
+							%td --
+					%td.BgNP= i.nota_presentacion
+					%td.BgNE= i.nota_examen
+					%td.BgNRep= i.nota_examen_repeticion
+					%td.BgNF= i.nota_final
+
+= datatable_src
+= datatable("asignaturas") 

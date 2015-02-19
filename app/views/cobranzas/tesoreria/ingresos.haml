@@ -1,0 +1,25 @@
+.page-header
+    %h1 
+        Informe de ingresos
+        = @institucion_sede.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+    %h2    
+        = @f_i
+        = "hasta #{@f_t}" unless @f_t.blank?
+
+%table.table.table-condensed
+    %thead
+        %tr
+            %th.txRight Fecha
+            %th.txRight Total
+            %th.txRight Cantidad documentos
+    %tfoot
+        %tr
+            %td
+            %td.txRight= dinero @monto_total
+            %td.txRight= @documentos_total
+    %tbody
+        - @data.each do |i|
+            %tr
+                %td.txRight= i.first
+                %td.txRight= dinero i.second[:total]
+                %td.txRight= i.second[:documentos].size

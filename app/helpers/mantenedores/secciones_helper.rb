@@ -1,0 +1,3 @@
+module Mantenedores::SeccionesHelper
+
+end

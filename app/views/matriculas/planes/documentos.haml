@@ -1,0 +1,40 @@
+- if @no_existe_plan.nil?	
+	.page-header
+		%h1 Documentos plan/planes de pago asociados a la matricula Nº #{@matricula.id} 
+
+	= notificaciones	
+	= render :partial => "matriculas/planes/partials/informacion_tabulada_plan_pago", :locals => { :no_mostrar => :generar_documentos }
+	= render :partial => "partials/notificaciones/info", :locals => {:mensaje => @mensaje}
+	
+	- @planes.each do |plan|
+		- if plan.url_contrato.blank?
+			= form_tag "#{matriculas_plan_generar_documentos_path plan.id}", :method => "post", :style => "text-align: center;", :class => "generar-documentos" do
+				%button.btn.btn-info.loading-button{:type => "submit", :data => {"loading-text" => "... generando documentos ..."}}
+					%i.icon-white.icon-list-alt
+					Generar documentos plan Nº #{plan.id}
+		- else
+			= form_tag "#{matriculas_plan_eliminar_documentos_path plan.id}", :method => "post", :style => "text-align: center;", :class => "eliminar-documentos" do
+				%button.btn.btn-danger.loading-button{:type => "submit", :data => {"loading-text" => "... eliminando documentos ..."}}
+					%i.icon-white.icon-list-alt
+					Eliminar documentos plan Nº #{plan.id}
+- else
+	.page-header
+		%h1 Documentos de planes de pago
+	= notificaciones
+
+:javascript
+	$(document).ready(function() {
+		$("form.generar-documentos").submit(function() {
+			if( ! confirm("¿Está seguro que desea generar los documentos?") )
+				return false;
+			notify_loader("Documentos de matrículas", "... aguarde un momento mientras se generan los documentos ...");
+			$(this).find(":input.loading-button").button('loading');
+		});
+
+		$("form.eliminar-documentos").submit(function() {
+			if( ! confirm("¿Está seguro que desea eliminar los documentos?") )
+				return false;
+			notify_loader("Documentos de matrículas", "... aguarde un momento mientras se eliminan los documentos ...");
+			$(this).find(":input.loading-button").button('loading');
+		});
+	});

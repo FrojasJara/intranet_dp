@@ -1,0 +1,65 @@
+%h3 
+    Informe Enviados Cobranza Externa - 
+    = @institucion.nombre
+    = @sede.nombre
+    - if @modalidad.to_i == InstitucionSedePlan::PRESENCIAL
+        Presencial
+    - else 
+        Distancia
+    = @fecha_inicio+" - "+@fecha_termino
+%br
+%br
+
+%table#informe-envio.table.table-condensed
+    %thead
+        %tr
+            %th.txCenter Nº
+            %th.txCenter Rut
+            %th.txCenter Nombre 
+            %th.txCenter Apellido 
+            %th.txCenter Carrera
+            %th.txCenter Rut Apoderado
+            %th.txCenter Nombre Apoderado
+            %th.txCenter Apellido Apoderado
+            %th.txCenter Dirección 
+            %th.txCenter Tel. Fijo
+            %th.txCenter Tel. Móvil
+            %th.txCenter Comuna
+            %th.txCenter Pagare
+            %th.txCenter Tipo Cuota
+            %th.txCenter Nro Cuota
+            %th.txCenter Valor
+            %th.txCenter Vencimiento
+    %tbody
+        - if @items.blank?
+            %tr
+                %td{colspan: 17} No hay registros
+        - else
+            - @items.each_with_index do |item, index|
+                - usuario           = item[:usuario]
+                - apoderado         = item[:apoderado]
+                - pagare            = item[:pagare]
+                - pago_comprometido = item[:pago_comprometido]
+                - plan_estudio      = item[:plan_estudio] 
+                - cobranza          = item[:cobranza]
+
+                %tr
+                    %td.txCenter= index + 1
+                    %td.txCenter= usuario.rut
+                    %td.txCenter= usuario.nombres
+                    %td.txCenter= usuario.apellidos
+                    %td.txCenter= plan_estudio.nombre
+                    %td.txCenter= apoderado.rut
+                    %td.txCenter= apoderado.nombres
+                    %td.txCenter= apoderado.apellidos
+                    %td.txCenter= apoderado.domicilio_completo
+                    %td.txCenter= apoderado.telefono_fijo unless apoderado.telefono_fijo.blank?
+                    %td.txCenter= apoderado.telefono_movil unless apoderado.telefono_movil.blank?
+                    %td.txCenter= apoderado.comuna.nombre
+                    %td.txCenter= pagare.numero
+                    %td.txCenter= get_name PagoComprometido,:CENTROS_COSTOS,pago_comprometido.centro_costo
+                    %td.txCenter= pago_comprometido.numero_cuota unless pago_comprometido.numero_cuota.blank?
+                    %td.txCenter= pago_comprometido.monto
+                    %td.txCenter= pago_comprometido.fecha_vencimiento
+= datatable_src
+= datatable 'informe-envio'

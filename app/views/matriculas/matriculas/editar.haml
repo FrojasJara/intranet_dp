@@ -1,0 +1,81 @@
+.page-header
+	%h1 Editar proceso de matrículas
+
+= notificaciones	
+
+- if @existe_matricula and @puede_editarse
+	= render :partial => "matriculas/matriculas/partials/informacion_tabulada_matricula", :locals => { :no_mostrar => :editar }
+	= render :partial => "partials/notificaciones/error", :locals => { :mensaje => @mensaje }
+	= form_tag "#{matriculas_actualizar_path @matricula.id}", :style => "text-align: center;", :class => "editar-matricula" do
+		= render "matriculas/matriculas/partials/edicion_jornada"
+		= render "matriculas/matriculas/partials/edicion_nivel"
+		= render "matriculas/matriculas/partials/edicion_alumno"
+		= render "matriculas/matriculas/partials/edicion_apoderado"
+		%button.loading-button.btn.btn-warning{:type => "submit", :data => {"loading-text" => "... editando matrícula ..."}, :style => "margin-top: 20px;"}
+			%i.icon-white.icon-warning-sign
+			Editar matrícula
+
+	:css
+		col.numero { width: 100px; }
+		col.estado { width: 100px; }
+		col.fecha { width: 180px; }
+		label.jornada_#{@institucion_sede_plan.id} { font-weight: bold; color: blue; }
+		label input { display: inline; }
+		.control-group {
+			display: inline-block;
+			margin-right: 15px;
+		}
+		h2 { font-size: 23px; }
+		legend {
+			background-color: transparent;
+			width: 100%;
+			margin-bottom: 10px;
+			padding: 4px 0;
+			margin-top: 18px;
+		}
+
+		div.bloque {
+			background-color: whiteSmoke;
+			border: 1px solid gray;
+			padding: 10px;
+		}
+
+		.editar-matricula > div { text-align: left; margin-bottom: 30px; }
+
+		.input-prepend .add-on { padding: 2px 3px; }
+
+	:javascript
+		$(document).ready(function() {
+			$("form.editar-matricula").validate({
+				rules: {
+					"rut_alumno" 						: { notEqualTo : "[name='rut_apoderado']" },
+					"usuario_alumno[telefono_fijo]" 	: { 
+						required			: function(element) { return $("select[name='usuario_alumno[codigo_area_telefono]']").val() != ""; },
+						minlength 			: 5
+					},
+					"documentos_alumno[]" 				: { minlength 	: 1 },
+					"usuario_alumno[telefono_movil]" 	: { minlength 	: 8 },
+					"usuario_apoderado[telefono_fijo]"	: { 
+						required			: function(element) { return $("select[name='usuario_apoderado[codigo_area_telefono]']").val() != ""; },
+						minlength 			: 5 
+					},
+					"usuario_apoderado[telefono_movil]" : { minlength 	: 8 },
+				},
+				submitHandler: function(form) {
+					if( confirm("¿Esta seguro que desea editar la matrícula? Luego deberá volver a generar la versión descagable PDF del contrato de prestación de servicios y pagaré.") ) {
+						notify_loader("Edición de matrículas", "Aguarde un momento mientras la matrícula es editada ...");
+						$(form).find(":input.n1").attr("disabled", "disabled");
+						$(form).find(":input.loading-button").button("loading");
+						form.submit();
+					} else {
+						return false;
+					}
+				},
+				invalidHandler: function(form, validator) {
+					notify_loader("Proceso de matrículas", "Por favor, verifique los campos ingresados");
+				}
+			})
+
+			$("input[name='inscripcion[institucion_sede_plan_id]']").val([#{@institucion_sede_plan.id}]);
+			$("input.rut").change(function() { $(this).siblings().val(this.value); });
+		})

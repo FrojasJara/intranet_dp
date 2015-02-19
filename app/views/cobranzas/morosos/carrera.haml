@@ -1,0 +1,66 @@
+.page-header
+    .box{style: 'float: left; display: inline'}
+        %h2{style: 'margin-bottom: 0'}
+            Informe de Morosidad
+            = Date.civil(@año.to_i, @mes.to_i, 1)
+            =" - "
+            = Date.civil(@año.to_i, @mes.to_i, -1)
+        %h3
+            = @sede.nombre
+            \- Alumnos
+            - if @modalidad == "All"
+                Presencial y Distancia
+            - elsif @modalidad.to_i == InstitucionSedePlan::PRESENCIAL
+                = @institucion.nombre+" - Presencial"
+            - else
+                Distancia
+        %h3
+            =@plan
+
+    .botones{:style => "float: right;"}
+        %a.not-print.btn.btn-info.impresion{:href => "#"}
+            %i.icon-white.icon-print
+            Imprimir
+    .clearfix
+%table#lista.table.table-condensed
+    %thead
+        %tr
+            %th Nº
+            %th Rut
+            %th Nombres
+            %th Apellidos
+            %th Carrera
+            %th Año Ingreso
+            %th Nivel
+            %th Estado
+            %th Total Cuotas
+            %th Saldo Cuotas
+            %th Cantidad Cuotas
+            %th Email
+            %th Teléfono
+            %th Celular
+            %th.not-print
+    %tbody
+        - @datos.each_with_index do |i, index|
+            %tr
+                %td= index+1
+                %td= i[:rut]
+                %td= i[:nombres]
+                %td= i[:apellidos]
+                %td= i[:carrera]
+                %td= i[:anio_ingreso]
+                %td= i[:nivel]
+                %td= i[:estado]
+                %td= i[:total_comprometido]
+                %td= i[:total_saldo]
+                %td= i[:cantidad]
+                %td= mail_to i[:email]
+                %td= i[:telefono]
+                %td= i[:celular]
+
+                %td.not-print 
+                    %a.not-print.btn.btn-primary{:href => matriculas_pagos_ver_alumno_path(i[:rut])}
+                        %i.icon-white.icon-list-alt
+                        Pagos
+= datatable_src
+= datatable 'lista', {nosort: true}  

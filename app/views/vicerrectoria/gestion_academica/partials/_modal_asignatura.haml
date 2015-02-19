@@ -1,0 +1,50 @@
+
+.modal.fade.hide{:id => "agregar_asignatura", :style => "width: 300px "}
+	.modal-header
+		%button.close{:data => {:dismiss => "modal"}}
+			x
+	.modal-body
+		%form#asignatura{:action => registrar_asignatura_plan_estudio_path, :method => "post"}
+			%fieldset
+				%legend Datos Asignatura
+				%input{:type => "hidden", :name => "asignatura[plan_estudio_id]", :value => @plan_estudio.id}
+				%div.control-group
+					%label.control-label Nombre
+					%div.controls
+						%input{:type => "text", :name => "asignatura[nombre]"}
+
+				%div.control-group
+					%label.control-label Código
+					%div.controls
+						%input{:type => "text", :name => "asignatura[codigo]"}
+
+				%div.control-group
+					%label.control-label Semestre
+					%div.controls
+						%input{:type => "text", :name => "asignatura[semestre]"}
+
+
+			%input.btn.btn-primary{:type =>"submit" , :value => "Guardar Asignatura"} 
+			%button.btn.btn-default{:data => {:dismiss => "modal"}}
+				Cancelar
+
+:css
+	div.modal-backdrop {
+		background-color: #808080 !important;
+	}
+	div.fade{
+		border-radius: 7px !important;
+	}
+:javascript
+	$(document).ready(function(){
+		$("#asignatura").validate({
+			invalidHandler: function(form, validator) {
+				notify_error("Error en la busqueda", "Por favor, compruebe que ha ingresado correctamente la información.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+				notify_notice("Enviando", "Por favor, Espere mientras la seccion es ingresada");
+			}
+		});
+		
+	});

@@ -1,0 +1,8 @@
+.alert.alert-block{style: 'border:0.5px inset #c09853;font-weight:bold;'}
+    %a.close{:href => "#", :data => {:dismiss => "alert"}}
+        ×
+    - if defined?(titulo) && !titulo.blank?
+        %h4.alert-heading 
+            %i.icon-warning-sign
+            = titulo
+    = raw mensaje

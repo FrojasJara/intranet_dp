@@ -1,0 +1,83 @@
+%div#asignaturas-dictadas	
+	:css
+		col.seccion { width: 65px; }
+		col.inscritos { width: 40px; }
+		col.aprobados { width: 40px; }
+		col.asignatura-carrera { width: 250px; }
+		col.reprobados { width: 40px; }
+		col.homologados { width: 40px; }
+		col.convalidados { width: 40px; }
+		col.promedio-aprobacion { width: 40px; }
+		col.promedio-reprobacion { width: 40px; }
+		col.desviacion-estandar { width: 40px; }
+		col.sede { width: 215px; }
+
+		ol.asignaturas {
+			list-style-type: decimal
+		}
+
+		ol.asignaturas span { display: block; line-height: 120%; }
+		ol.asignaturas span.carrera { font-style: italic; }
+		#asignaturas-dictadas table td { vertical-align: middle !important; }
+
+	.page-header
+		%h1 
+			Asignaturas dictadas en el 
+			= @periodo_seleccionado.nombre
+	= render "docentes/docentes/partials/seleccion_periodo"
+
+	= render "docentes/docentes/partials/informacion_tabulada_docente"
+	= notificaciones
+
+	- if @existen_datos		
+		%table.table.table-condensed
+			%colgroup
+				%col.seccion
+				%col.asignatura-carrera
+				%col.sede
+				%col.inscritos
+				%col.aprobados
+				%col.reprobados
+				%col.homologados
+				%col.convalidados
+				%col.promedio-aprobacion
+				%col.promedio-reprobacion
+				%col.desviacion-estandar
+				%col.opciones
+			%thead
+				%tr
+					%th.txCenter Seccion
+					%th.txLeft Asignatura/Carrera
+					%th.txLeft Sede
+					%th.txCenter INS
+					%th.txCenter APR
+					%th.txCenter REP
+					%th.txCenter HOM
+					%th.txCenter CON
+					%th.txCenter P.A.
+					%th.txCenter P.R.
+					%th.txCenter D.E.
+					%th.txLeft.not-print
+			%tbody
+				- @asignaturas_dictadas.each do |item|
+					- seccion 		= item[:seccion]
+					- asignaturas 	= item[:asignaturas]
+					%tr			
+						%td.txCenter= seccion.numero
+						%td.txLeft
+							%ol.asignaturas
+								- asignaturas.each do |item|
+									%li
+										%span.asignatura= item[:asignatura].nombre
+										%span.carrera= item[:plan_estudio].nombre
+						%td.txLeft= item[:institucion_sede]
+						%td.txCenter= seccion.alumnos_inscritos
+						%td.txCenter= seccion.alumnos_aprobados
+						%td.txCenter= seccion.alumnos_reprobados
+						%td.txCenter= seccion.alumnos_homologados
+						%td.txCenter= seccion.alumnos_convalidados
+						%td.txCenter= seccion.promedio_aprobacion
+						%td.txCenter= seccion.promedio_reprobacion
+						%td.txCenter= seccion.desviacion_estandar
+						%td.txLeft.not-print.dropdown
+							= opciones @usuario.id, item[:seccion].id

@@ -1,0 +1,9 @@
+- timeout ||= false
+.alert.alert-error{style: timeout ? 'margin-top: 20px' : ''}
+	%a.close{:href => "#", :data => {:dismiss => "alert"}}
+		×
+	%h4.alert-heading Atención
+	= raw mensaje
+- if timeout && timeout > 0
+	:javascript
+		setTimeout(function () { $(".alert-error").fadeOut("normal", function() { $(this).remove() })}, #{timeout});

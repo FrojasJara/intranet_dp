@@ -1,0 +1,33 @@
+#obtener-asignaturas-abandonadas
+
+    .page-header
+        %h1 Asignaturas abandonadas        
+    = render "alumnos/alumnos/partials/seleccion_plan"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+    - if @existen_datos
+        %table.table.table-condensed
+            %colgroup
+                %col.codigo
+                %col.asignatura
+                %col.periodo
+                %col.seccion
+                %col.f-tramite
+            %thead
+                %tr
+                    %th.txCenter Código
+                    %th.txLeft Asignatura
+                    %th.txCenter Período                     
+                    %th.txCenter Sección
+                    %th.txLeft F. trámite
+            %tbody
+                - @asignaturas_abandonadas.each do |item|                 
+                    %tr
+                        %td.txCenter= item[:asignatura].codigo
+                        %td.txLeft= item[:asignatura].nombre
+                        %td.txCenter= item[:periodo].nombre
+                        %td.txCenter= item[:seccion].numero
+                        %td.txLeft= fecha_humana item[:fecha]
+
+    - else
+        = notificaciones
+

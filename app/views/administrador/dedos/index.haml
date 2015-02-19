@@ -1,0 +1,63 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            Control de entrada
+            %span.divider / 
+        %li.active
+            %a{:href => "#"}  
+                Generar Informe
+%div.span10
+
+    = form_for :filtro, html: {class: 'form-inline'} do |f|
+        = f.text_field :fecha_inicio, value: (params[:filtro].blank? ? '' : params[:filtro][:fecha_inicio]), placeholder: 'Fecha de inicio'
+        = f.text_field :fecha_termino, value: (params[:filtro].blank? ? '' : params[:filtro][:fecha_termino]), placeholder: 'Fecha de término'
+        = f.submit 'Filtrar'
+
+    :javascript
+        $(function(){
+            $('#filtro_fecha_inicio').datepicker();
+            $('#filtro_fecha_termino').datepicker();
+            $('form.filtro').submit(function(){
+                notify_info('Generando informe, por favor espere...');
+                $('input[type=submit]').attr('disabled', true);
+            });
+
+        });
+    
+
+
+    - if not @items.blank?
+
+        = datatable_src
+
+
+        %table#example.table
+            %thead
+                %tr
+                    %th ID
+                    %th Rut
+                    %th Persona
+                    %th Fecha
+                    %th
+            %tbody
+                - @items.each do |i|
+                    %tr
+                        %td= i.id
+                        %td= i.rut
+                        %td= i.nombre
+                        %td= l i.fecha, format: :fecha
+                        %td= minutos_a_tiempo_en_palabras(i.diferencia) if not i.diferencia.blank?
+        %br
+    
+        %table.table
+            %thead
+                %tr
+                    %th Rut
+                    %th Persona
+                    %th Total estimado
+            %tbody
+                - @personas.each do |p|
+                    %tr
+                        %td= link_to p[:rut], ficha_administrador_dedos_path(p[:rut])
+                        %td= p[:nombre]
+                        %td= minutos_a_tiempo_en_palabras(p[:tiempo])

@@ -1,0 +1,35 @@
+%div.well{:style => "margin-bottom:20px"}  
+	%form.form-vertical{:id => 'frmFiltrarCarrera', :method => "post" , :action => generar_informe_alumnos_path }
+		%div.filtros
+			%label Sede
+			= select("filtro", "sede_id", Sede.all(:fields => [:id, :nombre] ).collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la Sede ::' }, {:class => 'span3'})
+		%div.filtros	
+			%label Carreras
+			= select("filtro", "plan_estudio_id", PlanEstudio.all(:fields => [:id, :nombre], :anio_inicio.gte => 2008, :order => [:nombre.asc]).collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la Carrera ::' }, {:class => 'span3'})
+		%div.filtros	
+			%label Estado Alumnos
+			= select("filtro", "estado_alumno", for_select(Alumno, :ESTADOS_ACADEMICOS,":: Seleccione el estado ::"),{},{:class => "span2"})
+			
+		%button.btn.btn-primary Filtrar 
+
+
+:javascript
+	/*Actualiza el combo de carreras segun sede*/
+	$("select[name='filtro[sede_id]']").change(function(){
+		var sede_id = $(this).val();
+		$.ajax({
+			url: "#{ajax_vicerrectoria_buscar_carreras_path}",
+			type: 'POST',
+			data: {sede_id :  sede_id},
+			success: function(data) {
+				var options = ""
+				$.each(data.carreras, function(k,v){
+					options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + "</option>"
+				});
+				$("#filtro_plan_estudio_id").html(options);
+			}
+		});
+	});
+
+:css
+	.filtros{display: inline-block; margin-bottom: 20px;}

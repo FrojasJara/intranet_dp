@@ -1,0 +1,86 @@
+.page-header
+    = breadcrumb ["Cobranzas", ["Buscar documento de venta", cobranzas_pagos_index_path], "Ver"]
+    %h1="Ver Documento de Venta #{@items.first.numero}"
+    %h2="Se han encontrado #{@items.length} documento/s de venta/s con este número"
+
+= notificaciones
+
+- @items.each_with_index do |item,index|
+    
+    = render partial: 'partials/notificaciones/important_warning', locals: {:mensaje => 'Al realizar cualquier modificación debe considerarse que el monto del documento de venta debe cuadrar con los montos de los abonos.'}
+
+    %form.informacion-tabulada
+        %fieldset
+            %legend="Información del Documento de Venta #{(index+1) if @items.length > 1}"
+            %ul
+                %li.ui-helper-clearfix
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Estado:
+                        %span= get_name DocumentoVenta, :ESTADOS, item.estado
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Tipo:
+                        %span= get_name DocumentoVenta, :TIPOS, item.tipo
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Número:
+                        %span= item.numero
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Monto:
+                        %span= dinero item.monto
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Fecha:
+                        %span= l item.fecha_emision, :format => :fecha
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Fecha Ingreso:
+                        %span= l item.created_at
+                    %div.contenedorElemento.separador{style: 'text-align:center'}
+                        %br
+                        = link_to cobranzas_pagos_edit_path(item.id), class: 'btn btn-warning' do
+                            %i.icon-edit.icon-white
+                            Modificar N° Boleta y Fecha
+                        
+                %li.ui-helper-clearfix
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Institución:
+                        %span= item.institucion_sede.institucion.nombre
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Plan Estudio:
+                        %span= item.alumno_plan_estudio.blank? ? item.carrera : item.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Rut:
+                        %span= item.alumno_plan_estudio.blank? ? item.rut : item.alumno_plan_estudio.alumno.datos_personales.rut
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Nombre:
+                        %span= item.alumno_plan_estudio.blank? ? item.nombre_completo : item.alumno_plan_estudio.alumno.datos_personales.nombre
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Ejecutivo:
+                        %span= item.ejecutivo_matriculas.datos_personales.nombre_corto
+                    - unless item.alumno_plan_estudio.blank? || item.plan_pago.blank?
+                        %div.contenedorElemento.separador{style: 'text-align:center'}
+                            %br
+                            = link_to matriculas_pagos_ver_alumno_path(item.alumno_plan_estudio.alumno.datos_personales.rut, item.plan_pago.id), class: 'btn btn-primary' do
+                                %i.icon-search.icon-white
+                                Ver Plan Pago
+                            
+    %form{action: cobranzas_pagos_update_abono_path, method: 'post'}             
+        %table.table.table-condensed
+            %thead
+                %tr
+                    %th Nº
+                    %th Estado
+                    %th Monto
+                    %th Interés
+                    %th Saldo
+            %tbody
+                - item.abonos.each_with_index do |abono, index|
+                    %tr
+                        %td.txCenter= index+1
+                        %td.txCenter= get_name Abono,:ESTADOS,abono.estado
+                        %td.txCenter
+                            %input{type: "number", name: "abonos[][monto]", class: "input-medium", value: abono.monto, min: 0}
+                        %td.txCenter
+                            %input{type: "number", name: "abonos[][interes]", class: "input-medium", value: abono.interes, min: 0}
+                        %td.txCenter
+                            %input{type: "number", name: "abonos[][saldos]", class: "input-medium", value: abono.saldo}
+                        %input{type: "hidden", name: "abonos[][id]", value: abono.id, min: 0}
+                        %input{type: "hidden", name: "numero", value: item.numero}
+        %input.btn.btn-success{type: 'submit', value: 'Guardar'}

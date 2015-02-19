@@ -1,0 +1,120 @@
+%br
+%br
+%br
+.page-header
+	%h1 NOTA ACLARATORIA
+	%h1 EXTENSIÓN PLAN DE PAGO
+.page-header
+	%h2 #{@plan_estudio.nombre.upcase}
+	%h2 #{@usuario_alumno.nombres.upcase} #{@usuario_alumno.apellidos.upcase} #{@alumno.anio_ingreso}
+%br
+%p
+	En #{raw "<span class='mayusculas'>#{@sede.nombre}</span>"} a #{raw "<span>#{l @matricula.created_at, :format => :humana2}</span>"}, Don(a) #{raw "<span class='mayusculas'>#{@usuario_alumno.nombres}</span>"} #{raw "<span class='mayusculas'>#{@usuario_alumno.apellidos}</span>"} R.U.T. #{raw "<span>#{@usuario_alumno.rut}</span>"}, domiciliado en #{raw "<span class='mayusculas'>#{@usuario_alumno.domicilio_completo}</span>"}, #{raw "<span class='mayusculas'>#{@usuario_alumno.comuna.nombre}</span>"} provincia de #{raw "<span class='mayusculas'>#{@usuario_alumno.comuna.provincia.nombre}</span>"} teléfono #{raw "<span class='mayusculas'>#{@usuario_alumno.telefono_fijo_completo}</span>"}, teléfono #{raw "<span class='mayusculas'>#{@usuario_alumno.telefono_movil}</span>"}.
+%br
+%p
+	En el período académico #{raw "<span '>#{@periodo.nombre}</span>"} se extiende plan de pago para que alumno curse las asignaturas de acuerdo al pase de matricula adjunto. Extensión válida por el semestre en curso.
+%br
+%p
+	Se fijan los siguientes valores:
+%br
+%div.valores
+	%table.table.table-condensed.estrecha
+		%caption Valores totales
+		%thead
+			%tr
+				%th.txLeft Concepto
+				%th.txCenter Año
+				%th.txCenter Valor
+		%tbody
+			%tr
+				%td.txLeft Matrícula
+				%td.txCenter= @periodo.anio
+				%td.txRight= dinero @plan.matricula
+			%tr
+				%td.txLeft Arancel
+				%td.txCenter= @periodo.anio
+				%td.txRight= dinero @plan.arancel
+
+			- if @plan.descuento_aplicado > 0
+				%tr
+					%td.txLeft= @plan.nombre_descuento
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.descuento_aplicado
+			- if @plan.monto_reconocido > 0	
+				%tr
+					%td.txLeft Monto reconocido
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.monto_reconocido
+			- if @plan.normativa > 0	
+				%tr
+					%td.txLeft Normativa
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.normativa
+			- if @plan.repactacion > 0	
+				%tr
+					%td.txLeft Repactación
+					%td.txCenter= @periodo.anio
+					%td.txRight= dinero @plan.repactacion
+			%tr
+				%td.txLeft Arancel total
+				%td.txCenter= @periodo.anio
+				%td.txRight= dinero @plan.arancel_total
+%br
+%p
+	Que se pagarán en: #{raw "<span '>#{@pagare.cuotas_arancel}</span>"} cuotas establecidas en el Pagaré Nº: #{raw "<span '>#{@pagare.numero}</span>"} anexo a este contrato.
+%br
+- pagares = @detalle_plan[:pagares]
+
+- if not pagares.empty?
+	- pagares.each do |item|
+		- pagare = item[:pagare]
+		- cuotas = item[:cuotas]
+		%table.table.table-condensed.estrecha.montos-comprometidos.pagare
+			%caption Cuadro Explicativo del Pagare
+			%thead
+				%tr
+					%th.txCenter N. cuota
+					%th Valor
+					%th Vencimiento
+			%tbody
+				- cuotas.each do |item|
+					- pagos = item[:pagos]
+					- total = item[:total]
+					- cantidad_pagos = pagos.size
+					- pagos.each_with_index do |pago, i|
+						- borde_inferior = (i == cantidad_pagos - 1) ? "1pt solid gray !important" : "none"
+						%tr{:style => "border-bottom: #{borde_inferior};"}
+							%td.txCenter= pago.numero_cuota
+							%td.txRight= dinero pago.monto
+							%td.txLeft= fecha_humana2 pago.fecha_vencimiento
+%div.Separador
+.firmas
+	%span.alumno Vº Bº
+
+= render "matriculas/planes/partials/css_contrato"
+
+:css
+	h1{
+		padding: 0;
+		margin: 0;
+		border: 0;
+	}
+
+	h2 {
+		text-align: center;
+		font-size: 15px !important;
+		line-height: normal;
+		margin-bottom: 5px;
+	}
+
+	.firmas > span { 
+		padding: 5px 10%; border-top: 1px solid black;
+	}
+	.firmas .alumno {
+		margin-left:38%;
+	}
+	
+	.Separador{
+		width:100%;
+		height:250px;
+	}

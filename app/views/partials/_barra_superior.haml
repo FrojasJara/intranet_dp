@@ -1,0 +1,64 @@
+.navbar.navbar-fixed-top
+    .navbar-inner
+        .container-fluid
+            %a{ :class => "btn btn-navbar",
+                :data => {:toogle => "collpse", :target => ".nav-collapse"}}
+                %span.icon-bar
+                %span.icon-bar
+                %span.icon-bar
+            %a.brand{:href => "#"}
+                %img{:src => "/assets/dportales.png"}
+                %span
+                    Organización Educacional
+                %span
+                    DIEGO PORTALES
+            .nav-collapse.ui-helper-clearfix
+                %ul.nav
+                    - if current_role_can? :alumno
+                        %li{class: (is_alumno? ? 'active' : '')}
+                            = link_to 'Alumno', alumno_path
+
+                    - if current_role_can? :academico
+                        %li{class: (is_academico? ? 'active' : '')}
+                            = link_to 'Académico', academico_path                    
+
+                    - if current_role_can? :mensajero
+                        %li{:class => (is_mensajero? ? 'active' : '')}
+                            = link_to 'Mensajero', mensajero_contactos_path
+                    - if current_role_can? :administracion
+                        %li{:class => (is_administracion? ? 'active' : '')}
+                            = link_to 'Administración', '#'
+                    - if current_role_can? :administrador
+                        %li{class: is_administrador? ? 'active' : ''}
+                            = link_to 'Administradores', administrador_path
+
+                - unless periodo_en_curso.blank?
+                    %p.periodo
+                        %span.estado En curso
+                        %span.nombre= "#{periodo_en_curso[:nombre]}"
+
+                - unless periodo_proximo.blank?
+                    %p.periodo
+                        %span.estado Próximo
+                        %span.nombre= "#{periodo_proximo[:nombre]}"
+
+
+                %ul.nav.pills.pull-right
+
+                    %li#menu1.dropdown
+                        %a.dropdown-toggle{ :data => {:togle => "dropdown"}, 
+                                            :href => "#menu1"}
+                            %i.icon-user.icon-white
+                            = current_user_object.nombre_corto unless current_user.nil?
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => "#modal_cambiar_clave", :data => {:toggle => "modal"}}
+                                    %i.icon-cog
+                                    Cambiar Contraseña                                    
+                            %li.divider
+                            %li
+                                %a{:href => logout_usuarios_path}
+                                    %i.icon-off
+                                    Salir                                   
+                    

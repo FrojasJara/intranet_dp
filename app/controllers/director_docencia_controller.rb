@@ -1,0 +1,6 @@
+class VicerrectoriaController < ApplicationController
+
+
+
+
+end

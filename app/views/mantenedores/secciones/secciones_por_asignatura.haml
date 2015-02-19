@@ -1,0 +1,33 @@
+.sectionHeader
+    %h1 Secciones
+%table.table
+    %thead
+        %tr
+            %th ID
+            %th Cupos
+            %th Numero
+            %th Estado
+            %th Asignatura
+            %th Periodo
+            %th Docente
+            %th Electivo Dictado
+            %th Fusiones
+            %th Acciones
+    %tbody
+        - @items.each do |i|
+            %tr
+                %td= i.id
+                %td= i.cupos
+                %td= i.numero
+                %td= get_name Seccion, :ESTADOS, i.estado 
+                %td= i.asignatura.nombre
+                %td= i.periodo.nombre
+                %td= i.docente.datos_personales.nombre
+                %td= (not i.electivo_dictado.nil? )  ?  i.electivo_dictado.electivo.nombre.to_s : "No electivo"  
+                %td= (not i.seccion_padre.nil? )  ?  i.seccion_padre.nombre.to_s : "No fusion" 
+                %td
+                    %i.icon-plus
+                    = link_to "Alumnos", agregar_alumnos_seccion_path(i.id)
+
+                -#%td
+                    = link_to 'Editar', edit_mantenedores_seccion_path(i), :class => 'btn btn-info'

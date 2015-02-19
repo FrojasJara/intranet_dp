@@ -1,0 +1,115 @@
+.sectionHeader
+	%h1  Notas Sección
+
+%div.well
+	= render :partial => "vicerrectoria/gestion_academica/partials/filtro_seccion", :locals => {:url_metodo => control_notas_seccion_path, :texto_boton => "Ver"}
+
+= notificaciones
+
+- unless  !@alumnos.blank?
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	:css 
+		.select-tabla{margin-bottom:4px !important;}
+	%div.informe-acta-notas
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Sede:
+							%span= @seccion.institucion_sede.sede.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Direccion:
+							%span= @seccion.institucion_sede.sede.direccion
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Asignatura:
+							%span= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura.codigo
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre Asignatura:
+							%span= @asignatura.semestre
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta cantidad de alumnos:
+							%span= @alumnos.size
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Carrera:
+							%span= @asignatura.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Rut Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.rut
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+	%form#registrar_notas{action: coordinador_carrera_registrar_notas_seccion_path, method: "post"}
+		%input{type: "hidden", name: "seccion_id", value: @seccion.id}
+
+		%table.table.table-striped#alumnos
+			%thead
+				%tr
+					%th.TxtLft Rut
+					%th.TxtLft Nombre
+					- @seccion.planificacion_calificaciones.each do |p|
+						%th.TxtLft
+							= p.fecha_comprometida
+							%br
+							= p.ponderacion_porcentual
+					%th.BgNP.TxtLft N.P
+					%th.TxtLft.BgNE N.E
+					%th.TxtLft.BgNREP N.REP
+					%th.TxtLft.BgNF N.F
+			%tbody
+				- @alumnos.each do |i|
+					%tr
+						%td= i.alumno.datos_personales.rut
+						%td= "#{i.alumno.datos_personales.apellidos} #{i.alumno.datos_personales.nombres}"
+						- @seccion.planificacion_calificaciones.each do |c|
+							- nota =  CalificacionParcial::nota_alumno_planificada(i.id, c.id)
+							
+							%td
+								- if nota.blank?
+									= "-" 
+								- else
+									= nota.calificacion
+
+						%td.BgNP
+							= i.np_seccion 
+						%td.BgNE
+							- if i.nota_examen.blank?
+								= "-"
+							- else 
+								= i.nota_examen
+						%td.BgNREP
+							- if i.nota_examen_repeticion.blank?
+								= "-"
+							- else
+								- if i.nota_examen_repeticion == 0.0
+									= "NCR"
+								- else
+									= i.nota_examen_repeticion
+						%td.BgNF
+							- unless i.nota_final.nil?
+								- if i.nota_final == 0
+									NCR
+								- else
+									= i.nota_final
+
+:css
+	.bg-success{background-color: #A9F5A9 !important;}
+= datatable_src
+= datatable("alumnos")

@@ -1,0 +1,58 @@
+%div.well
+	%h4 Seccion hija
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => fusion_seccion_path, :texto_boton => "Fusionar Secciones", :filtro => @filtro}
+	%br
+	%br
+	%h4 Seccion Maestra
+	%table.table.table-striped	
+		%thead.table
+			%tr
+				%th.TxtLft ID
+				%th.TxtLft Profesor
+				%th.TxtLft Periodo
+				%th.TxtLft carrera
+				%th.TxtLft Jornada Nº
+				%th.TxtLft Asignatura
+		%tbody
+			%tr
+				%td
+					= @items.id
+				%td
+					= @items.docente.blank? ? "No posee información" : @items.docente.datos_personales.nombre 
+				%td 
+					= @items.periodo.nombre
+				%td
+					= @items.asignatura_base.plan_estudio.nombre 
+				%td
+					= @items.nombre
+				%td
+					= @items.asignatura_base.nombre
+= notificaciones
+- unless @fusiones.blank?
+	%h4 Secciones fusionadas
+	%table.table.table-striped	
+		%thead.table
+			%tr
+				%th.TxtLft ID
+				%th.TxtLft Profesor
+				%th.TxtLft Periodo
+				%th.TxtLft carrera
+				%th.TxtLft Jornada Nº
+				%th.TxtLft Asignatura
+		%tbody
+			- @fusiones.each do |i|
+				%tr
+					%td
+						= i.id
+					%td
+						= i.docente.blank? ? "No posee información" : i.docente.datos_personales.nombre 
+					%td 
+						= i.periodo.nombre
+					%td
+						= i.asignatura_base.plan_estudio.nombre 
+					%td
+						= i.nombre
+					%td
+						= i.asignatura_base.nombre
+:css
+	.table thead th{color:#333 !important;}

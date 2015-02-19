@@ -1,0 +1,57 @@
+.page-header
+    = breadcrumb ["Matrículas", ["Buscar documento de venta", matriculas_documento_venta_path], ["Ver Nº#{@item.numero}", matriculas_documento_venta_show_path(@item.id)], "Anular y sustituir"]
+    %h1 Anular y sustituir Documento de Venta
+
+= notificaciones
+
+= simple_form_for :documento_venta do |f|
+    = f.hidden_field :numero_original, :value => @item.numero
+    = f.input :numero, input_value(@item.numero, 'Número de documento de venta')
+    = f.hidden_field :fecha_emision_original, :value => l(@item.fecha_emision.to_date)
+    = f.input :fecha_emision, input_value(l(@item.fecha_emision.to_date), 'Fecha de emisión')
+    = f.input :monto, input_readonly(@item.monto)
+
+    %button.btn.btn-warning
+        %i.icon-pencil.icon-white
+        Anular y Sustituir
+
+
+
+
+
+:javascript
+    $(function(){
+        $("#documento_venta_fecha_emision").datepicker();
+
+        $("form.documento_venta").submit(function(){
+            numero_igual = ( $("#documento_venta_numero_original").val() == $("#documento_venta_numero").val() );
+            fecha_igual = ( $("#documento_venta_fecha_emision_original").val() == $("#documento_venta_fecha_emision").val() );
+
+            console.log("Numero igual: " + numero_igual + " Fecha igual: " + fecha_igual);
+
+            if( !numero_igual && $("#documento_venta_numero").val().length == 0  )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que el nuevo número ingresado esté correcto");
+                return false;
+            }
+            if( !fecha_igual && $("#documento_venta_fecha_emision").val().length == 0 )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que la nueva fecha ingresado esté correcta");
+                return false;
+            }
+
+            if( numero_igual && fecha_igual )
+            {
+                notify_error("Datos incorrectos", "Por favor realice algún cambio antes de enviar");
+                return false;
+            }
+
+
+
+            return confirm("¿Está seguro de realizar el cambio?");
+        });
+    })
+
+
+
+

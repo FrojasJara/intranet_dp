@@ -1,0 +1,47 @@
+.page-header
+    = breadcrumb ["Cobranzas", "Matrículas", "Anulación"]
+    %h1 Buscar alumno
+
+= notificaciones
+
+= render :partial => 'partials/buscar_con_rut'
+
+- unless @us_alumno.blank?
+    %br
+    = render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+    = render partial: 'partials/notificaciones/info', locals: {:mensaje => 'Recuerde que este es un proceso irrevesible que cambiará la información financiera y académica del alumno'}
+    = render partial: 'partials/notificaciones/error', locals: {:mensaje => 'No podrá anular esta matrícula ya que el alumno no es de su sede'} unless @usuario.sede.eql?(@us_alumno.sede)
+
+    %table.table
+        %thead
+            %tr
+                %th Nº
+                %th Estado
+                %th Planes de pago
+                %th Período
+                %th Fecha creación
+                %th Fecha Anulacion
+                %th Monto matrícula
+                %th Monto arancel
+                %th
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td.txCenter
+                        = link_to matriculas_ver_path(i.id), class: 'btn' do
+                            %i.icon-search
+                            = i.id
+                    %td.txCenter= get_name MatriculaPlan, :ESTADOS, i.estado 
+                    %td.txCenter= i.planes_pago.length
+                    %td.txCenter= i.periodo.nombre
+                    %td.txCenter= l i.created_at
+                    %td.txCenter= l(i.fecha_anulacion) unless i.fecha_anulacion.blank?
+                    %td.txCenter= number_to_currency( i.planes_pago.sum(:matricula) ) unless i.planes_pago.blank?
+                    %td.txCenter= number_to_currency( i.planes_pago.sum(:arancel) ) unless i.planes_pago.blank?
+                    %td.txCenter
+                        - if i.estado != MatriculaPlan::ANULADA && @usuario.sede == @us_alumno.sede
+                            = link_to cobranzas_matriculas_anular_path(i.id), class: 'btn btn-danger', method: :post, confirm: '¿Está seguro de eliminar este registro?' do
+                                %i.icon-trash.icon-white
+                                Anular
+

@@ -1,0 +1,169 @@
+:css
+    .control-group{
+        float: left;
+        margin-right: 15px;
+    }
+    #repactacion_situacion_observación { 
+        width: 100% !important; 
+    }
+
+.page-header
+    - unless @us_alumno.blank?
+        - if params[:matricula_id].blank?
+            = breadcrumb [["Repactación Deuda", cobranzas_pagos_repactacion_path],"Alumno"]
+        - else
+            = breadcrumb [["Repactación Deuda", cobranzas_pagos_repactacion_path],["Alumno", cobranzas_pagos_repactacion_path(@us_alumno.rut)],"Plan de Pago"]
+
+    %h1 Repactación Deuda
+
+= notificaciones
+
+= render :partial => 'partials/buscar_con_rut'
+
+- unless @us_alumno.blank?
+    %br
+    = render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+    = render partial: 'partials/notificaciones/info', locals: {:mensaje => 'Recuerde que este es un proceso irrevesible que cambiará la información financiera y académica del alumno<br />Este proceso no modifica el contrato y pagaré ya generado, son modificaciones post-matricula'}
+    = render partial: 'partials/notificaciones/error', locals: {:mensaje => 'No podrá repactar este plan ya que el alumno no es de su sede'} unless @usuario.sede.eql?(@us_alumno.sede)
+
+    %br
+
+    - if params[:matricula_id].blank?
+        %table.table.table-condensed
+            %thead
+                %tr
+                    %th ID
+                    %th Estado
+                    %th Periodo
+                    %th Fecha
+                    %th Ejecutivo
+                    %th
+            %tbody
+                - @datos.each do |item|
+                    - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+                    %tr
+                        %td.txCenter= mat.id
+                        %td.txCenter= get_name MatriculaPlan, :ESTADOS, mat.estado
+                        %td.txCenter= periodo.nombre
+                        %td.txCenter= l mat.created_at
+                        %td.txCenter= ejecutivo.nombre_corto
+                        %td.txCenter
+                            - if @usuario.sede.eql?(@us_alumno.sede)
+                                %a.btn.btn-primary{:href => "#{params[:rut]}/#{mat.id}"} 
+                                    %i.icon-white.icon-pencil
+                                    Repactar Cuotas
+    - else
+        - item = @datos.first
+        - mat, planes, periodo, ejecutivo = item[:matricula], item[:planes], item[:periodo], item[:ejecutivo]
+
+        %h2="Repactación deuda Matrícula #{periodo.nombre} #{get_name(MatriculaPlan,:ESTADOS,mat.estado)}"
+        .clearfix
+        %br
+        - planes.each do |pl|
+            - p = pl[:plan]
+            - situaciones = pl[:plan].situaciones
+            - suma = 0
+
+            = simple_form_for :repactacion, html: {class: 'form-inline formularios'} do |f|
+
+                = f.input :plan_pago, as: :hidden, input_html: {value: p.id}
+                
+                .page-header
+                    %h3 Situaciones
+                %table.table.table-condensed.table-bordered
+                    %thead
+                        %tr
+                            %th.span1 Fecha
+                            %th Tipo
+                            %th Nº Resolución
+                            %th Observación
+                            %th Sit. Adm./Acad.
+                            %th Ejecutivo
+                    %tbody
+                        - situaciones.each do |situacion|
+                            %tr
+                                %td.span2= l situacion.fecha
+                                %td.span2= get_name Situacion, :TIPOS, situacion.tipo, 'Sin definir'
+                                %td.span2= situacion.resolucion
+                                %td= situacion.observacion
+                                %td.span2
+                                    = value situacion.tipo_situacion, :nombre
+                                    = Alumno::ESTADOS_ACADEMICOS[situacion.estado-1] unless situacion.estado.blank?
+                                %td.span2= value situacion.ejecutivo_matriculas, :nombre
+
+                - unless p.pagares.blank?
+                    - pag = p.pagares(:estado.not => Pagare::ANULADO).last
+                    %h3="Plan Pago #{get_name(MatriculaPlan,:TIPOS,p.tipo)} #{p.periodo.nombre} #{get_name(PlanPago,:ESTADOS,p.estado)} (Pagaré #{pag.numero})"
+                - else 
+                    %h3="Plan Pago #{get_name(MatriculaPlan,:TIPOS,p.tipo)} #{p.periodo.nombre} #{get_name(PlanPago,:ESTADOS,p.estado)}"
+                %br
+
+                %table.table.table-condensed
+                    %thead
+                        %tr
+                            %th Nº Cuota
+                            %th Estado
+                            %th Tipo
+                            %th Fecha Vencimiento
+                            %th Centro costos
+                            %th Monto
+                            %th Saldo
+                            %th
+                    %tbody
+                    = f.simple_fields_for :pagos_comprometidos do |pcf|
+                        - pl[:pagos_comprometidos].each do |pc|
+                            %tr
+                                %td.txCenter= pc[:numero_cuota]
+                                %td.txCenter= get_name(PagoComprometido, :ESTADOS, pc.estado)
+                                %td.txCenter= get_name(PagoComprometido, :TIPOS_CUOTAS, pc.tipo_cuota)
+                                %td.txCenter= l(pc.fecha_vencimiento) unless pc.nil? || pc.fecha_vencimiento.nil?
+                                %td.txCenter= get_name(PagoComprometido, :CENTROS_COSTOS, pc.centro_costo)
+                                %td.txCenter= dinero pc.monto
+                                %td.txCenter= dinero pc.saldo
+                                %td.txCenter
+                                    - if pc.estado.eql?(PagoComprometido::REPACTADO)
+                                        - suma += pc.monto
+                                    - elsif pc.monto.eql?(pc.saldo) && pc.estado != PagoComprometido::ANULADO && suma.eql?(0)
+                                        = pcf.input "#{pc.id}", as: :boolean,label: false,input_html: {class: 'check'}
+                .well
+                    - if suma.eql?(0)
+                        .page-header
+                            %h3 Agregar detalle situación administrativa
+                        .inputs
+                            = f.simple_fields_for :situacion do |sf|
+                                = sf.input :número_resolución, input_html: {class: :required}
+                                = sf.input :observación, as: :text, input_html: {rows: 10,class: :required}
+                        .clearfix
+
+                        = f.submit class: 'btn btn-primary',value: 'Repactar cuotas'
+                    - else
+                        = link_to cobranzas_pagos_certificado_repactacion_path(p.id,suma), disable_with: 'Imprimiendo...', method: :post, :class => 'btn btn-success' do
+                            %i.icon-print.icon-white
+                            Certificado Repactación
+    
+:javascript
+    $(function(){
+        $('input').removeClass('error');
+
+        $(".formularios").each( function(){
+            var form = $(this);
+            
+            form.validate({
+                invalidHandler: function(form, validator) {
+                    notify_error("Repactación de Cuotas", "Por favor, compruebe que ha llenado todos los campos.");
+                },
+                submitHandler: function(form) {
+                    if($(form).find('.check:checked').length > 0 && $(form).find('.check:checked').length <= 3){
+                        if( confirm("¿Está seguro que desea repactar la deuda del alumno?") ) {
+                            notify_info("Espere un momento", "Por favor, Espere mientras se repacta la deuda del alumno Gracias");
+                            form.submit();
+                        }
+                    }
+                    else{
+                        notify_error("Repactación de Cuotas", "Por favor, compruebe que ha seleccionado entre 1 y 3 cuotas para repactar.");
+                    }
+                }
+            });
+        });
+    });

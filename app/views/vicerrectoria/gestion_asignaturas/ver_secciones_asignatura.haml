@@ -1,0 +1,38 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Abrir Secciones
+			%span.divider
+		%li #{@asignatura.nombre}
+= notificaciones
+#planes-estudios
+	%a.btn.btn-primary{:href => "#nueva_asignatura", :data => {:toggle => "modal"}}
+		%i.icon-white.icon-edit
+		Abrir sección
+	= render partial: "vicerrectoria/partials/modal_abrir_seccion"
+	%table.table.table-striped.table-bordered#secciones
+		%colgroup  
+
+		%thead
+			%tr
+				%th Codigo
+				%th Nro. Seccion
+				%th Inst. Sede
+				%th Jornada
+				%th Cupos
+				%th Periodo
+
+		%tbody
+			- @secciones_dictadas.each do |i|
+				%tr
+					%td= i.id
+					%td= i.seccion.numero
+					%td= i.seccion.institucion_sede.nombre_corto
+					%td= get_name Seccion,"JORNADAS", i.seccion.jornada
+					%td= i.seccion.cupos
+					%td= i.seccion.periodo.nombre
+
+= datatable_src
+= datatable("secciones") 
+ 

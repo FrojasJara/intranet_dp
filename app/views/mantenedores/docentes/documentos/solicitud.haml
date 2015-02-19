@@ -1,0 +1,99 @@
+%h1 SOLICITUD
+
+%p{align: "justify"}
+    Yo,
+    = "#{@usuario.nombre_2}," 
+    solicito al 
+    - if @institucion_sede.sede.id == Sede::CONCEPCION 
+        señor Rector 
+        Don LUIS BELTRAN TRONCOSO,
+    - else
+        = @vicerrector.sexo == Usuario::FEMENINO ? 'señora Directora ' : 'señor Director'
+        = "#{@vicerrector.nombre_2}, "
+    del 
+    = @institucion.razon_social
+    de 
+    = "#{@sede.ciudad}, " 
+    me permita realizar horas de clases en la Institución, que implique no tener dependencia y poder realizarlas en un horario de mi conveniencia, ello con el objeto de que si no puedo cumplirlas, los alumnos no se perjudiquen y me reemplacen por otro en forma inmediata, lo cual significa acordar una gestión civil, solo con derecho al pago de honorarios, no teniendo en consecuencia, derecho a los beneficios laborales del D.F.L. Nº 1 del 2002 y sus modificaciones posteriores del Ministerio del Trabajo y Previsión Social, ya que actualmente me desempeño con Contrato de Trabajo en 
+    = "#{@contrato.empresa_trabaja}, " 
+    teniendo con ello cubierto mi Sistema Previsional y de Salud.  Emitiré la correspondiente Boleta de Honorarios percibidos, la cual implica no tener subordinación laboral, sino que una entrega profesional basada en mis conocimientos y experiencia.
+%br
+%br
+%br
+%br
+%br
+
+.firmas
+    .firma_box
+        %span FIRMA PROFESIONAL
+        %span 
+            = @usuario.nombre
+        %span
+            RUN Nº
+            = @usuario.rut
+.clearfix
+
+%br
+%br
+%br
+
+
+%p
+    En 
+    = "#{@sede.ciudad},"  
+    a
+    = l(@contrato.created_at, format: :humana2)
+
+.footer
+    %p Resolución:
+    %p Vistos:
+    %br
+    
+    .bloque
+    .bloque
+    .bloque
+    .bloque
+%br
+%br
+%br
+%br
+
+
+.firmas
+    .firma_box
+        - if @institucion_sede.sede.id == Sede::CONCEPCION 
+            %span Luis Beltrán Troncoso
+            %span RUT Nº 8.283.503-2
+        - else
+            %span= "#{@vicerrector.nombre_2}"
+            %span= "RUN Nº #{@vicerrector.rut}"
+        %span
+            = @institucion.razon_social
+            = @sede.ciudad
+        %span
+            RUT Nº
+            = @institucion.rut
+
+:css
+    html {
+        font-family: Arial, "Lucida Grande", sans-serif !important; 
+    }
+    h1 { font-size: 16px; }
+    p { font-size: 14px; line-height: 14px; margin-bottom: 20px; }
+    .footer { padding-top: 10px; }    
+    .footer p {
+        line-height: 10px;
+    }
+    .bloque { border-top: 1px solid #000; margin-bottom: 20px;}
+
+    .firmas { position: ;width: 100%; margin-top: 50px; }
+    .firma_box { width: 65%; margin-right: 5%; border-top: 1px solid #000; text-align: center; float: right;}
+    .firmas span {
+        display: block;
+        font-weight: bold;
+        padding-top: 10px;
+        line-height: 0px;
+    }
+    .mtop { margin-top: 20px; }
+
+

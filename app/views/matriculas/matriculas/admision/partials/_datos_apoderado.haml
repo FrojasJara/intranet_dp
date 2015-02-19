@@ -1,0 +1,252 @@
+#datos-personales-apoderado
+	.page-header
+		%h2 Identificación del apoderado
+	.controls
+		%label.checkbox.inline
+			%input{:type => "checkbox", :name => "es_alumno"} El mismo alumno es el apoderado
+	%br
+	.page-header
+		%h3{style: 'color:#696969;'} Datos del apoderado
+	.control-group
+		%label.control-label (*) Rut
+		.controls
+			%input.required.s1.s4.input-xlarge.required.rut{:type => "text", :name => "usuario_apoderado[rut]", :maxlength => 10}
+			%input.n1.rut-apoderado{:type => "hidden", :name => "rut_apoderado"}
+	.control-group
+		.controls
+			%button.s1.s4.btn.buscar-apoderado{:type => "submit"}
+				%i.icon-search
+				Buscar persona
+			%button.s1.s4.btn.btn-info.cambiar-apoderado{:type => "submit", :style => "display: none;"}
+				%i.icon-white.icon-refresh
+				Cambiar apoderado
+	%br
+	.control-group
+		%label.control-label (*) Primer nombre
+		.controls
+			%input.required.s1.s2.input-large{:type => "text", :name => "usuario_apoderado[primer_nombre]", :maxlength => 25, :disabled => "disabled",:style=> "text-transform: uppercase"}
+	.control-group
+		%label.control-label Segundo nombre
+		.controls
+			%input.s1.s2.input-large{:type => "text", :name => "usuario_apoderado[segundo_nombre]", :maxlength => 25, :disabled => "disabled",:style=> "text-transform: uppercase"}
+	.control-group
+		%label.control-label (*) Apellido paterno
+		.controls
+			%input.required.s1.s2.input-large{:type => "text", :name => "usuario_apoderado[apellido_paterno]", :maxlength => 25, :disabled => "disabled",:style=> "text-transform: uppercase"}
+	.control-group
+		%label.control-label (*) Apellido materno
+		.controls
+			%input.required.s1.s2.input-large{:type => "text", :name => "usuario_apoderado[apellido_materno]", :maxlength => 25, :disabled => "disabled",:style=> "text-transform: uppercase"}
+	%br
+	.control-group
+		%label.control-label (*) Domicilio
+		.controls
+			%input.required.s1.s2.input-xlarge.ic{:type => "text", :name => "usuario_apoderado[domicilio]", :maxlength => 255, :disabled => "disabled",:style=> "text-transform: uppercase"}	
+	.control-group
+		%label.control-label Villa/Población
+		.controls
+			%input.s1.s2.input-xlarge.ic{:type => "text", :name => "usuario_apoderado[villa_poblacion]", :maxlength => 255, :disabled => "disabled",:style=> "text-transform: uppercase"}
+	.control-group
+		%label.control-label Sector
+		.controls
+			%input.input-xlarge.s1.s2.ic{:type => "text", :name => "usuario_apoderado[sector]", :maxlength => 255, :disabled => "disabled",:style=> "text-transform: uppercase"}
+
+	%br
+	.control-group
+		%label.control-label Teléfono fijo
+		.controls
+			%select.s1.s2.ic{:type => "text", :style => "width: 40px; padding: 3px;", :name => "usuario_apoderado[codigo_area_telefono]", :disabled => "disabled"}
+				%option{:value => ""} -
+				- @codigos_fijos.each do |codigo|
+					%option{:value => "#{codigo}"}= codigo
+			%input.s1.s2.input-small.ic{:type => "text", :name => "usuario_apoderado[telefono_fijo]", :maxlength => 8, :disabled => "disabled"}
+	.control-group
+		%label.control-label Teléfono móvil
+		.controls
+			%input.s1.s2.input-small.ic{:type => "text", :name => "usuario_apoderado[telefono_movil]", :maxlength => 8, :disabled => "disabled"}	
+	.control-group
+		%label.control-label Email
+		.controls.input-prepend{:style => "width: 260px;"}
+			%span.add-on @
+			%input.s1.s2.sin_enie.email.input-large.ic{:type => "text", :name => "usuario_apoderado[email]", :maxlength => 32, :disabled => "disabled"}
+	%br
+	%legend Procedencia
+	.control-group
+		%label.control-label (*) País de origen
+		.controls
+			%select.s1.s2.required.span2.ic{:name => "usuario_apoderado[pais_id]", :disabled => "disabled"}
+				%option{:value => ""} :: Seleccione un país ::
+				- @paises.each do |pais|
+					%option{:value => "#{pais.id}"}= pais.nombre
+	.control-group
+		%label.control-label (*) Región
+		.controls
+			%select.s1.s2.required.span2.ic{:name => "usuario_apoderado[region_id]", :disabled => "disabled"}
+				%option{:value => ""} :: Seleccione una región ::
+				- @regiones.each do |region|
+					%option{:value => "#{region.id}"}= region.nombre
+	.control-group
+		%label.control-label (*) Comuna
+		.controls
+			%select.s1.s2.s3.required.span2{:disabled => "disabled", :name => "usuario_apoderado[comuna_id]"}
+				%option{:value => ""} :: Seleccione una comuna ::
+	
+	%legend Documentos presentados
+	.controls
+		- @documentos_apoderado.each do |documento|
+			%label.radio.inline
+				%input.s5.required{:type => "radio", 
+					:name => "apoderado[documentos_presentados]", 
+					:value => "#{Apoderado.const_get(documento)}",
+					:disabled => "disabled"}= get_name Apoderado, "DOCUMENTOS", Apoderado.const_get(documento)
+	%input.integridad-apoderado.required.n1{:type => "hidden", :name => "integridad-apoderado"}
+
+:javascript
+	$(document).ready(function(){
+		var $contenedor_apoderado = $("#datos-personales-apoderado");
+		var $rut = $("input[name='usuario_apoderado[rut]']");
+		var $primer_nombre = $("input[name='usuario_apoderado[primer_nombre]']");
+
+		/*	| Rut, primer nombre, segundo nombre, apellido paterno, apellido materno, domicilio, villa poblacion, codigo area telefonica,
+		*	telefono fijo, telefono movil, email |
+		*	| region, comuna, pais |
+		*	| buscar apoderado, cambiar apoderado |
+		*/
+		var $s1 = $contenedor_apoderado.find(":input.s1");
+
+		/*	| Primer nombre, segundo nombre, apellido paterno, apellido materno, domicilio, villa poblacion, codigo area telefonica,
+		*	telefono fijo, telefono movil, email |
+		*	| region, comuna, pais |
+		*/
+		var $s2 = $contenedor_apoderado.find(":input.s2");
+
+		/*	| comuna |
+		*/
+		var $s3 = $contenedor_apoderado.find(":input.s3");
+
+		/*	| Rut |
+		*	| buscar apoderado, cambiar apoderado |
+		*/
+		var $s4 = $contenedor_apoderado.find(":input.s4");
+
+		/*	| documentos del apoderado |
+		*/
+		var $s5 = $contenedor_apoderado.find(":input.s5");
+
+		/* | Datos de contacto |
+		 * | Domicilio, Villa/poblacion, Telefono fijo, Telefono movil, email |
+		 */
+		var $ic = $contenedor_apoderado.find(":input.ic");
+
+		var $rut_apoderado = $contenedor_apoderado.find("input.rut-apoderado");
+		var $boton_buscar_apoderado = $contenedor_apoderado.find("button.buscar-apoderado");
+		var $boton_cambiar_apoderado = $contenedor_apoderado.find("button.cambiar-apoderado");
+
+		$("select[name='usuario_apoderado[pais_id]']").val(1);
+		$("select[name='usuario_apoderado[region_id]']").change(function() {
+			var valor = $(this).val();
+			var $comunas = $("select[name='usuario_apoderado[comuna_id]']");
+			if (valor) {
+				$.getJSON(
+					"#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+					function(data) {
+						var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+						$(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+						$comunas.html(nuevos).removeAttr("disabled");
+					}
+				)
+			} else {
+				$comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", "disabled");
+			}
+		})
+
+		$("input[name='es_alumno']").change(function() {
+			$s5.attr("disabled", ! this.checked);	
+			if( ! this.checked ) {
+				$rut.removeAttr("readonly").focus();	
+				$s4.removeAttr("disabled");
+				formulario_no_integro();		
+			} else {
+				$s1.attr("disabled", "disabled").val("");
+				$("input[name='apoderado[usuario_id]']").remove();
+				$rut_apoderado.val("");
+				formulario_integro();
+				$boton_buscar_apoderado.show();
+				$boton_cambiar_apoderado.hide();
+			}
+		})
+
+		$boton_buscar_apoderado.click(function(e) {
+			e.preventDefault();
+
+			var valor = $rut.val();
+			if( valor && rut_valido(valor) ) {
+				alertify.success("Por favor, aguarda un momento mientras realizamos la búsqueda ...");
+				$.getJSON(
+					"#{ajax_apoderado_obtener_path 1}".replace("1", valor),
+					function(data) {
+						notify_close();
+						// Apoderado ya existe en el sistema
+						if( data.data ) {
+							var datos = data.data;
+
+							$("input[name='usuario_apoderado[primer_nombre]']").val(datos.primer_nombre);
+							$("input[name='usuario_apoderado[segundo_nombre]']").val(datos.segundo_nombre);
+							$("input[name='usuario_apoderado[apellido_paterno]']").val(datos.apellido_paterno);
+							$("input[name='usuario_apoderado[apellido_materno]']").val(datos.apellido_materno);
+							$("input[name='usuario_apoderado[domicilio]']").val(datos.domicilio);
+							$("input[name='usuario_apoderado[villa_poblacion]']").val(datos.villa_poblacion);
+							$("input[name='usuario_apoderado[sector]']").val(datos.sector);
+							$("select[name='usuario_apoderado[codigo_area_telefono]']").val(datos.codigo_area_telefono);
+							$("input[name='usuario_apoderado[telefono_fijo]']").val(datos.telefono_fijo);
+							$("input[name='usuario_apoderado[telefono_movil]']").val(datos.telefono_movil);
+							$("input[name='usuario_apoderado[email]']").val(datos.email);
+							$("select[name='usuario_apoderado[region_id]']").val(datos.region_id);							
+							$("select[name='usuario_apoderado[pais_id]']").val(datos.pais_id);
+							$("select[name='usuario_apoderado[comuna_id]']").html("<option value="+datos.comuna_id+" selected='selected'>" + datos.comuna + "</option>");
+
+							$("input[name='apoderado[usuario_id]']").remove();
+							var $apoderado_id = $("<input type='hidden' name='apoderado[usuario_id]' value='" + datos.id + "'>");
+							$contenedor_apoderado.append($apoderado_id);
+
+							$s2.removeAttr("disabled");	
+							$ic.removeAttr("disabled");
+						// Apoderado no existe en el sistema
+						} else {							
+							$s2.removeAttr("disabled");	
+							$primer_nombre.focus();
+						}
+
+						$boton_buscar_apoderado.hide();
+						$boton_cambiar_apoderado.show();
+
+						formulario_integro();
+						$s5.removeAttr("disabled");
+						$rut.attr("readonly", "readonly");
+						alertify.success("Proceso de matrículas " + data.mensaje , 10000);
+					}
+				);
+			} else {
+				formulario_no_integro();
+				alertify.error("Por favor, ingrese un rut válido.");
+				$rut.focus();
+			}
+		})
+
+		$boton_cambiar_apoderado.click(function(e) {
+			e.preventDefault();
+
+			$("input[name='apoderado[usuario_id]']").remove();
+			$s2.val("").attr("disabled", "disabled");
+			$s3.attr("disabled", "disabled");
+			$s5.attr("disabled", "disabled");
+			formulario_no_integro();
+
+			$(this).hide();		
+			$boton_buscar_apoderado.show();				
+			$rut.removeAttr("readonly").val("").focus();
+		})
+
+		function formulario_integro() { $contenedor_apoderado.find("input.integridad-apoderado").val("OK"); }
+		function formulario_no_integro() { $contenedor_apoderado.find("input.integridad-apoderado").removeAttr("value"); }
+	})

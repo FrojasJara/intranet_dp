@@ -1,0 +1,94 @@
+.sectionHeader
+	%h1  Asistencia Sección
+
+%div.well
+	- # El filtro de secciones se encuentra en coordianacion de carrera 
+	- url_metodo = apoyo_docente_ver_asistencia_seccion_path
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => url_metodo, :texto_boton => "Ver", :filtro => @filtro}
+
+= notificaciones
+
+- unless  @alumnos.size > 0 
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	:css 
+		.select-tabla{margin-bottom:4px !important;}
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información de la seccion
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera:
+						%span= @seccion.asignatura_base.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Asignatura:
+						%span= @seccion.asignatura_base.nombre			
+					%div.contenedorElemento.separador
+						%label.etiqueta Jornada:
+						%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%div.contenedorElemento.separador
+						%label.etiqueta Codigo Asignatura:
+						%span= @seccion.asignatura_base.codigo
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre Profesor:
+						- if @seccion.docente.blank?
+							%span Docente no asignado 
+						- else
+							%span= @seccion.docente.datos_personales.nombre
+
+	%form{action: apoyo_docente_registrar_asistencia_seccion_path, method: "post"}
+		%input{type: "hidden", name: "seccion_id", value: @seccion.id}
+
+		%button.btn.btn-large.btn-primary{type: "submit"}
+			%i.icon.icon-white.icon-ok
+			Guardar Asistencia
+		%br
+		%br
+		
+		%table.table.table-striped#alumnos
+			%thead
+				%tr
+					%th Rut
+					%th Nombre
+					- @seccion.clases.each do |c|
+						%th= c.fecha_planificada
+			%tbody
+				- @alumnos.each do |i|
+					%tr
+						%td= i.alumno.datos_personales.rut
+						%td= i.alumno.datos_personales.nombre
+						- @seccion.clases.each 	do |c|
+							- if c.estado == 2
+								%td S
+							- else
+								- asistencia = Asistencia.asistio_a_clase?(i.id, c.id)
+								- asistio = asistencia[:asistio]
+								- horas_asistidas = asistencia[:horas_asistidas]
+								- id_asistencia = asistencia[:id]
+								- unless asistio
+									%td
+										%input.span1{type: "hidden", :name => "alumnos[#{i.id}][][clase_id]", :disabled => true, :value => c.id}
+										%input.span1{type: "number", :name => "alumnos[#{i.id}][][horas]" ,:min => 0, :disabled => true, :value => c.horas}
+										%input.marcar_asistencia{type: "checkbox"}
+								- else
+									%td.bg-success
+										%input.span1{type: "hidden", :name => "alumnos_actualizado[#{id_asistencia}][][clase_id]", :disabled => true, :value => c.id}
+										%input.span1{type: "number", :name => "alumnos_actualizado[#{id_asistencia}][][horas]" ,:min => 0, :disabled => true, :value => horas_asistidas}
+										%input.marcar_asistencia{type: "checkbox"}
+
+
+= datatable_src
+= datatable("alumnos") 
+:javascript
+		$(document).ready(function(){
+			$(".marcar_asistencia").change(function() {
+				$(this).prev().attr("disabled", ! this.checked);
+				$(this).prev().prev().attr("disabled", ! this.checked);
+			});
+		});
+
+						
+

@@ -1,0 +1,32 @@
+= datatable_src
+
+.sectionHeader
+    %h1 Mantenedor de Instituciones
+    = link_to raw("#{t 'crud.new'} usuario"), new_administrador_institucione_path, class: "btn btn-primary"
+
+
+%table#example.table
+    %thead
+        %tr
+            %th ID
+            %th Rut
+            %th Nombre
+            %th Razón Social
+
+    %tbody
+        - @items.each do |i|
+            %tr
+                %td= i.id
+                %td
+                    .btn-group
+                        %a.dropdown-toggle{href: '#', data: {toggle: 'dropdown'}}
+                            = i.rut
+                            %span.caret
+                        %ul.dropdown-menu
+                            %li= link_to raw(t('crud.show')), administrador_institucione_path(i)
+                            %li= link_to raw(t('crud.edit')), edit_administrador_institucione_path(i)
+                            %li= link_to raw(t('crud.delete')), administrador_institucione_path(i), :confirm => t('crud.confirm'), method: :delete
+                            %li.divider
+                            %li= history i, t(:historial) 
+                %td= i.nombre
+                %td= i.razon_social

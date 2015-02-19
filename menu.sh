@@ -1,0 +1,1 @@
+rails r Utils::menu

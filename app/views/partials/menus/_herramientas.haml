@@ -1,0 +1,33 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Herramientas
+%ul.nav.nav-list
+	%li.nav-header Herramientas de Búsqueda 
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Alumnos
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Buscar Alumno', herramientas_buscar_alumno_path
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Apoderados
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Buscar Apoderado', herramientas_buscar_apoderado_path
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Docentes
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Buscar Docente', herramientas_buscar_docente_path
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Secciones
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Buscar Sección', herramientas_buscar_seccion_path

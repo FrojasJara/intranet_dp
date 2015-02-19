@@ -1,0 +1,77 @@
+%h2 
+    %i.icon-white.icon-chevron-right
+    Vicerrectoría Académica
+%ul.nav.nav-list
+    %li.nav-header Gestión Académica
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Carreras
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                %a{:href => lista_plan_estudios_path} Carreras Vigentes
+            %li
+                %a{:href => crear_plan_estudio_path} Crear Carrera
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}}
+            %i.icon.icon-chevron-right
+            Alumnos
+        %ul.hide.dropdown-menu.inner-list
+            / %li 
+            /     = link_to 'Informe alumnos por sede', generar_informe_alumnos_path
+            %li 
+                = link_to 'Informe matriculados',vicerrectoria_alumnos_matriculados_path
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}}
+            %i.icon.icon-chevron-right
+            Escuelas
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Editar Carreras', modificar_carrera_path
+
+    %li.nav-header Gestión Bibliográfica 
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Biblioteca
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Recursos Bibliográficos', lista_libros_sedes_path
+
+    %li.nav-header Gestión Docente 
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Docentes
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to  "Ingresar Docente", new_mantenedores_docente_path  
+            %li
+                = link_to 'Planilla Docentes', mantenedores_docentes_path
+    %li.nav-header Control Académico 
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Secciones 
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to  "Notas Seccion", control_notas_seccion_path 
+    %li.nav-header Traslados
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Traslado de Sede
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Habilitar Traslado', traslados_sin_matricula_path
+            %li
+                = link_to "Matricula sede nueva (Traslado información académica)", traslados_matriculados_path  
+            %li
+                = link_to "Matriculados sede antigua (Traslado de matricula)", traslados_matriculados_sede_antigua_path  
+                   
+
+    
+
+                
+
+        

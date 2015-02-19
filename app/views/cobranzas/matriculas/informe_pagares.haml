@@ -1,0 +1,47 @@
+%h3 
+	Libro Pagaré - Resumen ( 
+	= @p_f_i
+	= " - #{@p_f_t} )" unless @p_f_t.blank?
+%br
+%table#lista.table.table-condensed
+	%thead
+		%tr
+			%th Nº
+			%th Pagare
+			%th Fecha Creación
+			%th Fecha Vencimiento
+			%th Arancel
+			%th Número Cuotas
+			%th Rut Alumno
+			%th Nombres Alumno
+			%th Apellidos Alumno
+			%th Carrera
+			%th Domicilio
+			%th Comuna
+	%tbody
+		- if @pagares.blank? or @pagares.count.eql? 0
+			%tr
+				%td{colspan: 12} No hay registros
+		- else
+			- @pagares.each_with_index do |item, index|
+				- alumno_plan_estudio = item.alumno_plan_estudio
+				- institucion_sede_plan = alumno_plan_estudio.institucion_sede_plan
+				- plan_estudio = institucion_sede_plan.plan_estudio
+				- alumno = alumno_plan_estudio.alumno
+				- usuario_alumno = alumno.datos_personales
+			
+				%tr
+					%td= index + 1
+					%td= item.numero
+					%td= item.created_at.to_date.day.to_s+"-"+item.created_at.to_date.month.to_s+"-"+item.created_at.to_date.year.to_s
+					%td= item.fecha_termino
+					%td= item.monto
+					%td= item.cuotas_arancel
+					%td= usuario_alumno.rut
+					%td= usuario_alumno.nombres
+					%td= usuario_alumno.apellidos
+					%td= plan_estudio.nombre
+					%td= usuario_alumno.domicilio_completo
+					%td= usuario_alumno.comuna.nombre
+= datatable_src
+= datatable "lista"

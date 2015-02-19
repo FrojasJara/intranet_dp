@@ -1,0 +1,91 @@
+#obtener-calificaciones
+    :css
+        col.codigo { width: 75px; }
+        col.asignatura { width: 200px; }
+        @media print {
+            col.asignatura { width: 100px; }
+            .table-condensed th, .table-condensed td { padding: 3px 4px !important; }
+        }
+        col.seccion { width: 65px; }
+        col.np { width: 50px; }
+        col.ne { width: 50px; }
+        col.ner { width: 65px; }
+        col.nf { width: 50px; }
+
+        table.table table.table th { background-color: #EEE !important; color: #333 !important; }
+        .table-condensed th, .table-condensed td { padding: 3px 4px !important; }
+        td.planificacion span.ponderacion { font-weight: bold; }
+        #obtener-calificaciones td { vertical-align: middle !important; }
+
+    .page-header
+        %h1
+            Calificaciones registradas en el 
+            = @periodo_seleccionado.nombre
+    = render "alumnos/alumnos/partials/seleccion_plan_periodo"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+    - if @existen_datos        
+        %table.table.table-condensed
+            %colgroup
+                %col.codigo
+                %col.asignatura
+                %col.seccion
+                %col.np
+                %col.ne
+                %col.ner
+                %col.nf
+                %col.npar
+            %thead
+                %tr
+                    %th.txCenter.nombre
+                        Código
+                    %th.txLeft.nombre
+                        Asignatura
+                    %th.txCenter.nombre
+                        Sección
+                    %th.txCenter.nombre
+                        N. P.
+                    %th.txCenter.nombre
+                        N. E.
+                    %th.txCenter.nombre
+                        N. E. R.
+                    %th.txCenter.nombre
+                        N. F.
+                    %th.txLeft.nombre
+                        N. Parciales
+            %tbody
+                - @calificaciones.each do |item|                   
+                    %tr
+                        %td.txCenter.nombre= item[:asignatura].codigo
+                        %td.txLeft.nombre= item[:asignatura].nombre
+                        %td.txCenter.nombre= item[:seccion].numero
+                        %td.txCenter.nombre= item[:inscripcion].nota_presentacion
+                        %td.txCenter.nombre= item[:inscripcion].nota_examen
+                        %td.txCenter.nombre= item[:inscripcion].nota_examen_repeticion
+                        %td.txCenter.nombre= item[:inscripcion].nota_final
+                        %td.txLeft.nombre
+                            %table.table.table-condensed
+                                %colgroup
+                                    %col.instancia
+                                    %col.calificacion
+                                    %col.fecha
+                                %thead
+                                    %tr
+                                        %th.txLeft.nombre Instancia
+                                        %th.txCenter.nombre Nota
+                                        %th.txLeft.nombre Fecha
+                                %tbody
+                                    - item[:calificaciones].each do |item2|
+                                        %tr
+                                            %td.txLeft.planificacion.nombre
+                                                %span.nombre= item2[:planificacion].nombre_nota
+                                                %span.ponderacion.nombre= item2[:planificacion].ponderacion_porcentual
+                                            %td.txCenter.nombre= item2[:parcial]
+                                            %td.txLeft.nombre= item2[:planificacion].fecha_comprometida
+
+    - else
+        = notificaciones
+
+
+
+                
+                    

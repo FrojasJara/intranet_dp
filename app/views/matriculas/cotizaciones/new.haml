@@ -1,0 +1,303 @@
+= render partial: "matriculas/matriculas/admision/partials/assets_css", locals: {header: false}
+:javascript
+
+    // function limpiar_plan_pago_arancel() {
+    //     var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::ARANCEL}");
+    //     $contenedor_plan_pago.find("a.pago-combinado").attr("disabled", true);
+    //     $contenedor_plan_pago.find("a.pago-combinado").popover("destroy");
+    //     $contenedor_plan_pago.find("ol.pagos").attr("class", "pagos").find("> li:visible").remove();
+
+    //     /*
+    //      *  Monto documentado, monto pagar (:hiddens)
+    //      *  Monto documentado, (:visible)
+    //      *
+    //      **/
+    //     $contenedor_plan_pago.find("input.r1").val("0");
+    // }
+
+
+    // function limpiar_plan_pago_matricula() {
+    //     var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::MATRICULA}");
+    //     $contenedor_plan_pago.find("a.pago-combinado").attr("disabled", true);
+    //     $contenedor_plan_pago.find("a.pago-combinado").popover("destroy");
+    //     $contenedor_plan_pago.find("ol.pagos").attr("class", "pagos").find("> li:visible").remove();
+
+    //     /*
+    //      *  Monto documentado, monto pagar (:hiddens)
+    //      *  Monto documentado, (:visible)
+    //      *
+    //      **/
+    //     $contenedor_plan_pago.find("input.r1").val("0");
+    // }
+
+    $(document).ready(function() {
+        var $contenedor_plan = $("#plan-estudio");   
+        var $arancel = $contenedor_plan.find("input.arancel");
+        var $matricula = $contenedor_plan.find("input.matricula");
+
+        /*
+        *   |matricula, arancel|
+        */
+        var $g1 = $contenedor_plan.find("input:disabled.g1");
+
+        $("select[name='periodo']").change(function(){
+            var $periodo = $(this).find("option:selected");
+
+            $("input[type='checkbox']").attr({
+                'checked' : false
+            });
+
+            if($periodo.attr("class") == "sin-periodo"){
+                $("#sin-periodo").attr({
+                    "style" : "display:block",
+                    "name" : "cotizacion[institucion_sede_plan_id]"
+                });
+
+                $(".planes-matriculables").attr({"style" : "display:none",
+                    "name" : "cotizacion2[institucion_sede_plan_id]"
+                });
+
+                $(".planes-en-curso").attr({
+                    "style" : "display:none",
+                    "name" : "cotizacion3[institucion_sede_plan_id]"
+                });
+            }
+            else if($periodo.attr("class") == "periodo-matriculable"){
+                $(".planes-matriculables").attr({
+                    "style" : "display:block",
+                    "name" : "cotizacion[institucion_sede_plan_id]"
+                });
+
+                $(".planes-en-curso").attr({
+                    "style" : "display:none",
+                    "name" : "cotizacion2[institucion_sede_plan_id]"
+                });
+
+                $("#sin-periodo").attr({
+                    "style" : "display:none",
+                    "name" : "cotizacion3[institucion_sede_plan_id]"
+                });
+            }
+            else{
+                $(".planes-en-curso").attr({
+                    "style" : "display:block",
+                    "name" : "cotizacion[institucion_sede_plan_id]"
+                });
+
+                $(".planes-matriculables").attr({
+                    "style" : "display:none",
+                    "name" : "cotizacion2[institucion_sede_plan_id]"
+                });
+
+                $("#sin-periodo").attr({
+                    "style" : "display:none",
+                    "name" : "cotizacion3[institucion_sede_plan_id]"
+                });
+            }
+            
+        });
+
+        // $("select[name='cotizacion[institucion_sede_plan_id]']").change(function() {
+        //     var $carrera = $(this).find("option:selected");
+
+        //     if( $carrera.val() ) {
+                
+        //         $arancel.val($carrera.attr("data-arancel"));
+        //         $matricula.val($carrera.attr("data-matricula"));
+
+        //         mascaraDinero();
+        //     } else {
+        //         $g1.val("0");
+        //     }
+        // });
+
+
+
+        $("form.cotizacion").validate({
+            rules : {
+                "cotizacion[rut]"       : { minlength   : 10 }
+            },
+            invalidHandler: function(form, validator) {
+                notify_info("Existe información errónea", "Por favor, ingrese información en todos los campos requeridos como obligatorios. Además, verifique que los planes de pago estén adecuadamente conformados.");
+            }
+            ,submitHandler: function(form) {
+                // Correcion de nombres
+                $(form).find(":input.cambiar-nombre").each(function(i, v) { $(v).attr("name", $(v).attr("data-nombre-real")); });
+                // Eliminar elementos para que no se envien
+                $(form).find(":input.n1").each(function(i, v) { $(v).attr("disabled", "disabled"); });
+                form.submit();
+            }
+        });
+        $("select[name='cotizacion[region_id]']").change(function() {
+            var valor = $(this).val();
+            var $comunas = $("select[name='cotizacion[comuna_id]']");
+            if (valor) {
+
+                $.getJSON(
+                    "#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+                    function(data) {
+                        var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+                        $(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+                        $comunas.html(nuevos).removeAttr("disabled");
+                    }
+                )
+            } else {
+                $comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", true);
+            }
+        })
+            
+    });
+
+:css
+    .planes-matriculables,.planes-en-curso{
+        display: none;
+    }
+
+= form_tag "#{create_matriculas_cotizaciones_path}", :method => "post", :class => "cotizacion" do
+
+    .page-header
+        = breadcrumb [["Tipo de Cotización", tipo_matriculas_cotizacion_path], "Registrar Cotización"]
+        %h1= "Registrar Cotización #{get_name(Cotizacion,:TIPOS,@tipo).to_s.upcase}"
+
+    .matricula-nuevo.contenedor-matricula
+        #datos-personales-postulante
+            .page-header
+                %h2 Datos personales del postulante
+            .control-group
+                %label.control-label Rut
+                .controls
+                    %input.rut.input-xlarge{:type => "text", :name => "cotizacion[rut]", :maxlength => 10}
+            .control-group
+                %label.control-label (*) Nombres
+                .controls
+                    %input.required.input-large{:type => "text", :name => "cotizacion[nombre]", :maxlength => 25}
+            .control-group
+                %label.control-label (*) Apellidos
+                .controls
+                    %input.required.input-large{:type => "text", :name => "cotizacion[apellido]", :maxlength => 25}
+            %br
+            .control-group
+                %label.control-label Teléfono fijo
+                .controls
+                    %input.input-small{:type => "text", :name => "cotizacion[telefono_fijo]", :maxlength => 8}
+            .control-group
+                %label.control-label Teléfono móvil
+                .controls
+                    %input.input-small{:type => "text", :name => "cotizacion[telefono_movil]", :maxlength => 8} 
+            .control-group
+                %label.control-label Email
+                .controls.input-prepend{:style => "width: 260px;"}
+                    %span.add-on @
+                    %input.sin_enie.email.input-large{:type => "text", :name => "cotizacion[email]", :maxlength => 150}
+            %br
+            .control-group
+                %label.control-label Domicilio
+                .controls
+                    %input.input-xlarge{:type => "text", :name => "cotizacion[domicilio]", :maxlength => 255}   
+            .control-group
+                %label.control-label Villa/Población
+                .controls
+                    %input.input-xlarge{:type => "text", :name => "cotizacion[villa_poblacion]", :maxlength => 255}
+            .control-group
+                %label.control-label Sector
+                .controls
+                    %input.input-xlarge{:type => "text", :name => "cotizacion[sector]", :maxlength => 50}
+            %br
+            .control-group
+                %label.control-label (*) Institución de origen
+                .controls
+                    %input.required.input-xlarge{:type => "text", :name => "cotizacion[institucion_origen]", :maxlength => 255}
+            .control-group
+                %label.control-label Como supo de la institución
+                .controls
+                    %select.span2{:name => "cotizacion[medio]"}
+                        %option{:value => ""} :: Seleccione medio ::
+                        - for_select(Cotizacion, :MEDIOS).each do |medio|
+                            %option{:value => medio[1]}= medio[0]
+            %br
+            .control-group
+                %label.control-label (*) Región
+                .controls
+                    %select.required.span2{:name => "cotizacion[region_id]"}
+                        %option{:value => ""} :: Seleccione una región ::
+                        - @regiones.each do |region|
+                            %option{:value => "#{region.id}"}= region.nombre
+            .control-group
+                %label.control-label (*) Comuna
+                .controls
+                    %select.required.span2{:disabled => "disabled", :name => "cotizacion[comuna_id]"}
+                        %option{:value => ""} :: Seleccione una comuna ::
+        %br
+        #periodo
+            .page-header
+                %h2 Selección del Periodo de Cotización
+            .control-group
+                %label.control-label (*) Período a Cotizar
+                .controls
+                    %select.required{name: "periodo"}
+                        %option{:value => "", class: "sin-periodo"} :: Seleccione un periodo ::
+                        %option{value: "#{@periodo_en_curso[:id]}", class: "periodo-en-curso"}= @periodo_en_curso[:nombre]
+                        %option{value: "#{@periodo_matriculable[:id]}", class: "periodo-matriculable"}= @periodo_matriculable[:nombre]
+            .control-group.invisible
+                %label.control-label (*) Tipo de Cotización
+                .controls
+                    %select.required{name: "cotizacion[tipo]"}
+                        %option{:value => @tipo}= get_name Cotizacion,:TIPOS, @tipo
+                            
+        #plan-estudio
+            .page-header
+                %h2 Selección del plan de estudios
+            .control-group
+                %label.control-label{style: "font-weight:bold;"} (*) Plan de estudios
+                %div{:name => "cotizacion[institucion_sede_plan_id]", id: "sin-periodo"}
+                    %label{style: "color:red"} :: No se ha seleccionado el Periodo de Matricula ::
+                
+                %div{:name => "cotizacion[institucion_sede_plan_id]", class: "planes-matriculables"}
+                    %label{style: "font-weight:bold;"}= "Planes de modalidad a distancia"
+                    - @planes_matriculables[:planes_distancia].each do |plan|
+                        %div{class: 'checkbox'}
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+                    %label{style: "font-weight:bold;"}= "Planes de jornada diurna"
+                    - @planes_matriculables[:planes_diurnos].each do |plan|
+                        %div{class: 'checkbox'}
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+                    %label{style: "font-weight:bold;"}= "Planes de jornada vespertina"
+                    - @planes_matriculables[:planes_vespertinos].each do |plan|
+                        %div{class: 'checkbox'}
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+                %div{:name => "cotizacion[institucion_sede_plan_id]", class: "planes-en-curso"}
+                    %label{style: "font-weight:bold;"}= "Planes de modalidad a distancia"
+                    - @planes_en_curso[:planes_distancia].each do |plan|
+                        %div{class: 'checkbox'}
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+                    %label{style: "font-weight:bold;"}= "Planes de jornada diurna"
+                    - @planes_en_curso[:planes_diurnos].each do |plan|
+                        %div{class: 'checkbox'}    
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+                    %label{style: "font-weight:bold;"}= "Planes de jornada vespertina"
+                    - @planes_en_curso[:planes_vespertinos].each do |plan|
+                        %div{class: 'checkbox'} 
+                            %input{name: 'isp[]',type: "checkbox",:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula], "arancel" => plan[:arancel], "arancel-contado" => plan[:arancel_contado]}}= plan[:nombre]
+            %br
+            / .control-group
+            /     %label.control-label Matrícula
+            /     .controls.input-prepend{:style => "width: 305px;"}
+            /         %span.add-on $
+            /         %input.g1.matricula.input-xlarge{:type => "text", 
+            /             :disabled => "disabled", 
+            /             :style => "text-align: right", 
+            /             :value => "0", 
+            /             :alt => "dinero"}
+            / .control-group
+            /     %label.control-label Arancel
+            /     .controls.input-prepend{:style => "width: 305px;"}
+            /         %span.add-on $
+            /         %input.g1.arancel.input-xlarge{:type => "text", 
+            /             :disabled => "disabled", 
+            /             :style => "text-align: right", 
+            /             :value => "0", 
+            /             :alt => "dinero"}
+
+        = submit_tag 'Enviar'
+
+

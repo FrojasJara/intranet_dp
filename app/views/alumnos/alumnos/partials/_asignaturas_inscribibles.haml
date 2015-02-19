@@ -1,0 +1,62 @@
+= form_tag "#{alumno_registrar_inscripcion_asignaturas_path}", :class => "inscripciones", :method => "post" do
+    %fielset.campos
+        %table.table.table-condensed.estrecha#asignaturas
+            %colgroup
+                %col.semestre
+                %col.asignatura
+                %col.inscripcion
+            %thead
+                %tr
+                    %th.txCenter Semestre
+                    %th.txLeft Asignatura
+                    %th.txCenter Inscripción
+            %tbody
+                - propuesta_asignaturas.each do |item|
+                    %tr{:class => item[:estado]}
+                        %td.txCenter= item[:asignatura].semestre
+                        %td.txLeft= item[:asignatura].nombre
+                        %td.txCenter
+                            %input.required{:type => "checkbox", :name => "secciones_dictadas[]", :value => "#{item[:seccion_dictada].id}", :maxlength => "#{limite_asignaturas_inscribibles}"}
+    
+    %fieldset.botones
+        %button.btn.btn-primary.cargar{:input => "submit"}
+            %i.icon-check.icon-white
+            Inscribir asignaturas
+
+:css
+    col.asignatura { width: 350px; }
+    col.inscripcion { width: 90px; }
+    tr.vigente td { font-weight: bold; }
+    tr.atrasada { background-color: #FFEBE6; }
+    tr.selected { background-color: #CCFFCC; }
+
+:javascript
+    $(document).ready(function() {
+        $("form.inscripciones").validate({
+            #{
+                - if @matricula_cobro_especial
+                    %{
+                        rules:  {
+                            "secciones_dictadas[]": {
+                                minlenght: #{limite_asignaturas_inscribibles}
+                            }
+                        }
+                    },
+            }
+            
+            invalidHandler: function(form, validator) {
+                alertify.error("Inscripción de aignaturas", "Por favor, seleccione una cantidad adecuada de asignaturas para su inscripción.");
+                setTimeout($.unblockUI, 300);
+             
+            },
+            submitHandler: function(form) {
+                if( confirm("¿Está seguro que desea inscribir estas asignaturas?") )
+                    form.submit()
+            }
+        });
+
+        $("#asignaturas td :checkbox").change(function() {
+            var $fila = $(this).parent().parent();
+            if( this.checked ) $fila.addClass("selected"); else $fila.removeClass("selected");
+        })
+    })

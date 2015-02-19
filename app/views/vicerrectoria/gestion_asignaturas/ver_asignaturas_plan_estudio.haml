@@ -1,0 +1,33 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Planes de Estudio Vigentes
+#planes-estudios
+	%table.table.table-striped.table-bordered#asignaturas
+		%colgroup  
+
+		%thead
+			%tr
+				%th Código
+				%th Nombre
+				%th Semestre
+		%tbody
+			- @asignaturas.each do |i|
+				%tr
+					%td= i.codigo
+					%td.dropdown
+						%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+							= i.nombre
+							%b.caret
+						%ul.dropdown-menu
+							%li
+								%a{:href => ver_secciones_asignatura_path(i.id)}
+									%i.icon-zoom-in
+									Ver Secciones
+					%td= i.semestre
+= datatable_src
+= datatable("asignaturas")
+
+:css
+	td.dropdown.open .dropdown-menu {left: 300px !important; top: auto !important;}

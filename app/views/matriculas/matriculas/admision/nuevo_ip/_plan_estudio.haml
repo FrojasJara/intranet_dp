@@ -1,0 +1,246 @@
+:css
+	optgroup {
+		background-color: #eee;
+		padding: 3px 0;
+		text-transform: uppercase;
+	}
+	#sin-periodo{
+		color: red !important;
+	}
+	.planes-matriculables{
+		display: none;
+	}
+	.planes-en-curso{
+		display: none;
+	}
+
+#periodo.bloque
+	.page-header
+		%h2 Selección del Periodo de Matricula
+	.control-group
+		%label.control-label (*) Período Matricula
+		.controls
+			%select.required{name: "periodo"}
+				%option{:value => "", class: "sin-periodo"} :: Seleccione un periodo ::
+				%option{value: "#{@periodo_en_curso[:id]}", class: "periodo-en-curso"}= @periodo_en_curso[:nombre]
+				%option{value: "#{@periodo_matriculable[:id]}", class: "periodo-matriculable"}= @periodo_matriculable[:nombre]
+#plan-estudio.bloque
+	.page-header
+		%h2 Selección del Plan de Estudios
+	.control-group
+		%label.control-label (*) Plan de estudios
+		.controls
+			%select.span5{:name => "inscripcion_plan[institucion_sede_plan_id]", id: "sin-periodo", :required => true}
+				%option{:value => ""} :: No se ha seleccionado el Periodo de Matricula ::
+
+			%select.span5{:name => "inscripcion_plan[institucion_sede_plan_id]", class: "planes-matriculables"}
+				%option{:value => ""} :: Seleccione un plan de estudios ::
+				%optgroup{:label => "No se a seleccionado el Periodo de cotización"}
+				%optgroup{:label => "Planes de jornada diurna"}
+					- @planes_matriculables[:planes_diurnos].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Planes de jornada vespertina"}
+					- @planes_matriculables[:planes_vespertinos].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Planes de modalidad a distancia"}
+					- @planes_matriculables[:planes_distancia].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Centro de Estudios Integrado de Adultos - Diurno"}
+					- @planes_matriculables[:planes_ceia_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Centro de Estudios Integrado de Adultos - Vespertino"}
+					- @planes_matriculables[:planes_ceia_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "PreUniversitario - Diurno"}
+					- @planes_matriculables[:planes_preu_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "PreUniversitario - Vespertino"}
+					- @planes_matriculables[:planes_preu_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Otec - Diurno"}
+					- @planes_matriculables[:planes_otec_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Otec - Vespertino"}
+					- @planes_matriculables[:planes_otec_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+			%select.span5{:name => "inscripcion_plan[institucion_sede_plan_id]", class: "planes-en-curso"}
+				%option{:value => ""} :: Seleccione un plan de estudios ::
+				%optgroup{:label => "No se a seleccionado el Periodo de la matricula"}
+				%optgroup{:label => "Planes de jornada diurna"}
+					- @planes_en_curso[:planes_diurnos].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Planes de jornada vespertina"}
+					- @planes_en_curso[:planes_vespertinos].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Planes de modalidad a distancia"}
+					- @planes_en_curso[:planes_distancia].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Centro de Estudios Integrado de Adultos - Diurno"}
+					- @planes_en_curso[:planes_ceia_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Centro de Estudios Integrado de Adultos - Vespertino"}
+					- @planes_en_curso[:planes_ceia_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "PreUniversitario - Diurno"}
+					- @planes_en_curso[:planes_preu_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "PreUniversitario - Vespertino"}
+					- @planes_en_curso[:planes_preu_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Otec - Diurno"}
+					- @planes_en_curso[:planes_otec_diurno].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+				%optgroup{:label => "Otec - Vespertino"}
+					- @planes_en_curso[:planes_otec_vespertino].each do |plan|
+						%option{:value => "#{plan[:institucion_sede_plan_id]}", :data => {"matricula" => plan[:matricula].to_s, "arancel" => plan[:arancel].to_s, "arancel-contado" => plan[:arancel_contado].to_s, "tipo-matricula" => plan[:tipo_matricula].to_s, "institucion-sede-id" => plan[:institucion_sede_id].to_s}}= plan[:nombre]
+			.page-header{style: "margin-bottom:0;margin-top:10px !important;"}
+				%label.control-label Beneficio Matricula
+			.control-group{:style => "vertical-align: middle;"}
+				%label.checkbox
+					%input#beneficio-matricula{:type => "checkbox"} Beneficio Matricula Municipalidad Renaico (50%)
+	%br
+	.control-group
+		%label.control-label Matrícula
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.g1.matricula.input-xlarge{:type => "text", :disabled => "disabled", :style => "text-align: right", :value => "0", :alt => "dinero",id: "valor-matricula"}
+	.control-group
+		%label.control-label Arancel
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.g1.arancel.input-xlarge{:type => "text", :disabled => "disabled", :style => "text-align: right", :value => "0", :alt => "dinero"}
+
+	%input.g1.arancel{:type => "hidden", :name => "plan_pago[arancel]", :value => 0}
+	%input.g1.matricula{:type => "hidden", :name => "plan_pago[matricula]", :value => 0}
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor_plan = $("#plan-estudio");
+		var $contenedor_descuento = $("#descuentos");		
+		var $contenedor_documento_venta = $("#documento-venta");
+		var $arancel = $contenedor_plan.find("input.arancel");
+		var $matricula = $contenedor_plan.find("input.matricula");
+		var contenido_inicial_descuento = $contenedor_descuento.html();
+		var contenido_inicial_documento_venta = $contenedor_documento_venta.html();
+
+		/*
+		*	|matricula, arancel|
+		*/
+		var $g1 = $contenedor_plan.find(":input.g1");
+
+		$("select[name='periodo']").change(function(){
+			var $periodo = $(this).find("option:selected");
+
+			if($periodo.attr("class") == "sin-periodo"){
+				$("#sin-periodo").attr({
+					"style" : "display:block",
+					"name" : "inscripcion_plan[institucion_sede_plan_id]",
+					"required" : true
+				});
+
+				$(".planes-matriculables").attr({"style" : "display:none",
+					"name" : "inscripcion_plan2[institucion_sede_plan_id]",
+					"value" : "",
+					"required" : false
+				});
+
+				$(".planes-en-curso").attr({
+					"style" : "display:none",
+					"name" : "inscripcion_plan3[institucion_sede_plan_id]",
+					"value" : "",
+					"required" : false
+				});
+			}
+			else if($periodo.attr("class") == "periodo-matriculable"){
+				$(".planes-matriculables").attr({
+					"style" : "display:block",
+					"name" : "inscripcion_plan[institucion_sede_plan_id]",
+					"required" : true
+				});
+
+				$(".planes-en-curso").attr({
+					"style" : "display:none",
+					"name" : "inscripcion_plan2[institucion_sede_plan_id]",
+					"value" : "",
+					"required" : false
+				});
+
+				$("#sin-periodo").attr({
+					"style" : "display:none",
+					"name" : "inscripcion_plan3[institucion_sede_plan_id]",
+					"required" : false
+				});
+			}
+			else{
+				$(".planes-en-curso").attr({
+					"style" : "display:block",
+					"name" : "inscripcion_plan[institucion_sede_plan_id]",
+					"required" : true
+				});
+
+				$(".planes-matriculables").attr({
+					"style" : "display:none",
+					"name" : "inscripcion_plan2[institucion_sede_plan_id]",
+					"value" : "",
+					"required" : false
+				});
+
+				$("#sin-periodo").attr({
+					"style" : "display:none",
+					"name" : "inscripcion_plan3[institucion_sede_plan_id]",
+					"required" : false
+				});
+			}
+			$contenedor_descuento.html(contenido_inicial_descuento);
+			$contenedor_documento_venta.html(contenido_inicial_documento_venta);
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+			$arancel.val(0);
+			$matricula.val(0);
+
+			$("#beneficio-matricula").attr('checked' , false);
+		});
+		
+		$("select[name='inscripcion_plan[institucion_sede_plan_id]']").change(function() {
+			var $carrera = $(this).find("option:selected");
+			$contenedor_descuento.html(contenido_inicial_descuento);
+			$contenedor_documento_venta.html(contenido_inicial_documento_venta);
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+
+			if( $carrera.val() ) {
+				$arancel.val($carrera.attr("data-arancel"));
+				$matricula.val($carrera.attr("data-matricula"));
+				var tipo_matricula = parseInt($carrera.attr("data-tipo-matricula"));
+
+				/* |Checkbox pago contado|
+				 */
+				$contenedor_descuento.find(":input.pg").attr("disabled", ($.inArray(tipo_matricula, [#{MatriculaPlan::MATRICULAS_AFECTAS_PAGO_CONTADO.join(",")}]) == -1));
+
+				$contenedor_descuento.find("select[name='plan_pago[descuento_id]']").removeAttr("disabled");
+				$contenedor_descuento.append("<input type='hidden' class='arancel' value='" + $carrera.attr("data-arancel") + "'>");
+				$contenedor_descuento.append("<input type='hidden' class='arancel-contado' value='" + $carrera.attr("data-arancel-contado") + "'>");
+				$contenedor_descuento.append("<input type='hidden' name='institucion_sede_id' value='" + $carrera.attr("data-institucion-sede-id") + "'>");
+				$contenedor_descuento.append("<input type='hidden' name='plan_pago[tipo]' value='" + tipo_matricula + "'>");
+				$contenedor_documento_venta.append("<input type='hidden' class='institucion-sede-plan-id' value='" + $carrera.val() + "'>");
+
+				mascaraDinero();
+			} else {
+				$g1.val("0");
+			}
+
+			$("#beneficio-matricula").attr('checked' , false);
+		});
+
+		$("#beneficio-matricula").change(function(){
+			
+			if(this.checked){
+				$matricula.val($("input[name='plan_pago[matricula]']").val()*0.5);
+			}
+			else{
+				$matricula.val($("input[name='plan_pago[matricula]']").val()*2);
+			}
+
+			mascaraDinero();
+		});
+	})

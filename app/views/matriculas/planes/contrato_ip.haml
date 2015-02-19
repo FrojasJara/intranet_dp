@@ -1,0 +1,46 @@
+= render "matriculas/planes/partials/encabezado_contrato"
+
+%p{:style => "clear: both;"}
+	= "En #{@ciudad} a #{l @plan.created_at, :format => :humana2}, entre el "
+	= raw "<span class=mayuscula>#{@ip.razon_social}</span>, en adelante IPDP, representado por su rector don <span class=mayuscula>Luis Beltrán Troncoso</span>, "
+	= "ambos domiciliados en calle Maipu 301 - Concepción, por una parte y: Don(a) "
+	= raw "<span class=mayuscula>#{@usuario_alumno.nombre}</span>, R.U.T #{@usuario_alumno.rut}, con domicilio en <span class=mayuscula>#{@usuario_alumno.domicilio_completo}</span> "
+	= raw "ciudad <span class=mayuscula>#{@usuario_alumno.comuna.nombre}</span>, "
+
+	- if not @usuario_alumno.telefono_fijo.blank?
+		= raw "teléfono #{@usuario_alumno.telefono_fijo_completo}, "
+
+	- if not @usuario_alumno.telefono_movil.blank?
+		= "#{@usuario_alumno.telefono_movil}, "
+
+	= raw "en adelante \"EL ALUMNO\", y don(a) <span class=mayuscula>#{@usuario_apoderado.nombre}</span> R.U.T #{@usuario_apoderado.rut}" 
+	= raw ", con domicilio en <span class=mayuscula>#{@usuario_apoderado.domicilio_completo}</span> ciudad <span class=mayuscula>#{@usuario_apoderado.comuna.nombre}</span>, "
+
+	- if not @usuario_apoderado.telefono_fijo.blank?
+		= "teléfono #{@usuario_apoderado.telefono_fijo_completo}, "
+
+	- if not @usuario_apoderado.telefono_movil.blank?
+		= "#{@usuario_apoderado.telefono_movil}, "
+	 
+	= "en adelante \"EL APODERADO\", por la otra, se conviene en celebrar el siguiente contrato de servicios educacionales:"
+
+%p
+	%strong Primero:
+	= raw "Don(a) <span class=mayuscula>#{@usuario_alumno.nombre}</span> se matricula en este acto en el <span class=mayuscula>#{@institucion.razon_social}</span> "
+	= raw "en la carrera de <span class=mayuscula>#{@plan_estudio.nombre}</span> de jornada <span class=mayuscula>#{get_name InstitucionSedePlan, :JORNADAS, @institucion_sede_plan.jornada}</span> "
+	
+	- if not @es_contruccion_o_gastronomia
+		= raw "de #{@plan_estudio.duracion} semestres de duración incluyendo proceso de práctica y titulación, con el número de matrícula #{@matricula.id}"
+	- else
+		= raw "de #{@plan_estudio.duracion} semestres de duración mas proceso de práctica y titulación, con el número de matrícula #{@matricula.id}"
+	
+	- if @plan_estudio.tiene_salida_intermedia
+		= raw ", pudiendo optar en el semestre 5 al título de <span class=mayuscula>#{@plan_estudio.titulo_tecnico}</span>."
+	- else
+		= "."
+%p
+	%strong Segundo
+	Por la prestación de servicios se fijan los siguientes valores, según plan de pagos Nº #{@plan.id} generado el #{fecha_humana @plan.created_at}:
+
+= render "matriculas/planes/partials/detalle_contrato"
+= render "matriculas/planes/partials/css_contrato"

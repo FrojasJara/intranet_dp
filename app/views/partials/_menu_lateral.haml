@@ -1,0 +1,92 @@
+- if current_role_can? :mensajero and is_mensajero?
+    %ul.nav.nav-list
+        %li.nav-header
+            Equipo
+        %li{:class => controller_is?('contactos') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Contactos'), mensajero_contactos_path
+
+
+- if current_role_can? :administrador and is_administrador?
+    %ul.nav.nav-list
+        %li.nav-header
+            Administrador
+        /%li{:class => controller_is?('carnes') ? 'active' : ''}
+        /    = link_to raw('<i class="icon-book"></i>Carnés'), administrador_carnes_path
+        %li{class: controller_is?('roles') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Roles'), administrador_roles_path
+        %li{class: controller_is?('usuarios') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Usuarios'), administrador_usuarios_path
+        %li{class: controller_is?('instituciones') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Instituciones'), administrador_instituciones_path    
+        %li{class: controller_is?('sedes') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Sedes'), administrador_sedes_path
+        %li{class: controller_is?('institucion_sedes') ? 'active' : ''}
+            = link_to raw('<i class="icon-book"></i>Institución Sedes'), administrador_institucion_sedes_path
+        %li{class: controller_is?('dedos') ? 'active' : ''}
+
+    - if current_role_can? :ac_mantenedores    
+        %ul.nav.nav-list
+            %li.nav-header
+                Mantenedores
+            %li{:class => controller_is?('alumnos') ? 'active' : ''  }
+                = link_to 'Alumnos', mantenedores_alumnos_path
+            %li{:class => controller_is?('usuarios') ? 'active' : ''  }
+                = link_to 'Usuarios', mantenedores_usuarios_path 
+            %li{:class => controller_is?('carreras') ? 'active' : ''  }
+                = link_to 'Carreras', mantenedores_carreras_path 
+            %li{:class => controller_is?('asignaturas') ? 'active' : ''  }
+                = link_to 'Asignaturas', mantenedores_asignaturas_path
+            %li{:class => controller_is?('salas') ? 'active' : '' }
+                = link_to 'Salas', mantenedores_salas_path
+
+    -if current_role_can? :control_entrada
+        %ul.nav.nav-list
+            %li.nav-header
+                Control de entrada
+            %li{class: controller_is?('dedos') && action_is?('index') ? 'active' : ''}
+                = link_to 'Generar informe', administrador_dedos_path
+            %li{class: controller_is?('dedos') && action_is?('upload') ? 'active' : ''}
+                = link_to 'Subir archivo', upload_administrador_dedos_path
+
+- else
+    - if current_role_can? :administrador #cambiar por :rectoria luego... [AV]
+        = render partial: 'partials/menus/rectoria'
+    - if current_role_can? :vicerrectoria_academica
+        = render(:partial => "partials/menus/vicerrectoria")
+    
+    - if current_role_can? :direccion_docencia
+        = render(:partial => "partials/menus/direccion_docencia")
+        
+    - if current_role_can? :direccion_escuela
+        = render(:partial => "partials/menus/direccion_escuela")    
+
+- if current_role_can? :coordinador_carrera    
+    = render(:partial => "partials/menus/coordinador_carrera")
+    
+- if current_role_can? :apoyo_docente
+    = render(:partial => "partials/menus/apoyo_docente")
+
+
+- if current_role_can? :herramientas
+    = render(:partial => "partials/menus/herramientas")
+
+- if current_role_can? :ac_mantenedores
+    = render(:partial => "partials/menus/administracion_sistema")
+
+- if current_role_can? :alumno and is_alumno?
+    = render "partials/menus/alumno"
+
+- if current_role_can? :matriculas
+    = render "partials/menus/matriculas"
+
+- if current_role_can? :cobranzas
+    = render "partials/menus/cobranzas"
+
+- if current_role_can? :docente
+    = render "partials/menus/docente"
+
+- if current_role_can? :biblioteca
+    = render "partials/menus/biblioteca"
+
+- if current_role_can? :asistente_social
+    = render(:partial => "partials/menus/asistente_social")

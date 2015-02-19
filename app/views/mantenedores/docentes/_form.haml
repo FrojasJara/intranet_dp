@@ -1,0 +1,185 @@
+= form_for @item, :url => @item.new? ? mantenedores_docentes_path : mantenedores_docente_path(@item), :html => {:class => "informacion-docente"}   do |f|
+    %h3 I. ANTECEDENTES PERSONALES
+    = f.fields_for @datos_personales do |d|
+        %li
+            %div.datos-docentes
+                = d.label "Rut (*)", :class => "control-label"
+                %div.controls
+                    = d.text_field :rut, :class => "span3 required"
+        %li            
+            %div.datos-docentes
+                = d.label :primer_nombre, :class => "control-label"
+                %div.controls
+                    = d.text_field :primer_nombre, :class => "required"
+        
+            %div.datos-docentes
+                = d.label :segundo_nombre, :class => "control-label"
+                %div.controls
+                    = d.text_field :segundo_nombre, :class => "required"
+            %div.datos-docentes
+                = d.label :apellido_paterno, :class => "control-label"
+                %div.controls
+                    = d.text_field :apellido_paterno, :class => "required"
+        
+            %div.datos-docentes
+                = d.label :apellido_materno, :class => "control-label"    
+                %div.controls
+                    = d.text_field :apellido_materno, :class => "required"             
+        %li
+            %div.datos-docentes
+                = d.label "Email (*)", :class => "control-label"
+                %div.controls
+                    = d.text_field :email, :class => "span4 required"
+        %li            
+            %div.datos-docentes
+                = d.label :telefono_fijo, :class => "control-label"
+                %div.controls
+                    = d.text_field :telefono_fijo, :class => "span3 required"         
+        %li    
+            %div.datos-docentes
+                = d.label :domicilio, :class => "control-label"
+                %div.controls
+                    = d.text_field :domicilio, :class => "required"
+        %li   
+            %div.datos-docentes
+                = d.label :villa_poblacion, :class => "control-label"
+                %div.controls
+                    = d.text_field :villa_poblacion, :class => "required"
+        %li
+            %div.datos-docentes
+                = d.label :profesion, :class => "control-label"
+                %div.controls
+                    = d.text_field :profesion, :class => "required"
+        %li 
+            %div.datos-docentes
+                = d.label :institucion_sede, :class => "control-label"    
+                %div.controls
+                    = d.select("sede_id", Sede.collect {|i| [ "#{i.nombre}", i.id ] }, {:include_blank => ':: Seleccion Sede ::' }, {:class => 'span3, required', :value => ""})  
+        
+            %div.datos-docentes
+                = d.label :pais, :class => "control-label"    
+                %div.controls
+                    = d.select("pais_id", Pais.collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione el país ::' }, {:class => 'span3, required', :value => ""})
+          
+            %div.datos-docentes
+                = d.label :region, :class => "control-label"    
+                %div.controls
+                    = d.select("region_id", Region.collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione La Región ::' }, {:class => 'span3, required', :value => ""})  
+        
+            %div.datos-docentes
+                = d.label :comuna, :class => "control-label"    
+                %div.controls
+                    = d.select("comuna_id", Comuna.collect {|i| [ i.nombre, i.id ] }, {:include_blank => ':: Seleccione la comuna ::' }, {:class => 'span3 , required', :value => ""}) 
+
+        
+            -#%div.datos-docentes
+            -#    = f.label :curriculum, :class => "control-label"
+            -#    %div.controls
+            -#        = f.text_area :curriculum, :class => "textarea"
+            %div.datos-docentes
+                = f.label :en_ejercicio, :class => "control-label"
+                %div.controls
+                    = f.check_box :en_ejercicio
+
+    %div.experiencia
+        %h3.titulo-antecedentes II. EXPERIENCIA LABORAL 
+        %a.btn.btn-success.btn-agregar{:href => "#", :data => {"experiencia" => "2"}}  + 
+    %div.clear
+
+    %div.experiencia
+        %h3.titulo-antecedentes III. EXPERIENCIA DOCENTE
+        %a.btn.btn-success.btn-agregar{:href => "#",:data => {"experiencia" => "3"}} +
+    %div.clear
+    
+    %div.experiencia
+        %h3.titulo-antecedentes IV. ESTUDIO Y PERFECCIONAMIENTO LABORAL
+        %a.btn.btn-success.btn-agregar{:href => "#",:data => {"experiencia" => "1"}} +
+    %div.clear
+    
+    %div.experiencia
+        %h3.titulo-antecedentes V. ANTECEDENTES PERSONALES Y DESARROLLO
+        %a.btn.btn-success.btn-agregar{:href => "#",:data => {"experiencia" => "4"}} +
+    %div.clear
+    %div.experiencia
+        %h3.titulo-antecedentes VI. OTROS ANTECEDENTES
+        %a.btn.btn-success.btn-agregar{:href => "#",:data => {"experiencia" => "5"}} +
+    %div.clear
+    
+    = f.submit "Guardar", class: 'btn btn-primary'
+    = f.submit "Cancelar", class: 'btn'
+
+    %div.template{:style => "display:none"}
+        %input{:type => 'hidden', :name => 'antecedentes[][tipo_antecedente]', :disabled => "disabled"}
+        %div.datos-docentes
+            %label.control-label{} Institución / Empresa
+            %div.controls
+                %input.required{:name => "antecedentes[][institucion]", :type => "text", :disabled => "disabled"}
+        %div.datos-docentes
+            %label.control-label{} Cargo
+            %div.controls
+                %input.required{:name => "antecedentes[][cargo]",:type => "text", :disabled => "disabled"}
+        %div.datos-docentes
+            %label.control-label{} Desde
+            %div.controls
+                %input.required{:name => "antecedentes[][desde]",:type => "text", :disabled => "disabled"}
+        %div.datos-docentes
+            %label.control-label{} Hasta
+            %div.controls
+                %input.required{:name => "antecedentes[][hasta]",:type => "text", :disabled => "disabled"}
+        %br
+        %div.datos-docentes
+            %label.control-label{} Descripcion
+            %div.controls
+                %textarea.required{:name => "antecedentes[][descripcion]",:type => "text", :disabled => "disabled", :style => " height: 300px; width: 430px;",:maxlength=>"100"}
+        %div.datos-docentes    
+            %a.btn.btn-mini.btn-danger{ :class => "eliminar",:href => "#"}
+                %i.icon-white.icon-minus-sign
+                quitar
+:javascript
+    $(document).ready(function() {
+
+        $("form.informacion-docente").validate({
+            invalidHandler: function(form, validator) {
+                notify_info(
+                    "Existen campos sin información",
+                    "Por favor, verifique que todos los campos obligatorios del formulario tengan información."
+                );
+            },
+            submitHandler: function(form) {
+                notify_loader(
+                    "Docentes",
+                    "Se está registrando la información del docente."
+                );
+                form.submit();
+            }
+        });
+
+        $(".btn-agregar").on("click", function(e){
+            e.preventDefault();
+
+            var tipo = $(this).attr("data-experiencia");
+            
+            var $template = $(".template").clone();
+            $template.find(":input").attr("disabled", false);
+            $template.removeClass("template");
+            
+            $template.find(":input[type='hidden']").val(tipo); 
+           // $(this).parent().prepend($tipo_antecedente);
+            $template.addClass("nuevo");
+            
+            $template.appendTo($(this).parent()).show();
+            //var $template.find(":input").attr("disabled", false);
+
+        });
+
+       $(".experiencia").on("click", ".eliminar", function(){
+            elem = $(this).parent().parent();
+            elem.remove();
+        });
+    })
+:css
+    .datos-docentes{display: inline-block; margin-bottom: 20px;}
+    .titulo-antecedentes {display: inline-block !important; margin-bottom:20px; }
+    .btn-agregar{display: inline-block !important; vertical-align: top !important;}
+    .eliminar{display: inline-block !important; vertical-align: top !important; margin-top:5px; margin-left:10px;}
+    .clear{clear:both;}

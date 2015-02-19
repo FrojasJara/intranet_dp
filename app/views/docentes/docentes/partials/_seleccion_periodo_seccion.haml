@@ -1,0 +1,77 @@
+- if defined? current_url
+	:css
+		form.secciones-dictadas select {
+			width: 300px;
+		}
+
+	:javascript
+		$(document).ready(function() {
+			function deshabiltarFormulario() {
+				var $formulario = $("form.secciones-docente");
+				$formulario.find("select.secciones").html("").attr("disabled", true);
+				$formulario.find("input[type='submit']").attr("disabled", true);
+			}
+
+			function habilitarFormulario() {
+				var $formulario = $("form.secciones-docente");
+				$formulario.find("select.secciones").removeAttr("disabled");
+				$formulario.find("input[type='submit']").removeAttr("disabled");
+			}
+
+			$("form.secciones-docente").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+				},
+				submitHandler: function(form) {
+					var url = $(form).find("select.secciones").val();
+					location.href = url;
+				}
+			})
+			var val = $("form.secciones-docente select.periodos option[value$='#{@periodo_seleccionado.id}']").val();
+			$("form.secciones-docente select.periodos").val(val);
+
+			var val = $("form.secciones-docente select.secciones option[value$='#{(not @seccion.nil?) ? @seccion.id : nil}']").val();
+			$("form.secciones-docente select.secciones").val(val);
+
+			$("select.periodos").change(function() {
+				var url = $(this).val();
+				if(url) {
+					deshabiltarFormulario();
+					$.getJSON(url, function(data) {
+						var $lista = $("select.secciones");
+						$lista.html("<option value=''>:: Seleccione una sección ::</option>");
+						var current_url = "#{current_url}";
+
+						$.each(data, function(i, v) {
+							var $item = $("<option />")
+							$item.text(v.seccion);
+							$item.val( current_url + "/seccion/" + v.id );
+							$lista.append($item);
+						})
+						habilitarFormulario();
+					})
+				}				
+			})
+		})
+
+	= form_tag "#", :class => "secciones-docente", :method => "get" do
+		%fieldset
+			%legend Selección de la sección
+			%ul
+				%li.ui-helper-clearfix
+					%div.contenedorElemento.separador
+						%label Período
+						%select.required.periodos{:name => "periodos"}
+							%option{:value => ""} :: Seleccione un período ::
+							- @periodos.each do |p|
+								%option{:value => "#{ajax_url @docente.id, p.id}"}= p.nombre
+
+					%div.contenedorElemento.separador
+						%label Sección
+						%select.required.secciones{:name => "secciones"}
+							%option{:value => ""} :: Seleccione una sección :: 
+							- @asignaturas.each do |a|
+								%option{:value => "#{current_url @usuario.id, a[:id]}"}= a[:seccion]
+					
+					%div.contenedorElemento.separador
+						%input.btn.btn-primary{:type=> "submit", :style => "margin-top: 19px;", :value => "Consultar"}

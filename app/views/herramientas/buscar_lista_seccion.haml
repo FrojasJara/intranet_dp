@@ -1,0 +1,50 @@
+- unless @items.blank?
+    %div.clearfix
+        .span6
+            %h3 
+                Plan Estudio:
+                = @plan_estudio
+        .span2
+            %h5
+                Total:
+                = @items.length
+    %div.clearfix
+        %table#secciones.table-condensed.table
+            %thead
+                %tr
+                    %th Periodo
+                    %th Nº
+                    %th Nombre
+                    %th Profesor
+
+            %tbody
+                - @items.each do |i|
+                    - options = {seccion_id: i[:seccion_id], plan_estudio_id: @plan_estudio_id, asignatura_id: i[:asignatura_id]}
+                    %tr
+                        %td= i[:periodo]
+                        %td= i[:numero]
+                        %td
+                            .btn-group
+                                %a.dropdown-toggle{href: '#', data: {toggle: 'dropdown'}}
+                                    = i[:nombre]
+                                    %span.caret
+                                %ul.dropdown-menu
+                                    %li
+                                        = link_to raw('<i class="icon-book"></i> Listado alumnos'), director_escuela_listado_alumnos_path( options )
+                                    %li
+                                        = link_to raw('<i class="icon-book"></i> Libro Calificaciones'), director_escuela_libro_calificaciones_path( options )
+                                    %li
+                                        = link_to raw('<i class="icon-book"></i> Libro Asistencia'), director_escuela_libro_asistencia_path( options )
+                                    %li.divider
+                                    %li
+                                        = link_to raw('<i class="icon-th-list"></i> Acta de notas'), director_escuela_acta_notas_path( options )
+
+                                    / %li= link_to raw(t('crud.show')), administrador_usuario_path(i)
+                                    / != alumno_informes_links i
+                                    / %li.divider
+                                    / %li=# history i, t(:historial) 
+                        %td= i[:profesor]
+    = datatable_src
+    = datatable 'secciones', {nosort: true}
+- else
+    %h4 No hay resultados

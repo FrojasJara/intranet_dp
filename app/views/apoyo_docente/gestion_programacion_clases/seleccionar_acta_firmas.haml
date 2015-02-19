@@ -1,0 +1,122 @@
+.sectionHeader
+	%h1  Acta de Firmas
+= notificaciones
+%form#seccion.not-print{:action => apoyo_docente_acta_de_firmas_path ,:method => "post",:class => "form-horizontal"}
+	%fieldset
+		%legend Seleccion Jornada y fecha 
+		%div.control-group
+			%label{:class => "control-label"} Fecha
+			%div.controls
+				%input.required.numInput{:type => "date", name: "fecha"}
+		%div.control-group
+			%label{:class => "control-label"} Jornada
+			%div.controls
+				%select.required{:name => "jornada"}
+					%option{:value => ""} .: Debe elegir Jornada :.
+					%option{:value => Seccion::DIURNA} Jornada Diurna
+					%option{:value => Seccion::VESPERTINA} Jornada Vespertina
+					%option{:value => Seccion::DISTANCIA} Jornada Distancia
+		%div.form-actions.inline
+			%button.btn.btn-primary{type: "submit"}
+				%i.icon.icon-white.icon-search
+				buscar
+- unless @horarios.blank?
+	%div.informe-acta-notas
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la Carrera
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Sede:
+							%span= @usuario.sede.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							- if @jornada == Seccion::DIURNA
+								%span Diurna
+							- if @jornada == Seccion::VESPERTINA
+								%span Vespertina
+							- if @jornada.blank?
+								%span Distancia
+							- if @jornada == Seccion::DISTANCIA
+								%span Distancia
+						%div.contenedorElemento.separador
+							%label.etiqueta Fecha Asistencia:
+							%span= @fecha_clases
+					%li.ui-helper-clearfix.cuatro-columnas
+						%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+							%i.icon-white.icon-print
+							Imprimir
+	%table#informe.table.table-striped
+		%thead
+			%tr
+				%th Nº
+				%th.TxtLft Bloques
+				%th.TxtLft Sala
+				%th.TxtLft Profesor
+				%th.TxtLft Carrera
+				%th.TxtLft Nivel
+				%th.TxtLft Asig.
+				%th.TxtLft Firma
+				%th.TxtLft Obs.
+		%tbody
+			- if @horarios.blank? or @horarios.count.eql? 0
+				%tr
+					%td{colspan: 10} No hay registros
+			- else
+				- @horarios.each_with_index do |item, index|
+					%tr
+						%td= index+1
+						%td= item.horario.bloque_horario.nombre
+						%td= item.horario.sala.nombre
+						- if item.horario.seccion.docente.blank?
+							%td Docente no asignado 
+						- else
+							%td.espacio= item.horario.seccion.docente.datos_personales.nombre
+						%td.espacio= item.horario.seccion.asignatura_base.plan_estudio.nombre
+						%td= item.horario.seccion.asignatura_base.semestre
+						%td= item.horario.seccion.asignatura_base.nombre
+						%td
+						%td
+
+
+	= datatable_src
+	= datatable 'informe'
+:css
+	.docenteInput{
+		padding: 4px;
+		font: 12px "lucida grande",tahoma,verdana,arial,sans-serif !important;
+		-moz-box-sizing: content-box;
+		-webkit-box-sizing: content-box;
+		box-sizing: content-box;
+		color: black !important;
+		height: auto !important;
+		margin: 0 !important;
+		width: 300px;
+	}
+	@media print{
+		/* espacio informe acta de notas control docente */
+		.espacio{ 
+			width: 30%;
+		}
+	}
+:javascript
+	$(document).ready(function(){
+	$("#seccion").validate({
+		invalidHandler: function(form, validator) {
+			notify_error("Error en la busqueda", "Por favor, compruebe que ha ingresado correctamente la información.");
+		},
+		submitHandler: function(form) {
+			form.submit();
+		}
+	});
+	$(".ajax-busca-carrera").typeahead({ 
+		ajax: {
+			url: "/apoyo-docente/ajax/typeaheadresp-carreras", //ruta al controlador q retorna las carreras
+			timeout: 300, //tiempo de espera
+			triggerLength: 2, // a 2 caracteres empieza a buscar
+			method: "get",
+		},
+		items: 16 //cantidad de resultados a traer cada vez
+	});
+	});

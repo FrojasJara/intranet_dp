@@ -1,0 +1,10 @@
+:css
+	td.nombre > i { display: none; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::APROBADA} { background-color: #D6FFCA; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::APROBADA} i.icon-ok { display: inline-block !important; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::REPROBADA} { background-color: #FFEBEA; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::REPROBADA} i.icon-remove { display: inline-block !important; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::ABANDONADA} { color: #A2A2A2; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::ABANDONADA} i.icon-ban-circle { display: inline-block !important; }
+	#asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::INSCRITA} td {  }
+	@media print { #asignaturas.table-condensed tbody tr td.nombre > i { display: none !important; }

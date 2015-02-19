@@ -1,0 +1,192 @@
+.page-header
+    = breadcrumb [["Recepción de pagos", matriculas_pagos_buscar_alumno_path], ["Detalle cuotas", matriculas_pagos_ver_alumno_path(params[:rut])], "Abonar"]
+    %h1 Realizar abono
+
+= render "matriculas/matriculas/admision/partials/assets_css"
+
+= render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+%h2 Cuotas a abonar
+= render partial: 'matriculas/pagos/partials/lista_pagos_pendientes', locals: {pagos_pendientes: @pagos_pendientes}
+
+= simple_form_for :abonos, url: matriculas_pagos_guardar_abono_path do |f|
+
+    - @pagos_pendientes.each do |pcc|
+        - pp = pcc[:pago_comprometido]
+        %h3= "Abono cuota nº#{pp.numero_cuota}"
+
+        = render partial: 'matriculas/pagos/partials/lista_pagos_pendientes', locals: {pagos_pendientes: [pcc]}
+        - subquery = "abonos[pago_comprometido][#{pp.id}]"
+        - subidquery = subquery.gsub("[", "_").gsub("]", "")
+        = simple_fields_for subquery do |pc|
+
+            .bloque
+                .control-group
+                    = pc.input :medio_pago, collection: @medios_pago.map{|x| [x.nombre.eql?('Pagaré/Cheque') ? 'Cheque' : x.nombre, x.id]}, prompt: 'Seleccione'
+                .control-group(style="width: 200px;")
+                    %label.control-label{for: "#{subidquery}_monto"} Monto total:
+                    .controls.monto.input-prepend{}
+                        %span.add-on $
+                        %input.input-medium.monto_resumen.monto{id: "#{subidquery}_monto", name: "#{subquery}[monto]", value: pp.acumulado(pcc[:interes]), alt: 'dinero', type: 'text'}
+                    = pc.hidden_field :monto_total, value: pp.acumulado(pcc[:interes])
+                    = pc.hidden_field :monto_documentado, value: 0
+                .control-group
+                    %a.btn.btn-success.addAbono{"data-id" => pp.id}
+                        %i.icon-white.icon-plus-sign
+                        Agregar
+                %div{id: "detail_#{pp.id}", style: 'display: none'}
+                    %table.table.table-condensed
+    
+    %br
+    %h3 Detalle de documento            
+    .control-group
+
+        = f.input :numero_documento
+    .control-group
+        = f.input :total_documentado, readonly: true, input_html: {value: '0'}
+    .control-group
+        %label Tipo Documento
+        - for_select(DocumentoVenta, :TIPOS).each_with_index do |dv, index|
+            %label.radio.inline
+                = f.radio_button :documento_venta, dv[1], (index.eql?(0) ? {checked: 'checked'} : {})
+                = dv[0]
+    .control-group
+        = hidden_field_tag 'documento_encontrado', 0
+        %a#check-documento.btn.btn-warning{href: '#noti'} 
+            %i.icon-search.icon-white
+            Buscar documento
+    #noti.notificacion
+    %br
+    .control-group
+        %label
+        = f.submit 'Realizar pago', class: 'btn btn-primary', disable_with: 'Guardando...'
+:javascript
+    function info(texto)
+    {
+        notify_info("Información", texto);
+    }
+    function actualizar_total_documentado()
+    {
+     
+        total = 0;
+        $.each($("[name$='[monto_documentado]']"), function(index, val){
+            total += parseInt( $(val).val() );
+        });
+
+        $("[name$='[total_documentado]']").val(total);
+    }
+    function actualizar_monto(data_id, monto, funcion_post)
+    {
+        base_query = "[name='abonos[pago_comprometido][" + data_id + "]";
+        
+        medio_pago = parseInt( $(base_query + "[medio_pago]']").val() );
+        monto_documentado_query = base_query + "[monto_documentado]']";
+        monto_documentado = parseInt( $(monto_documentado_query).val() );
+        monto_total = parseInt( $(base_query + "[monto_total]']").val() );
+        
+        if (funcion_post != undefined) {
+            if( !(monto > 0) )          { info("El valor no puede ser menor o igual a 0"); return false; }
+            if ( !(medio_pago > 0) )    { info("Debe seleccionar un medio de pago"); return false; };
+            if (monto > monto_total)    { info("El monto a abonar no puede ser superior al valor total de la cuota"); $(monto_query).val(monto_total); return false; };
+            if ( (monto_documentado + monto) > monto_total )  { info("No es posible abonar un monto superior a lo adeudado"); return false; };
+    
+            funcion_post();
+        } else
+        {
+            $(monto_query).val( monto_total - $(monto_documentado_query).val( monto_documentado + monto).val() ); 
+            actualizar_total_documentado();
+        }
+            
+
+        
+
+        return true;
+    }
+    $(function(){
+        $(".table").on("click", ".quitar", function(){
+            elem = $(this).parent().parent();
+            monto = parseInt($(elem).find("[name$='[monto]']").val());
+            data_id = $(elem).find("[name$='[id]']").val();
+            actualizar_monto(data_id, -monto);
+            elem.remove();
+        });
+        $(".addAbono").click(function(){
+            data_id = $(this).attr('data-id');
+            base_query = "[name='abonos[pago_comprometido][" + data_id + "]";
+            monto_query = base_query + "[monto]']";
+            monto = parseInt( $(monto_query).val() );
+            
+            actualizar_monto(data_id, monto, function(){
+                $.post("#{abono_detalle_forma_pago_ajax_path}", {pago_comprometido_id: data_id, medio_pago_id: medio_pago, monto: monto}, function(data){
+                    if (data) {
+                        $("#detail_" + data_id).show();
+                        
+                        $(monto_query).val( monto_total - $(monto_documentado_query).val( monto_documentado + monto).val() ); 
+                        
+                        $(data).appendTo( "#detail_" + data_id + " > table" );
+                        actualizar_total_documentado();
+                    };
+                });    
+            });
+            
+        });
+
+        $("form").submit(function(){
+            var enviar = true;
+            mensaje = "";
+            $("input[name$='[numero_documento]']").each(function(i, v){
+                if( $(v).val().length == 0 && enviar )
+                {
+                    mensaje += "Debe ingresar toda la información de los abonos<br />";
+                    enviar = false;
+                }
+            });
+            $("input[name$='[fecha_documento]']").each(function(i, v){
+                if( Date.parse( $(v).val() ) == null && enviar )
+                {
+                    mensaje += "Debe ingresar la fecha de los documentos<br />";
+                    enviar = false;
+                    
+                }
+            });
+            if(!(parseInt( $("input[name='abonos[total_documentado]']").val() ) > 0))
+            {
+                mensaje += "Debe documentar algún pago<br />";
+                enviar = false;
+            }
+            if(!(parseInt( $("input[name='abonos[numero_documento]']").val() ) > 0))
+            {
+                mensaje += "Debe ingresar el número del documento<br />";
+                enviar = false;
+            }
+
+            if( $("[name='documento_encontrado']").val() == "0" )
+            {
+                enviar = false
+                mensaje += "Debe ingresar un numero de documento válido<br />";
+            }
+            if( mensaje != "" )
+                info(mensaje);
+
+            return enviar;
+        });
+        $("#check-documento").click(function(){
+            $.getJSON(
+                "#{ajax_alumno_verificar_validez_documento_venta_path @ejecutivo_matriculas.id, @institucion_sede_plan.id, 'td', 'nd'}"
+                    .replace("td", $('[name="abonos[documento_venta]"]:checked').val())
+                    .replace("nd", $("input[name='abonos[numero_documento]']").val()),
+                function(data) {
+                    notify_close();
+                    if( data.exito ) {
+                        $("[name='documento_encontrado']").val(1);
+                        $(".notificacion").html('<div class="alert alert-success">cont</div>'.replace('cont',"<b>"+data.mensaje+"</b>"));
+                    } else {
+                        notify_notice("Realizar abono", data.mensaje);
+                        $(".notificacion").html('<div class="alert alert-error">cont</div>'
+                        .replace("cont","<b>"+data.mensaje+"</b>"));
+                        $("[name='documento_encontrado']").val(0);
+                    }
+                }
+            );
+        });
+    });

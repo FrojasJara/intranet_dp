@@ -1,0 +1,18 @@
+.page-header
+	%h1 Contrato de prestación de servicios educacionales
+
+%p.importante{:style => "float: left; width: 60%"}
+	- if @es_cft_ip
+		%strong Carrera:
+	- else
+		%strong Curso:
+	= @plan_estudio.nombre
+%p.importante{:style => "float: right; width: 30%;"}
+	%strong Jornada:
+	= get_name InstitucionSedePlan, "JORNADAS", @institucion_sede_plan.jornada
+%p.importante{:style => "float: left; width: 60%"}
+	%strong Año de ingreso:
+	= @matricula.alumno_plan_estudio.anio_ingreso
+%p.importante{:style => "float: right; width: 30%"}
+	%strong Modalidad:
+	=get_name InstitucionSedePlan, "MODALIDADES", @institucion_sede_plan.modalidad

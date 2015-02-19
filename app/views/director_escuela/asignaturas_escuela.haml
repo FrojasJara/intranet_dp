@@ -1,0 +1,47 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Asignaturas
+%div#filtro   
+    %form.form-inline{:id => 'frmFiltrarCarrera', :method => "post" , :action => asignaturas_escuela_path }
+        %fieldset
+            %legend 
+                Buscar Carrera
+            
+            %label Carrera
+            = select("plan_estudios", "plan_estudio_id", @planes_estudios.collect {|i| [ i.nombre_completo, i.id ] }, {:include_blank => ':: Seleccione la Carrera ::' , :selected => @plan_estudio_id }, {:class => 'span3'})  
+            
+            %label Periodo
+            = select("plan_estudios", "periodo_id", @periodos[:todos].collect {|i| [ i.nombre, i.id ] }, {:selected => @periodos[:seleccionado][:id] }, {:class => 'span3'}) 
+            %div{:class => "form-actions"}
+                %button.btn.btn-primary Buscar asignaturas 
+
+%div#resultados
+    = notificaciones
+    %table.table.table-striped.table-bordered{:id => 'asignaturas'}
+        %thead
+            %tr
+                %th ID
+                %th Nombre
+                %th Semestre
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i[:id_asignatura]
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                            = i[:nombre_asignatura]
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => detalle_asignatura_secciones_path(i[:id_asignatura],@periodo_id)}
+                                    %i.icon-list-alt
+                                    Secciones
+                    %td= i[:semestre]
+= datatable_src
+= datatable("asignaturas")                   
+:css
+    table.table thead th{color:#333 !important;}
+    td .dropdown-menu { left: 58px !important; top: 34px !important; }
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important; 

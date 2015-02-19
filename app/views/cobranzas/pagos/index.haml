@@ -1,0 +1,22 @@
+.page-header
+    %h1 Buscar Documento de Venta
+
+= notificaciones
+
+.well{style: 'margin-bottom: 0px; padding-bottom: 0px'}
+    = form_for :busqueda, class: 'form-search', method: :get do |f|
+        .contenedorElemento.separador
+            %input#busqueda.input-large.search-query{name: 'documento_venta', placeholder: 'Número de boleta', style: 'height: 28px'}
+        .contenedorElemento.separador
+            %label
+                %input{name: 'tipo', type: 'radio', value: DocumentoVenta::BOLETA, checked: true} 
+                Boleta
+        .contenedorElemento.separador
+            %label
+                %input{name: 'tipo', type: 'radio', value: DocumentoVenta::FACTURA} 
+                Factura
+
+            
+        %button.btn.btn-primary 
+            %i.icon-search.icon-white
+            Buscar

@@ -1,0 +1,10 @@
+- if @institucion_sede_plan.modalidad == InstitucionSedePlan::PRESENCIAL
+	#edicion-jornada
+		.page-header
+			%h2 Jornada contratada
+
+		%input{:type => "hidden", :name => "inscripcion[id]", :value => @inscripcion.id}
+		- @instituciones_sedes_planes.each do |item|
+			%label{:class => "jornada_#{item.id}", :style =>"display: inline; margin-right: 50px;"}
+				%input.required{:type => "radio", :name => "inscripcion[institucion_sede_plan_id]", :value => item.id}
+				= get_name InstitucionSedePlan, "JORNADAS", item.jornada

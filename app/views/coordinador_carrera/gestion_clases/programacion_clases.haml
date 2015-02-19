@@ -1,0 +1,38 @@
+:css
+	.inline{float: left; margin-right: 10px;}
+
+.sectionHeader
+	%h1 Programación Clases
+
+%div.well
+	%form.form-inline#filtro-institucion{:action =>"",:method => "post"}
+		%div.control-group.inline
+			.control-label
+				%label Institucion
+			.controls
+				%select{}
+					%option{} IP
+					%option{} CFT
+		
+		%div.control-group.inline
+			.control-label
+				%label Carrera
+			.controls
+				%select{}
+					%option{} Informatica
+					%option{} Otra 
+		%div.control-group.inline
+			.control-label
+				%label Asignatura
+			.controls
+				%select{}
+					%option{} Asignatura 1
+					%option{} Asignatura 2
+		%div.control-group.inline
+			.control-label
+				%label Seccion
+			.controls
+				%select{}
+					%option{} Seccion 1
+					%option{} Seccion 2
+

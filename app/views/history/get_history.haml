@@ -1,0 +1,33 @@
+.modal-header
+	%a.close(data-dismiss="modal") x
+	%h3 Detalle historico #{@item_nombre}
+
+.modal-body
+	- if @item_nombre.blank?
+		No existe un historial para este registro
+	- else
+		%table.table(border=1)
+			%tr
+				%th Fecha
+				%th Tipo
+				%th(colspan=2) Modificaciones
+			- @items.each do |i|
+				:ruby
+					d = differences(i)
+					rs = d.length
+					count = 0
+				- d.each_key do |k|
+					%tr
+						
+						- if count == 0
+							%td(rowspan=rs)= l i.created_at, format: :mini
+							%td(rowspan=rs)= i.comment
+							
+						%td(style='text-align:right')= k.titleize
+						%td= d[k].to_s
+						
+					- count += 1
+
+				- count = 0
+.modal-footer
+	%a.btn.btn-primary(data-dismiss="modal") Cerrar

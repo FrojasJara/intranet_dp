@@ -1,0 +1,14 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	DAE
+%ul.nav.nav-list
+	%li.nav-header Gestión Exalumnos
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Exalumnos
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => asistente_social_buscar_alumno_path } Ingresar Antecedentes
+			%li
+				%a{:href => asistente_social_show_path } Antecedentes por Período

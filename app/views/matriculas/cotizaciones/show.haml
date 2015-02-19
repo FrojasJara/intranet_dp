@@ -1,0 +1,121 @@
+:css
+    #myFooter, #myHeader
+    {
+        display: none;
+    }
+
+.page-header
+    = breadcrumb [["Tipo de Cotización", tipo_matriculas_cotizacion_path], ["Registrar Cotización", new_matriculas_cotizacion_path(tipo: @item.tipo)], "Detalle Cotización"]
+    %h1 REGISTRO DE CONSULTAS 
+
+%div{style: 'margin-left: 40px'}
+
+    %table
+        %tbody
+            %tr
+                %td 
+                    %strong Nombre:
+                %td
+                    = @item.nombre
+                    = @item.apellido
+            %tr
+                %td 
+                    %strong  Rut:
+                %td= @item.rut
+            %tr
+                %td 
+                    %strong  Fono:
+                %td
+                    = @item.telefono_fijo
+                    - unless @item.telefono_movil.blank?
+                        \-
+                    = @item.telefono_movil
+            %tr
+                %td 
+                    %strong  Email:
+                %td= @item.email
+            %tr
+                %td 
+                    %strong  Domicilio:
+                %td
+                    = "#{@item.domicilio}"
+                    = "#{@item.villa_poblacion}"
+                    = "#{@item.sector}"
+
+            %tr
+                %td 
+                    %strong  Carrera de interés:
+                %td= @item.institucion_sede_plan.plan_estudio.nombre
+            %tr
+                %td 
+                    %strong  Jornada:
+                %td= get_name InstitucionSedePlan, :JORNADAS, @item.institucion_sede_plan.jornada
+
+            %tr
+                - matricula = (isp = @item.institucion_sede_plan.matriculas.last(:fecha_inicio.lte => Date.today, :fecha_termino.gte => Date.today)).nil? ? 0 : isp.precio
+
+                %td 
+                    %strong  Matrícula 1º año:
+                %td 
+                    - if @item.institucion_sede_plan.modalidad == InstitucionSedePlan::PRESENCIAL
+                        = 0
+                    - else
+                        = number_to_currency matricula
+            - arancel_contado = (isp = @item.institucion_sede_plan.aranceles.first(contado: true)).nil? ? 0 : isp.precio
+            - arancel_normal =  (isp = @item.institucion_sede_plan.aranceles.first(contado: false)).nil? ? 0 : isp.precio
+            %tr
+                %td 
+                    %strong  Arancel anual:
+                %td= number_to_currency arancel_normal
+
+            %tr
+                %td 
+                    %strong  10 Cuotas al crédito:
+                %td= number_to_currency arancel_normal/10
+
+            %tr
+                %td 
+                    %strong  Pago al contado:
+                %td= number_to_currency arancel_contado
+
+            - if @item.institucion_sede_plan.modalidad == InstitucionSedePlan::PRESENCIAL
+                %tr
+                    %td 
+                        %strong  
+                            10 cuotas con 
+                            %br
+                            20% de descuento:
+                    %td= number_to_currency (arancel_normal*0.8)/10
+            - elsif @item.institucion_sede_plan.modalidad == InstitucionSedePlan::DISTANCIA
+                %tr
+                    %td 
+                        %strong  
+                            8 cuotas con 
+                            %br
+                            20% de descuento:
+                    %td= number_to_currency (arancel_normal*0.8)/8
+                %tr
+                    %td 
+                        %strong  
+                            5 cuotas con 
+                            %br
+                            50% de descuento:
+                    %td= number_to_currency (arancel_normal*0.5)/5
+    %br
+
+    %strong Requisitos de Ingreso
+    %ul
+        %li Licencia de Enseñanza Media (Fotocopia legalizada)
+        %li Certificado de Nacimiento actualizado
+        %li Fotocopia cédula identidad del alumno y aval
+        %li Fotocopia liquidación de sueldo del aval
+        %li Fotocopia comprobante de domicilio
+
+
+%br 
+%br 
+%br 
+%br 
+%br 
+
+= l Time.now, format: :long

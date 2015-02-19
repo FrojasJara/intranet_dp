@@ -1,0 +1,52 @@
+= render "matriculas/matriculas/admision/partials/assets"
+
+= form_tag "#{matriculas_registrar_nuevo_ip_path}", :method => "post", :class => "admision admision-nuevo" do
+	.fixed-header
+		.page-header
+			%h1
+				Admisión
+				%small alumnos nuevos
+
+		%ul.admision-nuevo.nav.ui-helper-clearfix
+			%li
+				%a{:href => "#datos-personales-postulante"}	1. Datos personales del postulante
+			%li
+				%a{:href => "#datos-personales-apoderado"} 2. Datos personales del apoderado
+			%li
+				%a{:href => "#periodo"} 3. Plan de estudios
+			%li
+				%a{:href => "#descuentos"} 4. Cálculo del arancel
+			%li
+				%a{:href => "#planes-pago"} 5. Planes de pago
+			%li
+				%a{:href => "#documento-venta"} 6. Emisión de documentos
+
+		%button.btn.btn-primary.loading-button.cargar{:type => "submit", :data => {"loading-text" => "... matriculando ..."}}
+			%i.icon-white.icon-ok
+			Matricular
+
+	.matricula-nuevo.contenedor-matricula
+		.introduccion{:style => "padding-left: 10px; padding-top: 160px;"}
+			%h3 Estimado ejecutivo de matrículas
+			%p
+				El proceso de matrícula para alumnos nuevos en planes de estudios regulares presenciales ha sido devidido en 6 secciones, para su comodidad:
+			%ol{:style => "list-style: decimal; padding-left: 15px;"}
+				%li Datos personales del postulante
+				%li Datos personales del apoderado
+				%li Selección del periodo para el que se realizara la matricula
+				%li Selección de plan de estudios
+				%li Cálculo del arancel
+				%li Conformación de los planes de pagos
+				%li Selección del documento de venta
+
+		= notificaciones
+
+		= render "matriculas/matriculas/admision/nuevo_ip/datos_postulante"
+		= render "matriculas/matriculas/admision/partials/datos_apoderado"
+		= render "matriculas/matriculas/admision/nuevo_ip/plan_estudio"
+		= render "matriculas/matriculas/admision/nuevo_ip/descuentos"
+		#planes-pago
+			= render :partial => "matriculas/matriculas/admision/partials/plan_pago", :locals => {:centro_costo => PagoComprometido::MATRICULA, :forma_cuotas => @formas_cuotas_matriculas}
+			= render :partial => "matriculas/matriculas/admision/partials/plan_pago", :locals => {:centro_costo => PagoComprometido::ARANCEL, :forma_cuotas => @formas_cuotas_alumno_nuevo}
+		= render :partial => "matriculas/matriculas/admision/partials/documento_venta"
+		

@@ -1,0 +1,23 @@
+:css
+	.bloque_formulario .control-group{display:inline-block;}
+
+%div#contenedor_ingresar_carrera
+	%div.bloque_formulario
+		%h2 Información Carrera de Origen
+		%div#form-carrera-convalidar
+			%fieldset
+				%legend	Información Carrera
+				%div.control-group
+					%label.control-label Institucion de Procedencia
+					%select.span3.required{name: "carrera_convalidada[institucion_externa_id]"}
+						%option{value: ""} .: Institución Externa:.
+						- InstitucionExterna.all.each do |i|
+							%option{value: i.id}= i.nombre
+				%div.control-group
+					%label.control-label Carrera a Convalidar
+					%div.controls
+						%input.required{type: "text", :name => "carrera_convalidada[carrera_nombre]"}
+				%div.control-group
+					%label.control-label Número Documento
+					%div.controls
+						%input.required{type: "text", :name => "carrera_convalidada[numero_documento]"}

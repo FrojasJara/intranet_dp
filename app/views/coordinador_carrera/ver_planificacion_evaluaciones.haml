@@ -1,0 +1,75 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Generar Planificación de Evaluaciones
+			%span.divider
+
+#planificacion-evaluaciones
+
+	%form.form-horizontal{:action => coordinador_carrera_registrar_planificacion_evaluaciones_path, :method => "post"}
+		%fieldset
+			%legend Datos de la Sección
+			%input{:type => "hidden", :name => "planificacion[seccion_id]", :value => @seccion.id}
+			%div.control-group
+				%label.control-label Fecha
+				%div.controls
+					%input{:type => "text", :name => "planificacion[fecha_comprometida]"}
+
+			%div.control-group
+				%label.control-label Nombre de Evalución
+				%div.controls
+					%select{:name => "planificacion[nombre]"}
+						%option{} .: Debe Elegir un Nombre :.
+						%option{value: PlanificacionCalificacion::PRUEBA_PARCIAL } Prueba Parcial
+						%option{value: PlanificacionCalificacion::PRUEBA_GLOBAL } Prueba Global
+						%option{value: PlanificacionCalificacion::EXAMEN_FINAL} Examen Final
+						%option{value: PlanificacionCalificacion::EXAMEN_DE_REPETICION} Examen de Repetición
+
+			%div.control-group
+				%label.control-label TIPO DE EVALUACIÓN
+				%div.controls
+					%select{:name => "planificacion[tipo]"}
+						%option{} .: Debe elegir Tipo :.
+						%option{:value => PlanificacionCalificacion::SUMATIVA} Sumativa
+						%option{:value => PlanificacionCalificacion::FORMATIVA} Formativa
+						%option{:value => PlanificacionCalificacion::DIAGNOSTICO} Diagnostico
+
+
+			%div.control-group
+				%label.control-label Ponderación
+				%div.controls
+					%input{:type => "text", :name => "planificacion[ponderacion]"}
+			
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input{:type => "number", :name => "planificacion[numero]"}
+
+		%input.btn.btn-primary{:type =>"submit" , :value => "Guardar Evaluación"}
+	%br
+	%br
+
+	%table.table.table-striped.table-bordered#secciones
+		%colgroup  
+
+		%thead
+			%tr
+				%th Fecha
+				%th Nombre
+				%th Tipo
+				%th Ponderación
+				%th Numero
+
+
+		%tbody
+			- @planificacion_calificaciones.each do |i|
+				%tr
+					%td= i.nombre
+					%td= i.tipo
+					%td= i.ponderacion
+					%td= i.seccion.cupos
+					%td= i.seccion.periodo.nombre
+
+= datatable_src
+= datatable("secciones") 

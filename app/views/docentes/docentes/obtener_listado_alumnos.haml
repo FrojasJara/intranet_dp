@@ -1,0 +1,59 @@
+#alumnos-por-asignatura
+	= datatable_src
+	= datatable "alumnos", {msg_zero: "No se han encontrado alumnos"}
+
+	:css
+		col.numero { width: 30px; }
+		col.rut { width: 90px; }
+		col.nombre { width: 250px; }
+		col.carrera { width: 250px; }
+		col.anio-ingreso { width: 55px; }
+		col.estado { width: 80px; }
+		col.nota-final { width: 50px; }
+		
+
+		td.txLeft.dropdown ul.dropdown-menu {
+			left: 55px !important;
+			top: 26px !important;
+		}
+
+	.page-header
+		%h1 Alumnos por asignatura
+
+	= render "docentes/docentes/partials/seleccion_periodo_seccion" if @existe_seccion
+	
+	= notificaciones
+
+	- if not @seccion.nil? and @existen_datos
+		= render "docentes/docentes/partials/informacion_tabulada_seccion"
+		%table.table.table-condensed#alumnos
+			%colgroup
+				%col.numero
+				%col.rut
+				%col.nombre
+				%col.carrera
+				%col.anio-ingreso
+				%col.estado
+				%col.nota-final
+
+			%thead
+				%tr
+					%th.txLeft #
+					%th.txLeft Rut
+					%th.txLeft Alumno
+					%th.txLeft Carrera
+					%th.txLeft A. Ing.
+					%th.txCenter Estado
+					%th.txLeft N. F.
+			%tbody
+				- @alumnos.each_with_index do |item, index|
+					- puts "item: #{item.inspect}"
+					- puts "------------------------------------------------------------".bold.red
+					%tr
+						%td.txCenter= index + 1
+						%td.txLeft= item[:datos].rut
+						%td.txLeft= item[:datos].nombre
+						%td.txLeft= item[:carrera]
+						%td.txCenter= item[:anio_ingreso]
+						%td.txCenter= get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado
+						%td.txCenter= item[:inscripcion].nota_final

@@ -1,0 +1,22 @@
+= simple_form_for @item, :url => @item.new? ? administrador_usuarios_path : administrador_usuario_path(@item)  do |f|
+
+    = f.input :rut
+    = f.input :email
+    = f.input :password
+    = f.input :primer_nombre
+    = f.input :segundo_nombre
+    = f.input :apellido_paterno
+    = f.input :apellido_materno
+    = f.input :fecha_nacimiento
+    = f.input :estado_civil
+    = f.input :sexo
+    = f.input :domicilio
+    = f.input :villa_poblacion
+    = f.input :codigo_area_telefono
+    = f.input :telefono_fijo
+    = f.input :telefono_movil
+    = f.input :tipo
+    = f.input :rol_id, collection: Rol.all.map {|i| [i.nombre, i.id]}
+
+    %br
+    = f.submit 'Save', :class => 'aSubmit aS_ok right'

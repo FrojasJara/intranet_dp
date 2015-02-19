@@ -1,0 +1,30 @@
+:css
+	ul.estudios-docente {
+		list-style-type: decimal;
+		margin-left: 17px;
+	}
+
+	ul.estudios-docente span.anio {
+		display: block;
+		margin-bottom: 2px;
+		font-weight: bold;
+	}
+
+	ul.estudios-docente span.estudio {
+		font-style: italic;
+	}
+
+%form.informacion-tabulada
+	%fieldset
+		%legend Información del docente
+		%ul
+			%li.ui-helper-clearfix
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut:
+					%span= @usuario.rut
+				%div.contenedorElemento.separador
+					%label.etiqueta Nombre:
+					%span= @usuario.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta En ejercicio:
+					%span= bv @docente.en_ejercicio			

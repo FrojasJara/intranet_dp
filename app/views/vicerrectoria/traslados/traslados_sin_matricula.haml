@@ -1,0 +1,64 @@
+:css
+    #update {
+        float : right;
+        margin-right: 75px;
+    }
+
+.sectionHeader
+    %h1 Buscar Alumno
+= notificaciones
+.well{style: 'margin-bottom: 0px; padding-bottom: 0px'}
+    = form_for :busqueda, class: 'form-search', method: :get do |f|
+        %input.input-large.search-query{name: 'busqueda', placeholder: 'Buscar por rut o nombre', style: 'height: 28px'}
+        %button.btn.btn-primary Buscar
+        %br
+        %br
+        %span{style: 'color: rgb(155, 155, 155); font-weight: bolder'} Nota: Utilice solo el Primer nombre y el Apellido Paterno o el Rut con dígito verificador
+- unless @items.blank?
+    %br
+    %h4 Buscando: #{params[:busqueda]}
+    %br
+    = render partial: "partials/notificaciones/warning", locals: { mensaje: raw("<h4 class='alert-heading'>Importante</h4> <p style='font-weight: bold;'>Habilite el traslado solo si el alumno no tiene deuda en caso de que aun no este matriculado en este periodo, para verificar esto revisar situación del alumno.</p>")}
+    = link_to matriculas_pagos_ver_alumno_path(params[:busqueda]), class: 'btn btn-success' do
+        %i.icon-search.icon-white
+        Ver situación administrativa
+    = link_to alumno_obtener_informe_curricular_path(@usuario), class: 'btn btn-primary' do
+        %i.icon-search.icon-white
+        Ver situación académica
+    %br
+    %br
+    %form{method: 'post', action: update_estado_alumno_plan_estudio_path}
+        %table.table
+            %thead
+                %tr
+                    %th Rut
+                    %th Nombre
+                    %th Carrera
+                    %th Periodo
+                    %th Sede
+                    %th Estado
+            %tbody
+                - @items.each_with_index do |i,index|
+
+                    - usuario = i[:usuario]
+                    - alumno  = i[:alumno]
+                    - ape     = i[:alumno_plan_estudio]
+                    - isp     = i[:institucion_sede_plan]
+                    - plan    = i[:plan_estudio]
+
+                    %tr
+                        %td.txCenter= usuario.rut unless usuario.rut.blank?
+                        %td.txCenter= usuario.nombre unless usuario.nombre.blank?
+                        %td.txCenter= plan.nombre unless plan.nombre.blank?
+                        %td.txCenter= isp.periodo.nombre unless isp.periodo.blank?
+                        %td.txCenter= get_name(Sede,:SEDES,isp.institucion_sede.sede_id) unless isp.institucion_sede.blank?
+                        %td.txCenter
+                            %select{name: 'estado[]'}
+                                - unless ape.estado.eql?(Alumno::TRASLADADO)
+                                    %option{value: ape.estado}= get_name(Alumno,:ESTADOS_ACADEMICOS,ape.estado)
+                                %option{value: Alumno::TRASLADADO}= get_name(Alumno,:ESTADOS_ACADEMICOS,Alumno::TRASLADADO) 
+
+                    %input{type: 'hidden',name: 'id[]',value: ape.id}
+                    %input{type: 'hidden',name: 'rut',value: usuario.rut}
+
+        %input#update.btn.btn-primary{type: 'submit',value: "Actualizar"}

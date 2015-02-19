@@ -1,0 +1,10 @@
+= simple_form_for @item, :url => @item.new? ? mantenedores_asignaturas_path : mantenedores_asignatura_path(@item) do |f|
+    %fieldset
+        = f.input :nombre
+        = f.input :codigo
+        = f.input :semestre
+        = f.input :caracter
+        = f.input :horas_teoricas_semanales
+        = f.input :horas_practicas_semanales
+
+    = f.submit 'Enviar', :class => 'btn btn-primary'

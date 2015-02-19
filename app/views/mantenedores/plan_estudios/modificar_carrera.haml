@@ -1,0 +1,86 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Planes de Estudio
+#planes-estudios
+	%form{:action => registrar_modificar_carrera_path, :method =>  "post"}
+		%table.table.table-striped.table-bordered#carreras
+			%colgroup
+				%col.id-plan-estudio
+				%col.nombre-plan-estudio
+				%col.revision-plan-estudio
+				%col.anio-plan-estudio
+				%col.vigencia-plan-estudio
+				%col.escuela-plan-estudio
+				%col.modificar-plan-estudio
+
+			%thead
+				%tr
+					%th ID
+					%th Nombre
+					%th Revision
+					%th Anio Inicio
+					-#%th Vigencia
+					%th Escuela
+					%th Modificar
+			%tbody
+				- @planes_estudios.each do |i|
+					%tr
+						%td= i.id
+						%td
+							.btn-group
+								%a.dropdown-toggle{href: '#', data: {toggle: 'dropdown'}}
+									= i.nombre
+									%span.caret
+								%ul.dropdown-menu
+									%li= link_to raw(t('crud.edit')), edit_mantenedores_carrera_path(i)
+									-#%li= link_to raw(t('crud.delete')), mantenedores_carrera_path(i), :confirm => t('crud.confirm'), method: :delete
+									-#%li.divider
+									-#%li= history i, t(:historial) 
+						%td= i.revision
+						%td= i.anio_inicio
+						-#%td
+						-#	%select{:name => "plan_estudios[][vigencia]", :disabled => "disabled", :class => "vigencia"}
+						-#		%option{:value => 1 , :selected =>  i.estado == 1 ? true : false} Vigente
+						-#		%option{:value => 2 , :selected =>  i.estado == 2 ? true : false} No Vigente
+						%td
+							%select{:name => "plan_estudios[][escuela_id]", :disabled => "disabled", :class => "escuela"}
+								%option{}:: Seleccione Escuela ::
+								- @escuelas.each do |e|
+									%option{:value => e.id , :selected => e.id == i.escuela_id ? true : false}= e.nombre
+							%input{:type => "hidden", :disabled => "disabled", :name => "plan_estudios[][plan_estudio_id]", :value => i.id}
+						%td
+							%input.asignar-escuela{:type => :checkbox}
+
+		%br
+		%div{:class => "form-actions"}
+			%button.btn.btn-primary Asignar Escuela
+
+= datatable_src
+= datatable("carreras")                   
+:css
+	table.table thead th{color:#333 !important;}
+	td input[type="number"]{height: 28px !important; width:60px !important; }
+	select.vigencia{width:95px !important;}
+	select.escuela{width: 150px !important;}
+	col.id-plan-estudio{width: 20px !important;}
+	col.nombre-plan-estudio{width: 400px !important;}
+	col.revision-plan-estudio{width: 250px !important;}
+	col.anio-plan-estudio{width: 20px !important;}
+	col.vigencia-plan-estudio{width: 20px !important;}
+	col.escuela-plan-estudio{width: 20px !important;}
+
+
+:javascript
+
+	$("input.asignar-escuela").change(function(){
+		var $escuelas = $(this).parent().prev().find("select");
+		var $plan_estudio = $(this).parent().prev().find("input");
+		var $vigencia = $(this).parent().prev().prev().find("select");
+
+		$escuelas.attr("disabled", ! this.checked);
+		$plan_estudio.attr("disabled", ! this.checked);
+		$vigencia.attr("disabled", ! this.checked);
+	});
+

@@ -1,0 +1,48 @@
+#mainTitle.col16
+	%H1 Información
+	%h3
+		%span 
+			Datos Personales
+	%div.well
+		%div
+			%strong Rut:
+			%span= @item.rut
+		%div
+			%strong Nombres:
+			%span= @item.nombres
+		%div
+			%strong Apellidos:
+			%span= @item.apellidos
+		%div
+			%strong Fecha Nacimiento:
+			%span= @item.fecha_nacimiento
+		%div
+			%strong Sexo:
+			%span= get_name Usuario, :SEXOS, @item.sexo
+		%div
+			%strong Estado Civil
+			%span= get_name Usuario, :ESTADOS_CIVILES, @item.estado_civil
+	%h3
+		%span 
+			Datos Contacto
+	%div.well
+		%div
+			%strong Email:
+			%span= @item.email
+		%div
+			%strong Telefono Fijo:
+			%span= @item.telefono_fijo
+		%div
+			%strong Telefono Móvil:
+			%span= @item.telefono_movil
+
+	%h3
+		%span
+			Datos Domicilio
+	%div.well
+		%div
+			%strong Domicilio:
+			%span= @item.domicilio
+		%div
+			%strong Villa Población:
+			%span= @item.villa_poblacion

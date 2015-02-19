@@ -1,0 +1,91 @@
+:css
+	.inline{float: left; margin-right: 10px;}
+
+%h3 Filtrar Sección
+%form.form.form-inline#filtro-secciones{:action => url_metodo ,:method => "post"}
+	%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+	%div.control-group.inline
+		.control-label
+			%label Sede
+		.controls
+			%select.required{:name => "filtro[sede_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+				- @sedes.each do |s|
+					%option{value: s.id}= s.nombre
+	%div.control-group.inline
+		.control-label
+			%label Carrera
+		.controls
+			%select.required{:name => "filtro[plan_estudio_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+	%div.control-group.inline
+		.control-label
+			%label Jornada
+		.controls
+			%select.required{:name => "filtro[jornada]"}
+				%option{value: ""} .: Elija Una Opción :.
+				- @jornadas.each do |j|
+					%option{:value => "#{Seccion.const_get j}"}= get_name Seccion, "JORNADAS", Seccion.const_get(j)
+	%div.control-group.inline
+		.control-label
+			%label Periodo
+		.controls
+			%select.required{:name => "filtro[periodo_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+				- @periodos.each do |p| 
+					%option{value: p.id}= p.nombre
+	
+	%div.control-group.inline
+		.control-label
+			%label Nivel
+		.controls
+			%select.required{:name => "filtro[nivel]" }
+				%option{value: ""} .: Elija Una Opción :.
+	%div.form-actions
+		%button.btn.btn-primary{type: "submit"}
+			%i.icon.icon-white.icon-search
+			= texto_boton
+
+:javascript
+	$(document).ready(function(){
+		$("#filtro-secciones").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Estadisticas", "Por favor, compruebe que ha ingresado la información necesaria.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+		/*Actualiza el combo de carreras segun sede*/
+		$("select[name='filtro[sede_id]']").change(function(){
+			var sede_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_apoyo_docente_buscar_carreras_path}",
+				type: 'POST',
+				data: {sede_id : sede_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Carrera :.</option>";
+					$.each(data.carreras, function(k,v){
+						options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + " [Malla " + v.siaa_id_ma + "] </option>"
+					});
+					$("select[name='filtro[plan_estudio_id]']").html(options);
+				}
+			});
+		});
+		/* Actualiza el combo de niveles */
+		$("select[name='filtro[plan_estudio_id]']").change(function(){
+			var plan_estudio_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_coordinador_carrera_buscar_nivel_path}",
+				type: 'POST',
+				data: {plan_estudio_id : plan_estudio_id},
+				success: function(data) {
+					var options = "<option>.: Elija Un Nivel :.</option>";
+					for ( var i = 1; i < data.nivel+1; i++ ) {
+						options = options +  "<option value='" + i + "'>Nivel " + i + " </option>"
+					}
+					$("select[name='filtro[nivel]']").html(options);
+				}
+			});
+		});
+	});

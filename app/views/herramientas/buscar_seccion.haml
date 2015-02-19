@@ -1,0 +1,71 @@
+:css
+    .inputs span {display: block !important;}
+    label.collection_check_boxes {display: inline !important; padding: 5px; margin-right: 15px;}
+.sectionHeader
+    %h1 Buscar Sección
+
+    .well{style: 'margin-bottom: 0px; padding-bottom: 0px'}
+        = form_for :busqueda, url: herramientas_buscar_lista_seccion_path, class: 'form-search', method: :get, html: {id: 'formulario'} do |f|
+            .row
+                .span4
+                    %h3 Sede
+                    .inputs
+                        = f.collection_select :sede, [[nil, 'Seleccione']]+InstitucionSede::obtener_nombres_para_select, :first, :last, {}, {class: 'span4'}
+                .span3
+                    %h3 Plan Estudio
+                    .inputs
+                        %select#busqueda_carrera.span3{name: 'busqueda[carrera]'}
+                            / - InstitucionSedePlan.obtener_planes.each do |ipe|
+                            /     %option{value: ipe[:id], class:"sede#{ipe[:institucion_sede_id].to_s}"}=ipe[:nombre]
+                .span1
+                    %br
+                    %button#buscar.btn.btn-primary Buscar
+    #result
+        %br
+= datatable_src
+:javascript
+    var options = #{InstitucionSedePlan.obtener_planes.to_json};
+
+    function loadComboValues(sede_id, autoload)
+    {
+        $.each(options, function(index, itemData){
+
+            if(itemData.institucion_sede_id == sede_id)
+            {
+                $('#busqueda_carrera').append( '<option value="'+ itemData.id +'">' + itemData.nombre +'</option>');
+            }
+            
+        });
+
+        if(autoload)
+            $('#buscar').click();
+    }
+    
+    $(function(){        
+        $('#formulario').submit(function(){
+            $.ajax({
+                type: 'GET',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#result').html(data);
+                }
+            });
+            return false;
+        });
+
+        $('#busqueda_sede').change(function(){
+            $('#busqueda_carrera').empty();
+            select = $(this);
+            console.log(select, "=== > Este es el select");
+            window.location.hash = select.val();
+            console.log(window.location.hash, "=== > window.location.hash");
+            loadComboValues(select.val());
+        });
+        //-->    if( (val = window.location.hash).length > 0 )
+        //-->        loadComboValues( val.substr(1), true );
+
+    });
+    
+
+

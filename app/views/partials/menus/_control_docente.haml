@@ -1,0 +1,12 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Control de Docencia
+%ul.nav.nav-list
+	%li.nav-header Gestión Docente 
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Docentes
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Planilla Docentes', mantenedores_docentes_path

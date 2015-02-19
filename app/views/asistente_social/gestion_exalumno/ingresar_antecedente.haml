@@ -1,0 +1,72 @@
+- unless @alumno_plan_estudio.blank?
+	%h1 Exalumnos
+	= notificaciones
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información Exalumno
+			- if @usuario.nil?
+				%h3 El alumno no existe
+			- else
+				%ul
+					%li.ui-helper-clearfix
+						%h3 Alumno
+						%div.contenedorElemento.separador
+							%label.etiqueta Rut:
+							%span= @usuario.rut
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre:
+							%span= @usuario.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Fonos:
+							%span
+								= @usuario.telefono_fijo_completo
+								= "|" unless @usuario.telefono_movil.blank?
+								= @usuario.telefono_movil
+						%div.contenedorElemento.separador
+							%label.etiqueta Domicilio:
+							%span= @usuario.domicilio_completo
+						%div.contenedorElemento.separador
+							%label.etiqueta Comuna:
+							%span= @usuario.comuna.nombre unless @usuario.comuna.nil?
+						%div.contenedorElemento.separador
+							%label.etiqueta Email:
+							%span= mail_to @usuario.email
+						%br
+					- unless @us_apoderado.blank?
+						%li.ui-helper-clearfix
+							%h3 Apoderado
+							%div.contenedorElemento.separador
+								%label.etiqueta Rut:
+								%span= @us_apoderado.rut
+							%div.contenedorElemento.separador
+								%label.etiqueta Nombre:
+								%span= @us_apoderado.nombre
+							%div.contenedorElemento.separador
+								%label.etiqueta Fonos:
+								%span
+									= @us_apoderado.telefono_fijo_completo
+									= "|" unless @us_apoderado.telefono_movil.blank?
+									= @us_apoderado.telefono_movil
+							%div.contenedorElemento.separador
+								%label.etiqueta Domicilio:
+								%span= @us_apoderado.domicilio_completo
+							%div.contenedorElemento.separador
+								%label.etiqueta Comuna:
+								%span= @us_apoderado.comuna.nombre unless @us_apoderado.comuna.nil?
+							%div.contenedorElemento.separador
+								%label.etiqueta Email:
+								%span= mail_to @us_apoderado.email
+	.btn-group
+		= link_to matriculas_pagos_bitacora_cobranzas_path(@alumno_plan_estudio.id), class: 'btn btn-primary' do
+			%i.icon-search.icon-white
+			Bitacora
+		%a.not-print.btn.btn-info.impresion{:href => "#"}
+			%i.icon-white.icon-print
+			Imprimir
+	%br
+	= render :partial => 'asistente_social/gestion_exalumno/partials/form'
+	= render :partial => 'asistente_social/gestion_exalumno/partials/lista'
+:css   
+	@media print{
+		form.informacion-tabulada label.etiqueta { font-size: 12px !important; }
+		form.informacion-tabulada div.contenedorelemento span { font-size: 12px !important; margin-left: 100px !important; }

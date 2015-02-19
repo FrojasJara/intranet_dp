@@ -1,0 +1,51 @@
+.page-header
+	%h1 Planes de pago de procesos de matrículas
+
+= notificaciones
+
+- if @existe_matricula	
+	= render :partial => "matriculas/matriculas/partials/informacion_tabulada_matricula", :locals => { :no_mostrar => :planes }
+	%table.table.table-condensed
+		%thead
+			%th.txCenter N°
+			%th.txLeft Estado
+			%th.txLeft Tipo
+			%th.txRight Matricula
+			%th.txRight Arancel
+			%th.txRight Normativa
+			%th.txRight Descuento
+			%th.txRight Monto Rec.
+			%th.txRight Arancel total
+			%th.txCenter A. P.
+			%th.txCenter N. P.
+			%th.not-print
+		%tbody
+			- @planes.each do |plan|
+				%tr
+					%td.txCenter.dropdown
+						%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+							= plan.id
+							%b.caret
+						%ul.dropdown-menu{:style => "text-align: left;"}
+							%li
+								%a{:href => matriculas_ver_path(@matricula.id, :anchor => "plan-#{plan.id}")}
+									%i.icon-zoom-in
+									Ver plan
+							/ %li
+							/ 	%a{:href => "#{matriculas_plan_documentos_path plan.id}"} 
+							/ 		%i.icon-list-alt
+							/ 		Generar documentos
+
+					%td.txLeft= get_name PlanPago, "ESTADOS", plan.estado
+					%td.txLeft= get_name MatriculaPlan, "TIPOS", plan.tipo
+					%td.txRight= dinero plan.matricula
+					%td.txRight= dinero plan.arancel
+					%td.txRight= dinero plan.normativa
+					%td.txRight
+						= dinero plan.descuento_aplicado
+						%span{:style => "display: block; font-style: italic;"}= plan.nombre_descuento
+					%td.txRight= dinero plan.monto_reconocido
+					%td.txRight= dinero plan.arancel_total
+					%td.txCenter= plan.asignaturas_propuestas
+					%td.txCenter= plan.normativas_propuestas	
+	

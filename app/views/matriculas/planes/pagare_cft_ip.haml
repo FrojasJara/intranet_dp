@@ -1,0 +1,10 @@
+%br
+%br
+%br
+.page-header
+	%h1 Pagaré Nº #{pagare.numero}
+
+%p
+	Debo y pagaré a la orden del #{raw "<span class='mayusculas'>#{@institucion.razon_social}</span>"}, Rut. #{raw "<span class='mayusculas'>#{@institucion.rut}</span>"}, Giro: Enseñanza - Privada - Servicio de Fotocopias, la suma de #{dinero pagare.monto} (#{pagare.monto.wordify.capitalize}), pesos, modeda corriente, cantidad que adeudo por conceptos de matrícula y arancel por estudios superiores del Alumno Sr. #{raw "<span class='mayusculas'>#{@usuario_alumno.nombre}</span>"} de la carrera de #{raw "<span class='mayusculas'>#{@plan_estudio.nombre}</span>"} y cohorte del año #{periodo_matriculable[:anio]}.
+
+= render "matriculas/planes/partials/detalle_pagare"

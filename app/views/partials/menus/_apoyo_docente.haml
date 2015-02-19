@@ -1,0 +1,60 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Control de Docencia
+%ul.nav.nav-list
+	%li.nav-header Gestión Docente 
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Docentes
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => mantenedores_docentes_path}
+					Plantilla Docentes
+			%li
+				%a{:href => apoyo_docente_acta_de_firmas_path}
+					Acta de Firmas
+
+	%li.nav-header Gestión Salas
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Salas y Laboratorios
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => apoyo_docente_ver_salas_path} 
+					Ver Salas
+
+	%li.nav-header Gestión Horarios
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Bloques Horarios
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => apoyo_docente_ver_bloques_horarios_path} 
+					Ver Bloques
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Secciones
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => asignaturas_escuela_path}
+					Modificar Seccion
+			%li
+				%a{:href => apoyo_docente_ver_programacion_seccion_path} 
+					Programación Clases
+			-#%li
+				-#%a{:href => apoyo_docente_ver_horarios_seccion_path} 
+				-#	Horario Clases
+	%li.nav-header Gestión Asistencia
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Asistencia
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				%a{:href => apoyo_docente_ver_asistencia_seccion_path} Ver Asistencia Seccion
+			%li
+				%a{:href => apoyo_docente_buscar_alumno_path} Ver Asistencia Alumno

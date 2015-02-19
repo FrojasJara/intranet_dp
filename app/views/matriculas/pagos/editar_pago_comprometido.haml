@@ -1,0 +1,46 @@
+.page-header
+    = breadcrumb [["Recepción de pagos", matriculas_pagos_buscar_alumno_path], "Detalle cuotas", "Editar"]
+    %h1 Editar pago comprometido
+
+= render partial: 'matriculas/pagos/partials/detalle_alumno', locals: {botones: false}
+
+= simple_form_for :item, class: 'form-inline' do |f|
+    
+    %h3 Pago Comprometido
+    = f.simple_fields_for :pago_comprometido do |f_pc|
+        = hidden_field :id, @pago_comprometido.id
+        = f_pc.input :monto, input_readonly(@pago_comprometido.monto)
+        = f_pc.input :saldo, input_value(@pago_comprometido.saldo)
+
+    %h3 Abonos
+    %table.table.table-condensed
+        %thead
+            %tr
+                %th ID
+                %th Fecha
+                %th Medio
+                %th Monto
+                %th Interes
+                %th Saldo
+                %th Saldo Interes
+        %tbody
+            - (abns = @pago_comprometido.abonos).each do |abono|
+                %tr
+                    %td= abono.id
+                    %td= l abono.created_at, format: :fecha
+                    %td= value abono.medio_pago, :nombre
+                    %td
+                        %input{readonly: true, value: abono.monto, name: "item[abono][#{abono.id}][monto]"}
+                    %td
+                        %input{readonly: abns.last.eql?(abono) ? false : true, value: abono.interes, name: "item[abono][#{abono.id}][interes]"}
+                    %td
+                        %input{readonly: abns.last.eql?(abono) ? false : true, value: abono.saldo, name: "item[abono][#{abono.id}][saldo]"}
+                    %td
+                        %input{readonly: abns.last.eql?(abono) ? false : true, value: abono.saldo_interes, name: "item[abono][#{abono.id}][saldo_interes]"}
+
+    = f.submit 'Guardar', class: 'btn btn-primary'
+
+
+/ = debug @pago_comprometido
+
+/ = debug @pago_comprometido.abonos

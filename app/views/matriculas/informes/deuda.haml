@@ -1,0 +1,89 @@
+%h3 
+    Informe de deudas 
+    = PlanEstudio.nombre_item_malla params[:malla]
+    \|
+    = @periodo.nombre
+
+- def suma(pc)
+    - sum=0
+    - pc.each do |s|
+        - sum=sum+s.saldo
+
+    - return sum
+
+%table#informe.table.table-condensed
+    %thead
+        %tr
+            %th Nº
+            %th Rut
+            %th Nombres
+            %th Apellidos
+            %th Fecha de Matrícula
+            %th Año de Ingreso
+            %th Modalidad
+            %th Jornada
+            %th Nivel
+            %th Deuda total
+            %th Deuda actual
+            %th F/V
+            %th ENE
+            %th FEB
+            %th MAR
+            %th ABR
+            %th MAY
+            %th JUN
+            %th JUL
+            %th AGO
+            %th SEP
+            %th OCT
+            %th NOV
+            %th DIC
+            %th ENE
+            %th FEB
+    %tbody
+        - if @matriculas.blank? or @matriculas.count.eql? 0
+            %tr
+                %td{colspan: 11} No hay registros
+        - else
+            - @matriculas.each_with_index do |item, index|
+                - usuario, matricula, alumno_plan_estudio, inscripciones = item[:usuario], item[:matricula], item[:alumno_plan_estudio], item[:inscripciones]
+                %tr
+                    %td= index + 1
+                    %td= usuario.rut
+                    %td= usuario.nombres
+                    %td= usuario.apellidos
+                    %td= l matricula.created_at, format: :fecha
+                    %td= alumno_plan_estudio.anio_ingreso
+                    %td= get_name InstitucionSedePlan, :MODALIDADES, item[:institucion_sede_plan].modalidad
+                    %td= get_name InstitucionSedePlan, :JORNADAS, item[:institucion_sede_plan].jornada
+                    %td
+                        - if inscripciones.blank? 
+                            - unless item[:plan_pago].blank?
+                                - unless item[:plan_pago].nivel.blank?
+                                    = (item[:plan_pago].nivel)
+                                - else
+                                    = "-"
+                            - else
+                                = "-"
+                        - else
+                            - unless item[:plan_pago].blank?
+                                - unless item[:plan_pago].nivel.blank?
+                                    = (item[:plan_pago].nivel - 1)
+                                - else
+                                    = "-"
+                            - else
+                                = "-"
+                    %td.txRight= item[:pendientes].blank? ? 0 : item[:pendientes].sum(&:saldo)
+                    %td.txRight= item[:atrasadas].blank? ? 0 : item[:atrasadas].sum(&:saldo)
+                    - if item[:pendientes].blank?
+                        - 15.times do
+                            %td
+                    - else
+                        %td= item[:pendientes].first.fecha_vencimiento.day
+                        - (1..12).each do |m|
+                            %td= (pc = item[:pendientes].select{|x| x.fecha_vencimiento.month == m and x.fecha_vencimiento.year == @periodo.anio}).blank? ? '' : suma(pc)
+                        - (1..2).each do |m|
+                            %td= (pc = item[:pendientes].select{|x| x.fecha_vencimiento.month == m and x.fecha_vencimiento.year == @periodo.anio+1}).blank? ? '' : suma(pc)
+
+= datatable_src
+= datatable 'informe'

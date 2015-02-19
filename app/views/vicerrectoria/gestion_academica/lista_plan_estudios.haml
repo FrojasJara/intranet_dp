@@ -1,0 +1,47 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li.active
+			%a{:href => "#"}  
+				Planes de Estudio Vigentes
+#planes-estudios
+	%table.table.table-striped.table-bordered#carreras
+		%colgroup  
+
+		%thead
+			%tr
+				%th Nombre
+				%th Malla
+				%th Revisión
+				%th Duracion
+				%th Año Inicio
+				%th Año Fin
+				
+				
+		%tbody
+			- @plan_estudios.each do |i|
+				%tr
+					%td= i[:nombre]
+					%td.dropdown
+						%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+							= i[:nombre]
+							%b.caret
+						%ul.dropdown-menu
+							%li
+								%a{:href => agregar_asignatura_plan_estudio_path(i.id)}
+									%i.icon-zoom-in
+									Gestión Asignaturas
+							%li.divider
+							%li
+								%a{:href => abrir_plan_estudio_periodo_path(i.id)} 
+									%i.icon-list-alt
+									Dictar en Periodo
+					%td= i.revision
+					%td= i.duracion
+					%td= i.anio_inicio
+					%td= i.anio_fin
+
+					
+
+= datatable_src
+= datatable("carreras")                   
+

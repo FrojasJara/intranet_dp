@@ -1,0 +1,11 @@
+.sectionHeader
+	%ul.breadcrumb
+		%li
+			%a{:href => "#"}  
+				Planes de Estudio
+			%span.divider /
+		%li.active
+			%a{:href => "#"} 
+				= @item.nombre
+
+= render partial: 'form'

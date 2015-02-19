@@ -1,0 +1,38 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            %a{:href => "#"}  Abrir Secciones Asignaturas
+            %span.divider
+        %li.active
+            %a{:href =>"#"}
+                = periodo_en_curso[:nombre]
+#planes-estudios
+    %table.table.table-striped.table-bordered#carreras
+        %colgroup  
+
+        %thead
+            %tr
+                %th Nombre
+                %th Malla
+                %th Duracion
+                %th Año Inicio
+                %th Año Fin
+        %tbody
+            - @plan_estudios.each do |i|
+                %tr
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+                            = i.nombre
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => ver_asignaturas_plan_estudio_path(i.id)}
+                                    %i.icon-zoom-in
+                                    Ver asignaturas
+                    %td= i.revision
+                    %td= i.duracion
+                    %td= i.anio_inicio
+                    %td= i.anio_fin
+= datatable_src
+= datatable("carreras")                   
+

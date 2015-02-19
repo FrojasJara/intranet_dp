@@ -1,0 +1,42 @@
+%h2 
+    %i.icon-white.icon-chevron-right
+    Administración de Sistema
+%ul.nav.nav-list
+    %li.nav-header Configuración de Sistema
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Roles
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Roles', administrador_roles_path    
+
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Usuarios
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Usuarios', administrador_usuarios_path
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Instituciones
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Instituciones', administrador_instituciones_path
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Sedes
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Sedes', administrador_sedes_path
+
+    %li.dropdown
+        %a{:href => "#", :data => {:toggle => "dropdown"}} 
+            %i.icon.icon-chevron-right
+            Instituciones Sedes
+        %ul.hide.dropdown-menu.inner-list
+            %li
+                = link_to 'Institución Sedes', administrador_institucion_sedes_path

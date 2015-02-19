@@ -1,0 +1,54 @@
+.sectionHeader
+    %h1 Buscar Apoderado
+
+.well{style: 'margin-bottom: 0px; padding-bottom: 0px'}
+    = form_for :busqueda, class: 'form-search', method: :get do |f|
+        %input#busqueda.input-large.search-query{name: 'busqueda', placeholder: 'Buscar por rut o nombre', style: 'height: 28px'}
+        %button.btn.btn-primary Buscar
+        %br 
+        %br
+        %span{style: 'color: rgb(155, 155, 155); font-weight: bolder'} Nota: Utilice solo el Primer nombre y el Apellido Paterno o el Rut con dígito verificador
+
+- unless @items.blank?
+    %br
+    %h4 Buscando: #{params[:busqueda]}
+    %br
+    %table#alumnos.table-condensed.table
+        %thead
+            %tr
+                %th Rut
+                %th Nombre
+                %th Domicilio
+                %th Telefonos
+
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td
+                        .btn-group
+                            %a.dropdown-toggle{href: '#', data: {toggle: 'dropdown'}}
+                                = i.rut
+                                %span.caret
+                            %ul.dropdown-menu
+                                %li= link_to raw(t('crud.show')), administrador_usuario_path(i)
+                                %li
+                                    = link_to editar_apoderado2_herramientas_path "#{i.rut}" do
+                                        %i.icon-pencil
+                                        Editar Datos Personales 
+                    %td= i.nombre
+                    %td
+                        = i.domicilio
+                        - unless i.villa_poblacion.blank?
+                            ,
+                            = i.villa_poblacion
+                    %td
+                        - unless i.telefono_fijo.blank?
+                            = i.codigo_area_telefono
+                            -
+                            = i.telefono_fijo
+                        |
+                        = i.telefono_movil unless i.telefono_movil.blank?
+
+                    
+= datatable_src
+= datatable 'apoderados'

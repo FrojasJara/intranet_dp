@@ -1,0 +1,64 @@
+.sectionHeader
+    %h1 Usuarios
+
+    = link_to 'Agregar Usuario', new_mantenedores_usuario_path, :class => 'btn'
+
+#grid
+
+:javascript
+     $(document).ready(function() {
+        kendo.culture("es-CL");
+                    $("#grid").kendoGrid({
+                        dataSource: {
+                            data: #{@items.to_json.html_safe},
+                            pageSize: 9
+                        },
+                        height: 350,
+                        groupable: true,
+                        filterable: true,
+                        scrollable: true,
+                        sortable: true,
+                        pageable: true,
+                        columns: [ {
+                                field: "rut",
+                                width: 50,
+                                title: "RUT"
+                            },
+                            {
+                                field: "primer_nombre",
+                                width: 50,
+                                title: "Nombre"
+                            },
+                            {
+                                field: "apellido_paterno",
+                                width: 50,
+                                title: "Apellido Paterno"
+                            },
+                            {
+                                field: "apellido_materno",
+                                width: 50,
+                                title: "Apellido Materno"
+                            },
+                            {
+                                field: "sexo",
+                                width: 50,
+                                title: "Sexo"
+                            },
+                            {
+                                field: "comuna",
+                                width: 50,
+                                title: "Comuna"
+                            },
+                            {
+                                field: "region",
+                                width: 50,
+                                title: "Región"
+                            },
+                            {
+                                field: "pais",
+                                width: 50,
+                                title: "País"
+                            }
+                        ]
+                    });
+                });

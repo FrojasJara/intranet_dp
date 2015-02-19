@@ -1,0 +1,32 @@
+%html
+    %head
+        %title
+    %body
+        %p
+            = @user.nombres.upcase+" "+@user.apellidos.upcase
+            %br
+            = @user.rut.upcase
+            %br
+            %br
+            Junto con saludarlo(a) recuerdo a usted que tiene 2 cuotas pendientes correspondientes al 
+            - @fechas.each_with_index do |fecha,index|
+                - if index == 0
+                    = fecha  
+                - else
+                    =' y '+fecha.to_s 
+            por la cantidad de 
+            - suma = 0
+            - @saldos.each do |saldo|
+                - suma += saldo 
+            ='$'+suma.to_s
+            %strong
+                = ' a la cual se le debe sumar los intereses por gasto de cobranza externa, favor de cancelar antes del '+@fecha_fin.to_s+"."
+        %p Atentos en resolver cualquier dificultad que puedan producir estos atrasos, favor de contactarse con nosotros.
+        %p Saluda cordialmente
+        %p
+            %strong{style: 'float:left;width:100%;text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO DE COBRANZA
+                %br
+                ='e-mail '+@usuario.email

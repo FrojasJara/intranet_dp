@@ -1,0 +1,233 @@
+#libro-calificaciones
+	.page-header
+		%h1 Registro en el libro de calificaciones
+
+	= render "docentes/docentes/partials/seleccion_seccion_abierta" if @existen_secciones	
+
+	= render "docentes/docentes/partials/informacion_tabulada_docente" if not @seccion.nil?
+
+	= notificaciones
+
+	- permitir_examen = true
+
+	- if not @seccion.nil? and @existen_datos		
+		= form_tag "#{docente_registrar_libro_calificaciones_path @usuario.id, @seccion.id}", :class => "calificaciones", :method => "post" do
+			- planificacion_calificacion_id = nil
+			%table.table.table-condensed
+				%colgroup
+					%col.numero
+					%col.eleccion
+					%col.situacion
+					%col.rut
+					%col.alumno
+					- @libro[:planificaciones].each do
+						%col.instancia
+					- if @es_presencial
+						%col.gr
+					%col.np
+					%col.ne
+					%col.ner
+				%thead
+					%tr
+						%th.txCenter #
+						%th
+						%th.txLeft Situación
+						%th.txLeft Rut
+						%th.txLeft Alumno
+						- @libro[:planificaciones].each do |item|
+							%th.txCenter.calificacion-parcial
+								%span.instancia= item.nombre
+								%span.ponderacion= "(#{item.ponderacion_porcentual})"
+						- if @es_presencial
+							%th.txCenter.calificacion-parcial P.G.R.
+						%th.txCenter N. P.
+						%th.txCenter.calificacion-final N. E.
+						%th.txCenter.calificacion-final N. E. R.
+
+				%tbody
+					- @libro[:alumnos].each_with_index do |item, index|	
+						- evaluar_examen_repeticion = true
+						- evaluar_examen = true
+						- evaluar_pgr = true					
+						%tr.asistio
+							%td.txCenter= index + 1
+							%td.txLeft
+								%input.eleccion.asistio{:type => "radio", :checked => "checked", :name => "eleccion_#{index}", :data => { "show-class" => "asistio", "estado" => CalificacionParcial::CALIFICADA, "asistio" => "true" }}
+								
+								- if @es_presencial and not item[:calificacion_justificada]	
+									%input.eleccion.evaluacion-pendiente{:type => "radio", :name => "eleccion_#{index}", :data => { "show-class" => "evaluacion-pendiente", "estado" => CalificacionParcial::JUSTIFICADA, "asistio" => "false" }}
+								
+								%input.eleccion.no-asistio{:type => "radio", :name => "eleccion_#{index}", :data => { "show-class" => "no-asistio", "estado" => CalificacionParcial::AUSENTADA }}
+							%td.txLeft.situacion
+								.asistio
+									%span El alumno asistió.
+								.evaluacion-pendiente{:style => "display: none;"}
+									%span Justificado.
+								.no-asistio{:style => "display: none;"}
+									%span No asistió. Nota 1.
+							%td.txLeft.c1= item[:datos].rut
+							%td.txLeft.c1= item[:datos].nombre
+
+							- primera_parcial_comprometida = true
+							- item[:calificaciones].each_with_index do |calificacion, i|
+								- estado_calificacion = get_name(CalificacionParcial, "ESTADOS", calificacion[:estado_nota])
+								%td{:class => "txCenter calificacion-parcial #{estado_calificacion}"}
+									- if calificacion[:planificacion].estado == PlanificacionCalificacion::APLICADA
+										- if not calificacion[:estado_nota] == CalificacionParcial::JUSTIFICADA
+											= calificacion[:nota]
+										- else
+											P.G.R.
+									- elsif primera_parcial_comprometida
+										%input{:type => "hidden", :value => calificacion[:planificacion].id, :name => "calificaciones_parciales[][planificacion_calificacion_id]"}
+										%input{:type => "hidden", :value => item[:inscripcion].id, :name => "calificaciones_parciales[][alumno_inscrito_seccion_id]"}
+										%input.estado{:type => "hidden", :name => "calificaciones_parciales[][estado]", :value => CalificacionParcial::CALIFICADA }
+										%input.cambiar-nombre.calificacion.required{:type => "text", :name => "parcial_#{calificacion[:planificacion].id}_#{item[:inscripcion].id}", :data => {"nombre-real" => "calificaciones_parciales[][calificacion]"}, :tabindex => index + 1}										
+										- planificacion_calificacion_id = calificacion[:planificacion].id
+										- primera_parcial_comprometida = false
+										- evaluar_examen_repeticion = false
+										- evaluar_examen = false
+										- evaluar_pgr = false	
+										- permitir_examen = false
+
+							- if @es_presencial
+								%td.txCenter.calificacion-parcial
+									- if not item[:inscripcion].nota_global_recuperativa.nil?
+										= item[:inscripcion].nota_global_recuperativa
+									- elsif evaluar_pgr and item[:inscripcion].nota_presentacion.nil?
+										%input{:type => "hidden", :name => "recuperativas[][id]", :value => item[:inscripcion].id}	
+										%input.cambiar-nombre.calificacion.required{:type => "text", :name => "recuperativa_#{index}", :data => {"nombre-real" => "recuperativas[][nota_global_recuperativa]"}, :tabindex => index + 1}
+										%input.asistio{:type => "hidden", :name => "recuperativas[][asistio_global_recuperativa]", :value => "true"}
+										- evaluar_examen = false
+										- permitir_examen = false								
+
+							%td.txCenter= item[:inscripcion].nota_presentacion
+							%td.txCenter.calificacion-final
+								- if not item[:inscripcion].nota_examen.nil?
+									= item[:inscripcion].nota_examen
+								- elsif evaluar_examen
+									%input.cambiar-nombre.required.calificacion{:type => "text", :name => "examen_#{item[:inscripcion].id}", :data => {"nombre-real" => "examenes[][nota_examen]"}, :tabindex => index + 1}
+									%input{:type => "hidden", :value => "#{item[:inscripcion].id}", :name => "examenes[][alumno_inscrito_seccion_id]"}
+									%input.asistio{:type => "hidden", :name => "examenes[][asistio_examen]", :value => "true"}
+									- evaluar_examen_repeticion = false	
+
+							%td.txCenter.calificacion-final 
+								- if not item[:inscripcion].nota_examen_repeticion.nil?
+									= item[:inscripcion].nota_examen_repeticion
+								- elsif evaluar_examen_repeticion
+									%input.cambiar-nombre.required.calificacion{:type => "text", :name => "e_repeticion_#{item[:inscripcion].id}", :data => {"nombre-real" => "finales[][nota_examen_repeticion]"}, :tabindex => index + 1}
+									%input{:type => "hidden", :value => "#{item[:inscripcion].id}", :name => "finales[][alumno_inscrito_seccion_id]"}
+									%input.asistio{:type => "hidden", :name => "finales[][asistio_examen_repeticion]", :value => "true"}
+	
+			%input{:type => "hidden", :name => "planificacion_calificacion_id", :value => planificacion_calificacion_id}
+			%button.btn.btn-primary.loading-button{:type => "submit", :data => {"loading-text" => "... registrando calificaciones ..."}}
+				%i.icon-white.icon-edit
+				Registrar calificaciones
+
+:css
+	col.eleccion { width: 60px; }
+	col.situacion { width: 137px; }
+	col.numero { width: 30px; }
+	col.rut { width: 83px; }
+	col.instancia { width: 90px; }
+	col.np { width: 50px; }
+	col.global { width: 50px; }
+	col.ne { width: 50px; }
+	col.ner { width: 50px; }
+	col.nf { width: 50px; }
+
+	#libro-calificaciones th, #libro-calificaciones td {
+		vertical-align: middle;
+		line-height: normal;
+	}	
+	#libro-calificaciones th.calificacion-parcial {
+		background-color: #426600 !important;
+		color: white !important;
+	}
+	#libro-calificaciones th.calificacion-final {
+		background-color: #4A9FFF !important;
+		color: white !important;
+	}
+	th.calificacion-parcial span { display: block !important; font-size: 10px; }
+	th.calificacion-parcial span.ponderacion { font-weight: bold; }
+	td.calificacion-parcial { background-color: #E1FFD5 !important; }
+	td.calificacion-final { background-color: #DFECFF !important; }	
+
+	input[type="text"].calificacion {
+		width: 30px;
+		text-align: center;
+	}
+	td div span { display: block; font-weight: bold; }
+	td div.asistio { color: #007A00; }
+	td div.no-asistio { color: red; }
+	td div.evaluacion-pendiente { color: #707070; }
+	td.justificada { font-weight: bold; }
+	td.ausentada { font-weight: bold; color: red; }
+
+	tr.asistio td.c1 { }
+	tr.no-asistio td.c1 { color: red; }
+	tr.evaluacion-pendiente td.c1 { color: #707070; }
+
+	form.calificaciones { text-align: center; }
+
+:javascript
+	$(document).ready(function() {
+		$("form.calificaciones").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Existe información errónea", "Por favor, ingrese un valor válido de calificación.");
+			},
+			submitHandler: function(form) {
+				if( confirm("¿Está seguro que desea registrar las calificaciones?") ) {
+					notify_loader("Registrando calificaciones ...", "Espere un momento mientras las calificaciones son registradas.");
+					// Correcion de nombres
+					$(form).find(":input.cambiar-nombre").each(function(i, v) { $(v).attr("name", $(v).attr("data-nombre-real")); })
+					$(form).find(":input.loading-button").button("loading");
+					form.submit();
+				}
+			}
+		});
+
+		$(":radio.eleccion").change(function() {
+			var $fila = $(this).parent().parent();
+			var $situacion = $fila.find("td.situacion");
+
+			var clase = $(this).attr("data-show-class");
+			var estado = $(this).attr("data-estado");
+			var asistencia = ($(this).attr("data-asistio") != undefined) ? $(this).attr("data-asistio") : "false";
+
+			$situacion.find("> div").hide();
+			$situacion.find("> div." + clase).show();
+			$fila.attr("class", clase);
+
+			var $estado = $fila.find(":hidden.estado");
+			var $calificacion = $fila.find("input.calificacion");
+			var $asistencia = $fila.find(":hidden.asistio");
+
+			switch( clase ) {
+				case "asistio":
+					$calificacion.val("").removeAttr("readonly").removeAttr("disabled");
+					$asistencia.val(asistencia);
+					break;
+				case "no-asistio":
+					$calificacion.val("1.0").removeAttr("disabled").attr("readonly", "readonly");
+					$asistencia.val(asistencia);
+					break;
+				case "evaluacion-pendiente":
+					$calificacion.val("").removeAttr("readonly").attr("disabled", "disabled");
+					break
+			}
+			$estado.val(estado).css("border-color", "silver");
+		})
+
+		#{
+			if permitir_examen
+				%{
+					$(":radio.evaluacion-pendiente").remove();
+				}
+			else
+				%{
+					$("td.calificacion-final :input").remove();
+				}				
+			end
+		}
+	})
+

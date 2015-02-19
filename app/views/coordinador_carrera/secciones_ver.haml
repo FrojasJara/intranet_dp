@@ -1,0 +1,33 @@
+.page-header
+    .no-imprimir
+        = breadcrumb ["Coordinación de Carrera",  ["Secciones", coordinador_carrera_secciones_path], "Ver"]
+    %h1 
+        Seccion
+    %h2
+        = @seccion.links_secciones_dictadas.asignaturas.first.nombre
+        \-
+        = @seccion.nombre
+    = notificaciones 
+    %a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+        %i.icon-white.icon-print
+        Imprimir Resumen
+- unless @data.blank?
+    %table.table.table-striped#secciones
+        %thead
+            %tr
+                %th Rut
+                %th Apellidos
+                %th Nombre
+                %th Carrera
+        %tbody
+            - @data.each do |item|
+                %tr
+                    %td= item[:usuario].rut
+                    %td= item[:usuario].apellidos
+                    %td= item[:usuario].nombres
+                    %td= item[:plan_estudio].nombre
+= datatable_src
+= datatable("secciones")
+
+    
+/ = debug @data

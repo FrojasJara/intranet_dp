@@ -1,0 +1,125 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Informes Alumnos
+
+= render :partial => "informes/partials/filtro_alumnos"
+
+%div#resultados{:style => "margin-bottom:20px"}
+    %table.table.table-striped.table-bordered{:id => 'alumnos'}
+
+        %thead
+            %tr
+                %th RUT
+                %th Email
+                %th Nombre
+                %th Fecha Nac.      
+                %th Estado Civil
+                %th Sexo
+                %th Año Ingreso
+                %th Semestre Actual
+                %th Estado Acad
+                %th Trabajador
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i[:rut]
+                    %td= i[:email]
+                    %td= full_name_from_hash(i)
+                    %td= i[:fecha_nacimiento]
+                    %td= (get_name Usuario, "ESTADOS_CIVILES", (i[:estado_civil]) unless i[:estado_civil].blank?)
+                    %td= (get_name Usuario, "SEXOS", i[:sexo])
+                    %td= i[:anio_ingreso_institucion]
+                    %td= i[:semestre_actual]
+                    %td= (get_name Alumno, "ESTADOS_ACADEMICOS", (i[:estado_academico]) unless i[:estado_academico].blank?)
+
+                    %td= i[:es_trabajador]
+    %br
+    %br
+    = link_to 'Guardar en Excel', generar_informe_alumnos_path(:format => 'xls')
+    %br
+    = link_to 'Ver Graficos', '#modalGraficos', "data-toggle" => "modal"
+    %br
+    = link_to 'Generar Pdf', generar_informe_alumnos_path(:format => 'pdf')
+
+
+#modalGraficos.modal.hide
+    %div.modal-header
+        %button.close{:type => "button" , "data-dismiss" => "modal"}x
+        %h3{}Grafico de alumnos
+    %div.modal-body
+        #graficoAlumnos
+    %div.modal-footer
+        %a.btn{:href => "#", "data-dismiss" => "modal"} Cerrar
+
+= datatable_src
+= datatable("alumnos")                   
+= higthcharts_src
+
+
+
+:javascript
+    
+    $(function () {
+        var chart;
+        $(document).ready(function() {
+            chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'graficoAlumnos',
+                    type: 'column'
+                },
+                title: {
+                    text: 'Alumnos'
+                },
+                subtitle: {
+                    text: 'Información segmentada de alumnos'
+                },
+                xAxis: {
+                    categories: 
+                                ['Trabajadores','No Trabajadores']
+                        },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Cantidad (alumnos)'
+                    }
+                },
+                legend: {
+                    layout: 'vertical',
+                    backgroundColor: '#FFFFFF',
+                    align: 'left',
+                    verticalAlign: 'top',
+                    x: 100,
+                    y: 70,
+                    floating: true,
+                    shadow: true
+                },
+                tooltip: {
+                    formatter: function() {
+                        return ''+
+                            this.x +': '+ this.y +' Nro.';
+                    }
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                    series: [{
+                            name: 'Hombres',
+                            data: [#{rand(50)},#{rand(50)}]
+        
+                        }, 
+                        {
+                            name: 'Mujeres',
+                            data: [#{rand(50)},#{rand(50)}]
+                
+                        }
+                        ]
+            });
+        });
+        
+    });
+

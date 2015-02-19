@@ -1,0 +1,113 @@
+.sectionHeader
+	%h1  Horarios Sección
+
+%div.well
+	= render :partial => "apoyo_docente/gestion_programacion_clases/partials/filtro_seccion", :locals => {:url_metodo => apoyo_docente_ver_horarios_seccion_path, :texto_boton => "Buscar Horarios"}
+
+= notificaciones
+
+- unless  @clases.size > 0 
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p Aún no se han programado clases para esta sección.
+-else
+	:css 
+		.select-tabla{margin-bottom:4px !important;}
+
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información de la sección 
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera
+						%span= @asignatura.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Asignatura
+						%span= @asignatura.nombre	
+					%div.contenedorElemento.separador
+						%label.etiqueta Periodo
+						%span= @seccion.periodo.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Docente:
+						- if @seccion.docente.blank?
+							%span Docente no asignado 
+						- else
+							%span= @seccion.docente.datos_personales.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Jornada:
+						%span= get_name Seccion, :JORNADAS, @seccion.jornada
+				%li.ui-helper-clearfix.cuatro-columnas
+
+	%form#seccion_horario{action: apoyo_docente_registrar_horarios_seccion_path, method: "post"}
+		%input{type: "hidden", name: "seccion_id", value: @seccion.id, id: "seccion_horario"}
+
+		%button.btn.btn-primary.loading-button{type: "submit",:data => {"loading-text" => "...Registrando Informacion ..."}}
+			%i.icon.icon-white.icon-ok
+			Guardar Horarios
+
+		- @clases.each do |i|
+			%h4= "Clase Nº #{i.numero}"
+			%table.table.table-striped
+				%thead
+					%tr
+						%th Número
+						%th Fecha Planificada
+						%th Total Horas
+						%th Horario Actual pactado
+						%th Sala Actual pactada
+						%th Bloques Horario
+						%th Salas
+
+				%tbody
+					%tr
+						%td= i.numero
+						%td= i.fecha_planificada
+						%td= i.horas
+						%td 
+							- @horario_clase.each do |h|
+								- if i.id == h.clase.id
+									= h.horario.bloque_horario.nombre
+									%br
+						%td 
+							- @horario_clase.each do |h|
+								- if i.id == h.clase.id
+									= h.horario.sala.nombre
+									%br
+						%td
+							- #%input{type: "hidden", name: "horario", value: i.id}
+							- i.horas.times do |num|
+								%select.select-tabla.required{name: "horario[][#{i.id}][bloques][#{num}]",:disabled => true}
+									%option{value: ""} .:Seleccion un bloque horario:.
+									- @bloques_horarios.each do |i|
+										%option{value: i.id }= i.nombre
+						%td
+							- i.horas.times do |num|
+								%select.select-tabla.required{name: "horario[][#{i.id}][salas][#{num}]",:disabled => true}
+									%option{value: ""} .:Seleccion una Sala:.
+									- @salas.each do |i|
+										%option{value: i.id}= i.nombre
+							%input.habilitar_clase{type: "checkbox"}
+
+:javascript
+	$(document).ready(function(){
+
+	$(".habilitar_clase").change(function() {
+		$(this).parent().parent().find("select").attr("disabled", ! this.checked);	
+	
+	});
+
+	$("#seccion_horario").validate({
+		invalidHandler: function(form, validator) {
+			notify_info("Registro Bloque horario y salas", "Por favor, Verifique que ingreso correctamente la informacion");
+		},
+		submitHandler: function(form) {
+			if( confirm("¿Está seguro que desea Guardar el horario?") ) {
+				notify_info("Espere un momento", "Por favor, Espere mientras se resgistra El nuevo horario Gracias");
+				$("button.loading-button").button("loading");
+				form.submit();
+			}
+		}
+	});
+
+	})

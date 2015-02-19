@@ -1,0 +1,305 @@
+.page-header
+	%h1 Pase Matrícula
+= notificaciones
+= render partial: 'partials/buscar_con_rut'
+- unless @alumno.blank?
+	%form.informacion-tabulada#form_plan_estudio{:action =>coordinador_carrera_pase_semestral_path ,:method => "post"}
+		%fieldset
+			%legend Información del alumno
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span= @usuario.rut			
+					%div.contenedorElemento.separador     	
+						%label.etiqueta Nombre:
+						%span= @usuario.nombre
+					%hr
+					%div.contenedorElemento.separador
+						%select.span3{name: "alumno_plan_estudio_id"}
+							-# selected =  @alumno_plan_estudio_seleccionado.blank? ? false : true
+							- @alumno_plan_estudios.each do |i|
+								%option{:value => i.id , selected: @alumno_plan_estudio_seleccionado.blank? ? false : i.id == @alumno_plan_estudio_seleccionado.id }= i.plan_estudio.nombre
+						%button.btn.btn-success#buscar_plan{type: "submit"}
+							%icon.icon-white.icon-search
+							Consultar
+- unless @malla_curricular.blank?							
+	%div
+		%form.informacion-tabulada.form-promover{:action => coordinador_carrera_pase_semestral_path ,:method => "post"}
+			%fieldset
+				%legend Información del alumno
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre:
+							%span= @alumno_plan_estudio.alumno.datos_personales.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta rut:
+							%span= @alumno_plan_estudio.alumno.datos_personales.rut
+						%div.contenedorElemento.separador
+							%label.etiqueta Plan Estudios:
+							%span= @alumno_plan_estudio.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Institución:
+							%span= @alumno_plan_estudio.institucion_sede_plan.institucion_sede.nombre_corto
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso a la carrera:
+							%span= @alumno_plan_estudio.periodo.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Ingreso real:
+							%span= @alumno_plan_estudio.alumno.anio_ingreso
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento
+							%label.etiqueta Jornada:
+							%span= get_name InstitucionSedePlan, :JORNADAS, @alumno_plan_estudio.institucion_sede_plan.jornada
+						%div.contenedorElemento
+							%label.etiqueta Modalidad:
+							%span= get_name InstitucionSedePlan, :MODALIDADES, @alumno_plan_estudio.institucion_sede_plan.modalidad
+						%div.contenedorElemento.separador
+							%label.etiqueta Estado:
+							%span= get_name Alumno, :ESTADOS_ACADEMICOS, @alumno_plan_estudio.estado
+						%div.contenedorElemento
+							%label.etiqueta Semestre que cursa:
+							%span= @alumno_plan_estudio.semestre
+						%div.contenedorElemento
+							%label.etiqueta Elección de Nivel:
+						%div.eleccion
+							%span.etiqueta -Tecnico
+							%input.seleccion{type: "checkbox"}
+						%div.eleccion
+							%span.etiqueta -Profesional
+							%input.seleccion{type: "checkbox"}
+					%li.ui-helper-clearfix.cuatro-columnas
+						- if @alumno_plan_estudio.estado == Alumno::SIN_MATRICULA
+							%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+								%i.icon-white.icon-print
+								Imprimir
+						%input{:name => "alumno",type: "hidden",:value => @alumno_plan_estudio.id}
+			%button.btn.btn-success.btn-promover.not-print{type: "submit", :class => "impresion"}
+				Cambiar estado				
+			%select.span3.required.not-print{name: "estado_elejido"}
+				%option{value: ""} .: Elija un estado para el alumno :.
+				%optgroup{:label =>"Solo alumnos de primer nivel"}
+					%option{:value => "9"}= "Anular alumno"
+				%optgroup{:label =>"Solo alumnos de Ultimo año que pasan a ip"}
+					%option{:value => "11"}= "Cambiar de CFT a IP"
+				%optgroup{:label =>"Alumnos matriculables o inscripcion de asignaturas"}
+					%option{:value => "5"}= "Promover de Nivel (para matricular)"
+					%option{:value => "6"}= "Inscripcion de Asignatura"
+					%option{:value => "2"}= "Alumno Regular"
+				%optgroup{:label =>"Solo alumnos que se retiran de la carrera "}
+					%option{:value => "14"}= "Retirar Alumno"
+				%optgroup{:label =>"Solo alumnos que se convalida carrera "}
+					%option{:value => "18"}= "Convalidar Alumno"
+
+		.malla-curricular.ui-helper-clearfix
+			- duracion_plan			= @malla_curricular[:duracion_plan]
+			- 1.upto(duracion_plan) do |semestre|
+				.periodo
+					%h3= Periodo.obtener_anio_periodo duracion_plan, semestre
+					%ul{:class => "ped_#{semestre}"}
+						- @malla_curricular[:malla_curricular].each do |item|
+						- next if item[:asignatura].semestre != semestre
+							- tipo = get_name Asignatura, "TIPOS", item[:asignatura].tipo
+							%li{:class => "ui-helper-clearfix #{tipo} semestre_#{item[:asignatura].semestre}"}
+
+								-# Preguntamos si tiene inscripciones
+								- if not item[:inscripciones].empty?
+									.historial-grafico
+										- item[:inscripciones].each do |i|		
+											- estado = get_name AlumnoInscritoSeccion, "ESTADOS", i[:inscripcion].estado	
+											%span{:class => "estado-asignatura #{estado}"}
+												%span.inscrita I
+												%span.aprobada A
+												%span.reprobada R
+												%span.abandonada B
+												%span.convalidada C
+												%span.homologada H
+									%span.nombre-asignatura{:title => item[:nombre_real_asignatura]}
+										= item[:nombre_real_asignatura]
+									- i = item[:inscripciones].last
+									-# %span.nombre-asignatura= i[:periodo].nombre
+									%span.nombre-asignatura= get_name AlumnoInscritoSeccion, "ESTADOS", i[:inscripcion].estado
+									%span.nombre-asignatura= i[:inscripcion].nota_final
+								- else
+									%span.nombre-asignatura{:title => item[:nombre_real_asignatura]}
+										= item[:nombre_real_asignatura]
+									%span.codigo-asignatura= "(#{item[:asignatura].codigo})"
+	%div.solo-imprimir
+		%span observación: ____________________________________________________________________________________________________
+		%span ____________________________________________________________________
+		%br		
+	%div.solo-imprimir
+		%p ________________________________
+		%p
+			%span= current_user_object.nombre_1
+		%span Nota: ¡Importante! este documento esta sujeto a modificaciones y es de uso exclusivo para el proceso de matriculas
+:css
+	.malla-curricular { padding-bottom: 168px; }
+	.periodo { 
+		float: left; 
+		width: 120px;
+		margin-right: 10px;
+	}
+	.solo-imprimir p {
+		margin-left: 400px;
+	}
+	.nota{
+		width: 20;
+	}
+	.seleccion {
+		float: left;
+	}
+	.eleccion {
+		margin-left: 180px;
+	}
+
+	.periodo > ul { position: relative; }
+	.periodo li.semestre_5.#{get_name Asignatura, "TIPOS", Asignatura::TERMINAL} { 
+		position: absolute; 
+		left: -55px; 
+		width: 92px;
+		border-color: blue;
+	}
+
+	.periodo > h3 { font-size: 11px; text-align: center; }
+	.periodo li {
+		position: relative;
+		padding: 10px 2px;
+		border: 2px solid #333;
+		margin-bottom: 10px;
+		height: 50px;
+	}
+	.periodo li > a { display: block; }
+	.periodo li span { display: block; text-align: center; font-size: 11px; }
+	.estado-asignatura {
+		width: 10px;
+		height: 10px;
+	}
+	span.estado-asignatura > span { display: none; }
+	span.nombre-asignatura {
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.modal-header h3 span { 
+		font-style: italic !important; 
+		font-size: 18px !important;
+		display: inline !important;
+	}
+	.periodo .historial-grafico { position: absolute; top: 0; right: 0; }
+	.periodo .estado-asignatura { float:left; margin-left: 1px;}
+	.estado-asignatura.aprobada { background: green !important; }
+	.estado-asignatura.reprobada { background: red !important; }
+	.estado-asignatura.inscrita { background: yellow !important; }
+	.estado-asignatura.abandonada { background: orange !important; }
+	.estado-asignatura.convalidada { background: blue !important; }
+	.estado-asignatura.homologada { background: purple !important; }
+	.leyendas-estados-asignaturas {
+		margin-bottom: 10px;
+	}
+	.leyendas-estados-asignaturas li {
+		float: left;
+		text-transform: uppercase;
+		margin-right: 15px;
+	}
+	.leyendas-estados-asignaturas .estado-asignatura {
+		margin: 5px 3px 0 0;
+		float: left;
+	}
+	.info{
+		min-height: 20px;
+		min-height: 20px;
+		padding: 10px;
+		margin-top: 10px;
+		margin-bottom: 5px;
+		background-color: #f5f5f5;
+		border: 1px solid #eee;
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+		-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+		-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+		box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	}
+
+	@media print {
+		.malla-curricular { padding: 0; }
+		.periodo li.semestre_5.#{get_name Asignatura, "TIPOS", Asignatura::TERMINAL} { 
+			position: relative;
+			left: auto;
+			top: auto !important;
+			width: auto;
+		}
+		ul.leyendas-estados-asignaturas { 
+			margin: 0 0 10px 0 !important;
+			padding: 3px 0;
+			border: 1px solid #eee;
+			border-style: solid none;
+		}
+		ul.leyendas-estados-asignaturas li { font-size: 7pt !important; }
+
+		.periodo > h3 { line-height: normal; font-size: 7pt; }
+		.periodo { width: 70px !important; margin-right: 5px; }
+		.periodo li { 
+			width: 63px;
+			height: 20px !important; 
+			border-width: 1px !important;
+			margin-bottom: 8px;
+			padding: 12px 2px 8px 2px !important;
+			border-color: black !important;
+		}
+
+		.periodo li a[data-toggle="modal"] span, .periodo li > span { 
+			font-size: 6pt !important; 
+			line-height: normal !important; 
+		}
+
+		.periodo .historial-grafico { top: 1px !important; right: 1px !important; }
+		.estado-asignatura {  }
+		.estado-asignatura span { 
+			line-height: 9px;
+			font-size: 8px; 
+		}
+		.estado-asignatura.aprobada span.aprobada { display: block !important; }
+		.estado-asignatura.reprobada span.reprobada { display: block !important; }
+		.estado-asignatura.inscrita span.inscrita { display: block !important; }
+		.estado-asignatura.abandonada span.abandonada { display: block !important; }
+		.estado-asignatura.convalidada span.convalidada { display: block !important; }
+		.estado-asignatura.homologada span.homologada { display: block !important; }
+		.eleccion {
+			margin-left: 150px;
+		}
+		form.informacion-tabulada div.contenedorelemento span{
+			font-size: 12px !important;
+		}
+
+	}
+
+:javascript
+	$(document).ready(function() {
+		var offset = 10 + Math.max($("ul.ped_4").height(), $("ul.ped_5").height());
+		$(".periodo li.semestre_5.#{get_name Asignatura, 'TIPOS', Asignatura::TERMINAL}").each(function(i, v) {
+			$(v).css("top", offset);
+			offset += 84;
+		})
+
+		$("form.form-promover").validate({
+			invalidHandler: function(form, validator) {
+				notify_info(
+					"Existe información errónea", 
+					"Por favor, Debe seleccionar un estado para cambiar." 
+				);
+			}
+			,submitHandler: function(form) {
+				if( confirm("¿Está seguro que desea cambiar el estado del alumno?") ) {
+					notify_loader("Cambio de estado en curso", "Aguarde un momento mientras se cambia el estado del alumno ...")
+					form.submit();
+				}
+			}
+		})
+
+
+	})

@@ -1,0 +1,35 @@
+#obtener-asignaturas-inscritas
+    :css
+        col.asignatura { width: 300px; }
+        col.codigo { width: 75px; }
+        col.docente { width: 250px; }
+        col.seccion { width: 56px; }
+
+    .page-header
+        %h1 Asignaturas inscritas
+    = render "alumnos/alumnos/partials/seleccion_plan"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+
+    = notificaciones
+
+    - if @existen_datos
+        %table.table.table-condensed
+            %colgroup
+                %col.codigo
+                %col.asignatura
+                %col.docente
+                %col.seccion
+            %thead
+                %tr
+                    %th.txLeft.nombre Código
+                    %th.txLeft.nombre Asignatura
+                    %th.txLeft.nombre Docente
+                    %th.txLeft.nombre Sección
+            %tbody
+                - @asignaturas_inscritas.each do |item|                   
+                    %tr
+                        %td.txLeft.nombre= item[:asignatura].codigo
+                        %td.txLeft.nombre= item[:asignatura].nombre
+                        %td.txLeft.nombre= (not item[:docente].nil?) ? item[:docente].nombre : "Aún no asignado"
+                        %td.txLeft.nombre= item[:seccion].numero
+        

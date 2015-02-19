@@ -1,0 +1,16 @@
+%h1 Contactos
+
+- @items.each do |i|
+    .span3.well
+        %p
+            %i.icon-user
+            = "#{i.primer_nombre} #{i.apellido_paterno}"
+        %p
+            %i.icon-envelope
+            = mail_to i.email
+        %p
+            %i.icon-book
+            = i.telefono_movil.nil? && i.telefono_fijo.nil? ? 'Sin teléfonos definidos' : "#{i.telefono_fijo} #{!i.telefono_movil.nil? && !i.telefono_fijo.nil? ? '-' : ''} #{i.telefono_movil}"
+
+        
+        

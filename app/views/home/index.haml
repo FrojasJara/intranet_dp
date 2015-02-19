@@ -1,0 +1,6 @@
+= notificaciones
+
+- if current_role_can? :alumno
+	= render 'mensaje'
+- else
+	= render 'mensaje_admin'

@@ -1,0 +1,22 @@
+%html
+    %head
+        %title
+    %body
+        %p 
+            = @user.nombres.upcase+" "+@user.apellidos.upcase
+            %br
+            = @user.rut.upcase
+            %br
+            %br
+            ='Junto con saludarlo(a) recuerdo a usted que tiene pendiente cuota del '+@fecha.to_s+' por la cantidad de $'+@saldo.to_s+', favor de'
+            %strong='cancelar antes del '+@fecha_fin.to_s 
+            y de esta forma evitar gastos de cobranza externa.
+        %p Atentos en resolver cualquier dificultad que puedan producir estos atrasos, favor de contactarse con nosotros.
+        %p Saluda cordialmente
+        %p
+            %strong{style: 'float:left;width:100%;text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO DE COBRANZA
+                %br
+                ='e-mail '+@usuario.email

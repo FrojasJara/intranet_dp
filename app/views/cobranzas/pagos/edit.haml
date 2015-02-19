@@ -1,0 +1,81 @@
+.page-header
+    = breadcrumb ["Cobranzas", ["Buscar documento de venta", cobranzas_pagos_index_path], ["Ver Nº#{@item.numero}", cobranzas_pagos_show_path(@item.numero)], "Modificar N° Boleta y Fecha"]
+    %h1 Modificar ó Eliminar Documento de Venta
+
+= notificaciones
+
+= simple_form_for :documento_venta do |f|
+    = f.hidden_field :numero_original, :value => @item.numero
+    = f.hidden_field :nSede, :id =>'nSede', :value => @item.institucion_sede_id
+    = f.input :numero, input_value(@item.numero, 'Número de documento de venta')
+    = f.input :monto, input_value(@item.monto,'Monto boleta')
+    = f.hidden_field :fecha_emision_original, :value => l(@item.fecha_emision.to_date)
+    = f.input :fecha_emision, input_value(l(@item.fecha_emision.to_date), 'Fecha de emisión') 
+    .control-group
+        %label.control-label Ejecutivo
+        .controls
+            %select.required{:name => "ejecutivo", :id => "ejecutivo"}
+                - @ejecutivos_matriculas.each do |ejecutivo|
+                    - if @item.ejecutivo_matriculas_id == ejecutivo.id
+                        %option{value: ejecutivo[:id], selected: true}= ejecutivo.datos_personales.nombre
+                    - else
+                        %option{value: ejecutivo[:id]}= ejecutivo.datos_personales.nombre
+    .control-group
+        %label.control-label Institución
+        .controls
+            %select.required{:id=>"institucion_sede",:name=>"institucion_sede"}
+                - @instituciones_sedes.each_with_index do |i_s|
+                    - if @item.institucion_sede.id == (i_s.id)
+                        %option{value: i_s.id, selected: true}= i_s.nombre
+                    - else
+                        %option{value: i_s.id}= i_s.nombre
+    %br
+    %input.btn.btn-success{type: 'button', value: 'Realizar Cambios', id: 'actualizar', class: 'btn btn-warning'}
+    - if @item.estado != DocumentoVenta::ANULADA    
+        %a.btn.btn-warning{ id: 'eliminar', name: cobranzas_pagos_eliminar_documento_venta_path(@item.id), class: 'btn btn-warning'} Anular Documento
+
+:javascript
+    $(function(){
+        $("#documento_venta_fecha_emision").datepicker();
+
+        $("#eliminar").click(function()
+        {
+            var flag = confirm("¿Está seguro de eliminar el documento?");
+
+            if(flag){
+                window.location.href = $('#eliminar').attr('name');
+            }  
+            else{
+                return false;
+            }  
+        });
+
+        $("#actualizar").click(function()
+        {
+             if(confirm("¿Está seguro de realizar el cambio?")){
+              $("form.documento_venta").submit();
+             }        
+        });
+        
+        $("form.documento_venta").submit(function(){
+            numero_igual = ( $("#documento_venta_numero_original").val() == $("#documento_venta_numero").val() );
+            fecha_igual = ( $("#documento_venta_fecha_emision_original").val() == $("#documento_venta_fecha_emision").val() );
+
+            console.log("Numero igual: " + numero_igual + " Fecha igual: " + fecha_igual);
+
+            if( !numero_igual && $("#documento_venta_numero").val().length == 0  )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que el nuevo número ingresado esté correcto");
+                return false;
+            }
+            if( !fecha_igual && $("#documento_venta_fecha_emision").val().length == 0 )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que la nueva fecha ingresado esté correcta");
+                return false;
+            }
+        });
+    })
+
+
+
+

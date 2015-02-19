@@ -1,0 +1,149 @@
+:css
+    legend{
+        font-weight:bold;
+    }
+
+    label{
+        float: left;
+        width: 125px;
+        font-weight: bold;
+    }
+    .no-mostrar{
+        display: none;
+    }
+    .btn{
+        margin-left: 0;
+    }
+    input.fecha{
+        width: 212px;
+        text-align: center !important;
+    }
+
+.page-Header
+    %h1 Informes de cotizaciones
+
+= notificaciones
+
+%form{id: 'listado-cotizaciones', method: 'post', action: matriculas_cotizaciones_informe_global_path}
+    %fieldset
+        %legend Informe global de cotizaciones
+        %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+        %br
+        %select.required{:name => "institucion1", :id => "institucion1"}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion.nombre
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{type: "hidden", name: "modalidad1", value: InstitucionSedePlan::PRESENCIAL, id: "modalidad1"}
+        %select.required{:name => "tipo1", :id => "tipo1"}
+            - for_select(Cotizacion,:TIPOS).each do |c|
+                %option{value: c[1]}= c[0].upcase
+        %select{name: "periodo1", id: "periodo1"}
+            - @periodos.each do |periodo|
+                %option{value: periodo.id}= periodo.nombre
+        %br
+        %input{type: "text",class: 'fecha',name: "fecha_inicio",placeholder: 'Fecha de inicio'}
+        %input{type: "text",class: 'fecha',name: "fecha_termino",placeholder: 'Fecha de termino'}
+        
+        %input.btn.btn-success{type: 'submit', value: 'Filtrar', id: 'boton1'}
+
+%form{id: 'listado-cotizaciones_carrera', method: 'post', action: matriculas_cotizaciones_informe_global_carrera_path}
+    %fieldset
+        %legend Informe global de cotizaciones por carrera
+        %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+        %br
+        %select.required{:name => "institucion3", :id => "institucion3"}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion.nombre
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{type: "hidden", name: "modalidad3", value: InstitucionSedePlan::PRESENCIAL, id: "modalidad3"}
+        %select.required{:name => "tipo3", :id => "tipo3"}
+            - for_select(Cotizacion,:TIPOS).each do |c|
+                %option{value: c[1]}= c[0].upcase
+        %select{name: "periodo3", id: "periodo3"}
+            - @periodos.each do |periodo|
+                %option{value: periodo.id}= periodo.nombre
+        %br
+        %input{type: "text",class: 'fecha',name: "fecha_inicio2",placeholder: 'Fecha de inicio'}
+        %input{type: "text",class: 'fecha',name: "fecha_termino2",placeholder: 'Fecha de termino'}
+        
+        %input.btn.btn-success{type: 'submit', value: 'Filtrar', id: 'boton3'}
+
+%form{id: 'listado-cotizaciones-matriculados', method: 'post', action: matriculas_cotizaciones_informe_matriculados_path}
+    %fieldset
+        %legend Informe de matriculados por periodo cotizaciones
+        %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+        %br
+        %select.required{:name => "institucion2", :id => "institucion2"}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion.nombre
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{type: "hidden", name: "modalidad2", value: InstitucionSedePlan::PRESENCIAL, id: "modalidad2"}
+        %select.required{:name => "tipo2", :id => "tipo2"}
+            - for_select(Cotizacion,:TIPOS).each do |c|
+                %option{value: c[1]}= c[0].upcase
+        %select{name: "periodo2", id: "periodo2"}
+            - @periodos.each do |periodo|
+                %option{value: periodo.id}= periodo.nombre
+        
+        %input.btn.btn-success{type: 'submit', value: 'Filtrar', id: 'boton2'}
+
+%form{id: 'listado-cotizaciones-matriculados_carrera', method: 'post', action: matriculas_cotizaciones_informe_matriculados_carrera_path}
+    %fieldset
+        %legend Informe de matriculados por carrera y periodo cotizaciones
+        %input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+        %br
+        %select.required{:name => "institucion4", :id => "institucion4"}
+            - @instituciones.each do |institucion|
+                %option{value: institucion[:id]}= institucion.nombre
+            %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{type: "hidden", name: "modalidad4", value: InstitucionSedePlan::PRESENCIAL, id: "modalidad4"}
+        %select.required{:name => "tipo4", :id => "tipo4"}
+            - for_select(Cotizacion,:TIPOS).each do |c|
+                %option{value: c[1]}= c[0].upcase
+        %select{name: "periodo4", id: "periodo4"}
+            - @periodos.each do |periodo|
+                %option{value: periodo.id}= periodo.nombre
+        
+        %input.btn.btn-success{type: 'submit', value: 'Filtrar', id: 'boton4'}
+
+:javascript
+    $(document).ready(function() {
+        
+        $('#institucion1').change(function(){
+            if($('#institucion1 .distancia:selected').val() == 1){
+                $('#modalidad1').attr({'value' : 2});
+            }
+            else{
+                $('#modalidad1').attr({'value' : 1});
+            }
+        });
+
+        $('#institucion2').change(function(){
+            if($('#institucion2 .distancia:selected').val() == 1){
+                $('#modalidad2').attr({'value' : 2});
+            }
+            else{
+                $('#modalidad2').attr({'value' : 1});
+            }
+        });
+
+        $('#institucion3').change(function(){
+            if($('#institucion3 .distancia:selected').val() == 1){
+                $('#modalidad3').attr({'value' : 2});
+            }
+            else{
+                $('#modalidad3').attr({'value' : 1});
+            }
+        });
+
+        $('#institucion4').change(function(){
+            if($('#institucion4 .distancia:selected').val() == 1){
+                $('#modalidad4').attr({'value' : 2});
+            }
+            else{
+                $('#modalidad4').attr({'value' : 1});
+            }
+        });
+
+        $('.fecha').datepicker();
+    });

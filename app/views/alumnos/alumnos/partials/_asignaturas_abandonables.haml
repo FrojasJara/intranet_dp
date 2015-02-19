@@ -1,0 +1,53 @@
+= form_tag alumno_registrar_abandono_asignaturas_path, :class => "abandonar-asignaturas", :method => "post" do
+    %fieldset.campos
+        %table.table.table-condensed.asignaturas-abandonables
+            %colgroup
+                %col.asignatura
+                %col.codigo
+                %col.seccion
+                %col.abandono
+            %thead
+                %tr
+                    %th.txLeft Asignatura
+                    %th.txCenter Código
+                    %th.txCenter Sección
+                    %th.txCenter Abandonar
+            %tbody
+                - asignaturas_abandonables.each do |item|
+                    %tr
+                        %td.txLeft= item[:asignatura].nombre
+                        %td.txCenter= item[:asignatura].codigo
+                        %td.txCenter= item[:seccion].numero
+                        %td.txCenter
+                            %input.required{:type => "checkbox",
+                                :name => "abandonadas[]", 
+                                :value => "#{item[:inscripcion].id}",
+                                :maxlength => limite_asignaturas_abandonables}
+        
+    %fieldset.botones
+        %button.btn.btn-primary{:type => "submit"}
+            %i.icon-thumbs-down.icon-white
+            Abandonar asignaturas
+
+:javascript
+    $(document).ready(function() {
+        $("form.abandonar-asignaturas").validate({
+            rules:  {
+                secciones: {
+                    maxlenght: #{limite_asignaturas_abandonables}
+                }
+            },
+            invalidHandler: function(form, validator) {
+                notify_info("Existe información errónea", "Por favor, seleccione solo una asignatura para abandonar.");
+             
+            },
+            submitHandler: function(form) {
+                form.submit()
+            }
+        })        
+        $("form.abandonar-asignaturas :checkbox[name^='abandonadas']").change(function() {
+            var $chequeados = $("form.abandonar-asignaturas :checked[name^='abandonadas']");
+            var deshabilitar =  $chequeados.length >= #{limite_asignaturas_abandonables}; 
+            $("form.abandonar-asignaturas :checkbox[name^='abandonadas']").not($chequeados).not($(this)).attr("disabled", deshabilitar);
+        })
+    }); 

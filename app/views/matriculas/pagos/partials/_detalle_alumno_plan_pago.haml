@@ -1,0 +1,71 @@
+.modal-header
+    %h3 Detalle de Planes de Pago
+
+.modal-body
+    .page-header
+        %h4 Matrículas
+
+    %table.table.table-condensed
+        %thead
+            %tr
+                %th #
+                %th Tipo
+                %th Plan Estudio
+                %th Fecha
+                %th Matrícula
+                %th.usa_tooltip{title: 'Monto reconocido'} M.R.
+                %th Arancel
+                %th Descuento
+                %th Arancel Total
+                %th Apoderado
+                %th Rut
+                %th Teléfonos
+        %tbody
+            - c = 1
+            - @matriculas_planes.each do |mp|
+                - mp.planes_pago.each do |pp|
+                    - apoderado = pp.apoderado
+                    - ap_user = apoderado.datos_personales
+                    %tr
+                        %td= c
+                        %td= get_name MatriculaPlan, :TIPOS, mp.planes_pago.last.tipo
+                        %td= mp.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre
+                        %td= l mp.created_at, format: :fecha
+                        %td= dinero pp.matricula
+                        %td= dinero pp.monto_reconocido
+                        %td= dinero pp.arancel
+                        %td= dinero pp.descuento_aplicado
+                        %td= dinero pp.arancel_total
+                        %td= ap_user.nombre
+                        %td= ap_user.rut
+                        %td
+                            = ap_user.telefono_fijo_completo
+                            |
+                            = ap_user.telefono_movil
+                    - c += 1
+    %br
+    .page-header
+        %h4 Pagarés
+    %table.table.table-condensed
+        %thead
+            %tr
+                %th.txLeft #
+                %th.txLeft Número pagaré
+                %th.txLeft Fecha emisión
+                %th.txLeft Ejecutivo
+                %th.txLeft Periodo
+        %tbody
+            - @matriculas_planes.planes_pago.each_with_index do |pp, index|
+                %tr
+                    %td= index + 1
+                    %td
+                        - pp.pagares.each do |pg|
+                            = pg.numero
+                    %td= l pp.created_at, format: :fecha
+                    %td= pp.ejecutivo_matriculas.datos_personales.nombre_corto
+                    %td= pp.matricula_plan.periodo.nombre
+
+    %br
+
+.modal-footer
+    %button.btn{'data-dismiss' => 'modal', 'aria-hidden' => true} Cerrar

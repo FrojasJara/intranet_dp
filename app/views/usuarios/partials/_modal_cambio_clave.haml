@@ -1,0 +1,37 @@
+.modal.hide{:id => "modal_cambiar_clave", :style => "width: 420px;"}	
+	.modal-header
+		%button.close{:data => {:dismiss => "modal"}}
+			x
+		%h3 
+			%i.icon-lock
+			Cambio de clave
+	= form_tag "#{cambiar_clave_path}", :method => "post", :class => "form-horizontal cambio-clave" do
+		.modal-body
+			= render :partial => "partials/notificaciones/info", :locals => {:mensaje => "Luego de este procedimiento, deberás cerrar tu sesión y abrirla nuevamente."}
+			.control-group
+				%label.control-label{:style => "width: 120px;"} Contraseña actual
+				.controls{:style => "margin-top: 4px;"}
+					%input.required{:type => "password", :name => "password_actual", :maxlength => 25}
+			.control-group
+				%label.control-label{:style => "width: 120px;"} Nueva contraseña
+				.controls{:style => "margin-top: 4px;"}
+					%input.required{:type => "password", :name => "nuevo_password", :maxlength => 25}
+			.control-group
+				%label.control-label{:style => "width: 120px;"} Confirmar nueva contraseña
+				.controls{:style => "margin-top: 4px;"}
+					%input.required{:type => "password", :name => "confirmacion_nuevo_password", :maxlength => 25}
+		.modal-footer
+			%button.btn.btn-primary{:type => "submit"}
+				%i.icon-white.icon-edit
+				Cambiar clave
+
+	:javascript
+		$(document).ready(function() {
+			$("form.cambio-clave").validate({
+				rules : {
+					"nuevo_password" : {
+						equalTo : "[name='confirmacion_nuevo_password']"
+					}
+				}
+			});
+		})

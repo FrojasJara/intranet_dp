@@ -1,0 +1,39 @@
+= datatable_src
+
+.sectionHeader
+    %h1 Roles
+    = link_to raw("#{t 'crud.new'} Rol"), new_administrador_role_path, class: "btn btn-primary"
+
+
+%table#example.table
+    %thead
+        %tr
+            %th ID
+            %th Nombre
+            %th Por defecto
+            %th Alumno
+            %th Académico
+            %th Administrativo
+            %th Administrador
+            %th Mensajero
+
+    %tbody
+        - @items.each do |i|
+            %tr
+                %td= i.id
+                %td              
+                    .btn-group
+                        %a.dropdown-toggle{href: '#', data: {toggle: 'dropdown'}}
+                            = i.nombre
+                            %span.caret
+                        %ul.dropdown-menu
+                            %li= link_to raw(t('crud.edit')), edit_administrador_role_path(i)
+                            %li= link_to raw(t('crud.delete')), administrador_role_path(i), :confirm => t('crud.confirm'), method: :delete
+                            %li.divider
+                            %li= history i, t(:historial) 
+                %td= bv i.por_defecto
+                %td= bv i.alumno
+                %td= bv i.academico
+                %td= bv i.administrativo
+                %td= bv i.administrador                
+                %td= bv i.mensajero

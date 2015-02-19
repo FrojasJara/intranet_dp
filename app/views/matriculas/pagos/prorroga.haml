@@ -1,0 +1,75 @@
+.page-header
+    = breadcrumb [["Recepción de pagos", matriculas_pagos_buscar_alumno_path], ["Detalle cuotas", matriculas_pagos_ver_alumno_path(params[:rut])], "Prorroga"]
+    %h1 Prorrogas
+
+= notificaciones
+
+.row
+    .span3
+        %table.table.table-condensed.table-bordered        
+            %tr
+                %th Fecha original
+                %td
+                    = l @pago_comprometido.fecha_vencimiento
+                    = hidden_field_tag :fecha_vencimiento, @pago_comprometido.fecha_vencimiento
+            %tr
+                %th Monto
+                %td= dinero @pago_comprometido.monto
+            %tr
+                %th Estado
+                %td= get_name PagoComprometido, :ESTADOS, @pago_comprometido.estado
+    .span7
+        %table.table.table-condensed.table-bordered
+            %thead
+                %tr
+                    %th.txLeft Fecha Comprometida
+                    %th.txLeft Ejecutivo
+                    %th.txLeft Observación
+                    %th.txLeft Acciones
+            %tbody
+                - if @pago_comprometido.prorrogas.size == 0
+                    %tr
+                        %td.txCenter{colspan: 4} No hay registros
+                - else
+                    - @pago_comprometido.prorrogas.each do |pr|
+                        %tr
+                            %td= l pr.fecha
+                            %td= pr.ejecutivo_matriculas.datos_personales.nombre_corto
+                            %td= pr.observacion.blank? ? 'Sin observación' : pr.observacion
+                            %td
+                                = link_to "Eliminar", matriculas_pagos_prorroga_eliminar_path(params[:rut], params[:pago_comprometido_id], pr.id)
+
+.page-header
+    %h1 Agregar nueva prorroga
+
+= simple_form_for :prorroga do |f|
+    = f.input :fecha
+    = f.input :porcentaje, input_html: {type: 'number', min: '0', max: '100', value: '0', step: "5"} 
+    = f.input :observacion
+
+    = f.submit 'Enviar', class: 'btn btn-primary'
+
+:javascript
+    function valida_fecha()
+    {
+        if( $.datepicker.parseDate("yy-mm-dd", $("#fecha_vencimiento").val()) >= $.datepicker.parseDate("dd/mm/yy", $("#prorroga_fecha").val()) )   
+        {
+            notify_error("Datos incorrectos", "Por favor verifiquie que la fecha de prorroga sea mayor a la fecha original");
+            return false;
+        }
+        return true;
+    }
+    $(function(){
+        $("#prorroga_fecha").datepicker();
+
+        $("form").submit(function(){
+            if( $("#prorroga_fecha").val().length < 10 || !fecha_valida( $("#prorroga_fecha").val() ) )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que la fecha sea correcta");
+                return false;
+            }
+            return valida_fecha() ? true : false;
+        })
+    })
+
+

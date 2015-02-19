@@ -1,0 +1,39 @@
+.page-header
+    %h1= "INFORME MATRICULADOS COTIZACIONES "+get_name(Cotizacion,:TIPOS, @tipo).upcase+" "+@periodo.nombre
+    %h3
+        = get_name(Institucion,:TIPOS,@institucion_id).upcase
+        = get_name(Sede,:SEDES,@sede_id).upcase
+        = get_name(InstitucionSedePlan,:MODALIDADES,@modalidad.to_i).upcase
+        = @fechaIni
+        = "- #{@fechaFin}" unless @fechaFin.blank?
+
+%table#informe_matriculados.table
+    %thead
+        %tr
+            %th.txCenter #
+            %th.txCenter Carrera
+            - @ejecutivos.each do |ejecutivo|
+                %th.txCenter= ejecutivo.nombre
+            %th.txCenter Total
+    %tfoot
+        %tr
+            %th.txCenter Totales
+            %th.txCenter
+            - suma = 0
+            - @ejecutivos.each_with_index do |ejecutivo,index|
+                - valor = @datos.map{|x| x[:ejecutivos][index].to_i}.inject(:+)
+                %th.txCenter= valor
+                - suma += valor
+            %th.txCenter= suma
+
+    %tbody
+        - @datos.each_with_index do |i,index|
+            %tr
+                %td.txCenter= index+1
+                %td.txCenter= i[:carrera]
+                - i[:ejecutivos].each do |e|
+                    %td.txCenter= e
+                %td.txCenter= i[:total]
+
+= datatable_src
+= datatable 'informe_matriculados'

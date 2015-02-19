@@ -1,0 +1,59 @@
+%h1 Exalumnos
+= notificaciones
+= render :partial => 'asistente_social/gestion_exalumno/partials/filtro_institucion_periodo'
+
+- unless @antecedentes.blank? 
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información
+			%ul
+				%li.ui-helper-clearfix
+					%div.contenedorElemento.separador
+						%label.etiqueta Sede:
+						%span= @sede.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Dirección:
+						%span= @sede.direccion
+				%li.ui-helper-clearfix
+					%div.contenedorElemento.separador
+						%label.etiqueta Periodo:
+						%span= @periodo.nombre
+	%a.not-print.btn.btn-info.impresion{:href => "#"}
+		%i.icon-white.icon-print
+		Imprimir
+	%br
+	%table.table.table-condensed#lista
+		%thead
+			%tr
+				%th.TxtLft.nombre Nº
+				%th.TxtLft.nombre Alumno
+				%th.txLeft.nombre Carrera
+				%th.TxtLft.nombre Renta
+				%th.TxtLft.nombre Lugar
+				%th.TxtLft.nombre Funcion
+				%th.TxtLft.nombre Ocupacion
+				%th.TxtLft.nombre Periodo
+				%th.TxtLft.nombre.no-imprimir Acción
+		%tbody
+			- @antecedentes.each_with_index do |a, index|
+				%tr{:class => "#{get_name Egresado, :OCUPACION, a.ocupacion}"}
+					%td.txLeft.nombre= a.id 
+					%td.txLeft.nombre= a.alumno_plan_estudio.alumno.datos_personales.nombre 
+					%td.txLeft.nombre= a.alumno_plan_estudio.plan_estudio.nombre      
+					%td.txLeft.nombre= a.renta
+					%td.txLeft.nombre= a.lugar.blank? ? "Sin informacion " : "#{a.lugar}" 
+					%td.txLeft.nombre= a.funcion.blank? ? "Sin informacion " : "#{a.funcion}" 
+					%td.txLeft.nombre= get_name Egresado, :OCUPACION, a.ocupacion
+					%td.txLeft.nombre= a.periodo.nombre
+					%td.txLeft.nombre.no-imprimir
+						.btn-group
+							= link_to asistente_social_ingresar_antecedente_path(a.alumno_plan_estudio_id), class: 'btn btn-primary' do
+								Antecedente
+	= datatable_src
+	= datatable("lista") 
+:css
+	#lista tr.#{get_name Egresado, "OCUPACION", Egresado::CESANTE} { background-color: #FF9999; }
+	#lista tr.#{get_name Egresado, "OCUPACION", Egresado::CONTRATADO} { background-color: #D6FFCA; }
+	#lista tr.#{get_name Egresado, "OCUPACION", Egresado::HONORARIO} { background-color: #D6FFCA; }
+	#lista tr.#{get_name Egresado, "OCUPACION", Egresado::INDEPENDIENTE} { background-color: #D6FFCA; }
+	#lista tr.#{get_name Egresado, "OCUPACION", Egresado::ESTUDIANTE} { background-color: #D6FFCA; }

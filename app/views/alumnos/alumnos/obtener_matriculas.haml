@@ -1,0 +1,80 @@
+#obtener-matriculas
+    :css
+        col.tipo { width: 130px; }
+        col.periodo { width: 60px; }
+        col.apoderado { width: 130px; }
+        col.descuento { width: 150px; }
+        #obtener-matriculas td { vertical-align: middle; }
+        #obtener-matriculas td strong {
+            display: block
+        }
+        td span { display: block; }
+        td span.nombre { font-style: italic; }
+        td span.estado { font-weight: bold; }
+
+    .page-header
+        %h1 Matrículas y planes de pago
+        
+    = render "alumnos/alumnos/partials/seleccion_plan"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+
+    - if @existen_datos        
+        %table.table.table-condensed
+            %colgroup
+                %col.matricula
+                %col.plan
+                %col.tipo
+                %col.periodo
+                %col.apoderado
+                %col.descuento
+                %col.arancel
+                %col.matricula
+                %col.normativa
+                %col.monto_reconocido
+                %col.arancel_total
+                %col
+            %thead
+                %tr
+                    %th.txCenter.nombre Matricula
+                    %th.txCenter.nombre Plan
+                    %th.txLeft.nombre Tipo
+                    %th.txCenter.nombre Período
+                    %th.txLeft.nombre Apoderado
+                    %th.txRight.nombre Descuento
+                    %th.txRight.nombre Arancel
+                    %th.txRight.nombre Matrícula
+                    %th.txRight.nombre Normativa
+                    %th.txRight.nombre Reconoc.
+                    %th.txRight.nombre Aran. Total
+                    %th.txLeft.not-print
+            %tbody
+                - @matriculas.each do |item|                   
+                    - matricula = item[:matricula]
+                    - plan = item[:plan]
+                    - periodo = item[:periodo]
+                    - descuento = item[:descuento]
+                    - apoderado = item[:apoderado]
+                    %tr
+                        %td.txCenter
+                            %span.estado= matricula.id
+                            %span.estado= get_name MatriculaPlan, "ESTADOS", matricula.estado
+                        %td.txCenter
+                            %span.descuento= plan.id
+                            %span.descuento= get_name PlanPago, "ESTADOS", plan.estado
+                        %td.txLeft.nombre= get_name MatriculaPlan, "TIPOS", plan.tipo
+                        %td.txCenter.nombre= periodo.nombre
+                        %td.txLeft.nombre= apoderado.nombre
+                        %td.txRight
+                            %span.descuento= dinero descuento[:monto]
+                            %span.descuento= descuento[:nombre]
+                        %td.txRight.nombre= dinero plan.arancel
+                        %td.txRight.nombre= dinero plan.matricula
+                        %td.txRight.nombre= dinero plan.normativa
+                        %td.txRight.nombre= dinero plan.monto_reconocido
+                        %td.txRight.nombre= dinero plan.arancel_total
+                        %td.txLeft.not-print
+
+    - else
+        = notificaciones
+
+                    

@@ -1,0 +1,27 @@
+%a.dropdown-toggle{:href => "#", :data => {:toggle => "dropdown"}}
+	Opciones
+	%b.caret
+%ul.dropdown-menu
+	- if not no_mostrar == :opcion_alumnos
+		%li
+			%a{:href => "#{docente_obtener_listado_alumnos_path usuario_id, seccion_id}"}
+				%i.icon-user
+				Ver listado de alumnos
+
+	- if not no_mostrar == :opcion_asistencias
+		%li
+			%a{:href => "#{docente_obtener_libro_asistencia_path usuario_id, seccion_id}"}
+				%i.icon-list-alt
+				Ver libro de asistencia
+
+	- if not no_mostrar == :opcion_calificaciones
+		%li
+			%a{:href => "#{docente_obtener_libro_calificaciones_path usuario_id, seccion_id}"}
+				%i.icon-th-list
+				Ver libro de calificaciones
+
+	- if not no_mostrar == :opcion_clases
+		%li
+			%a{:href => "#{docente_obtener_libro_clases_path usuario_id, seccion_id}"}
+				%i.icon-calendar
+				Ver libro de clases

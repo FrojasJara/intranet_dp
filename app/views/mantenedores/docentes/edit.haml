@@ -1,0 +1,13 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            %a{:href => mantenedores_docentes_path} Docentes  
+            %span.divider / 
+        %li
+            %a{:href => "#"} Editar
+            %span.divider /
+        %li.active
+            %a{:href => "#"} 
+                = full_name_from_hash(@datos_personales.attributes)
+
+= render partial: 'form'

@@ -1,0 +1,79 @@
+:css
+	ul.asignaturas { 
+		display: block;
+		margin-left: 185px; 
+		padding-left: 15px;
+		list-style-type: decimal;
+	}
+	ul.asignaturas li {
+		margin-bottom: 0 !important;
+	}
+
+	ul.asignaturas span {
+		margin: 0 !important;
+		display: inline !important;
+	}
+	span.codigo { font-weight: bold; }
+
+%form.informacion-tabulada
+	%fieldset
+		%legend Información de la sección
+		%ul
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut docente:
+					%span= @usuario.blank? ? 'Sin información' : @usuario.rut
+				%div.contenedorElemento.separador
+					%label.etiqueta Nombre docente:
+					%span= @usuario.blank? ? 'Sin información' : @usuario.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Asignaturas
+					%ul.asignaturas
+						- @asignaturas_seccion.each do |item|
+							%li
+								%span.asignatura= item.nombre
+								%span.codigo= "(#{item.codigo})"
+				%div.contenedorElemento.separador
+					%label.etiqueta Sección:
+					%span= @seccion.numero
+				%div.contenedorElemento.separador
+					%label.etiqueta Período:
+					%span= @periodo_seleccionado.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Estado:
+					%span= get_name Seccion, "ESTADOS", @seccion.estado
+				%div.contenedorElemento.separador
+					%label.etiqueta Jornada:
+					%span= get_name InstitucionSedePlan, "JORNADAS", @seccion.jornada
+				%div.contenedorElemento.separador
+					%label.etiqueta Modalidad:
+					%span= "#{@seccion.jornada.nil? ? 'Distancia' : 'Presencial'}"
+				%div.contenedorElemento.separador
+					%label.etiqueta Sede
+					%span= @seccion.institucion_sede.nombre
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Inscritos:
+					%span= @seccion.alumnos_inscritos
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Aprobados:
+					%span= @seccion.alumnos_aprobados
+				%div.contenedorElemento.separador
+					%label.etiqueta Reprobados:
+					%span= @seccion.alumnos_reprobados
+				%div.contenedorElemento.separador
+					%label.etiqueta Homologados:
+					%span= @seccion.alumnos_homologados
+				%div.contenedorElemento.separador
+					%label.etiqueta Convalidados:
+					%span= @seccion.alumnos_convalidados
+				%div.contenedorElemento.separador
+					%label.etiqueta P. aprobación:
+					%span= @seccion.promedio_aprobacion
+				%div.contenedorElemento.separador
+					%label.etiqueta P. reprobación:
+					%span= @seccion.promedio_reprobacion
+				%div.contenedorElemento.separador
+					%label.etiqueta D. estándar:
+					%span= @seccion.desviacion_estandar

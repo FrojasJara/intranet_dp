@@ -1,0 +1,120 @@
+#documento-venta.bloque
+	.page-header
+		%h2 Documento de venta
+
+	.control-group
+		%label.control-label Tipo
+		.controls
+			- @documentos_venta.each  do |documento|
+				%label.radio.inline
+					%input.tipo-documento.required{:type => "radio", :value => DocumentoVenta.const_get(documento), :name => "documento_venta[tipo]"}
+					= get_name DocumentoVenta, "TIPOS", DocumentoVenta.const_get(documento)
+
+	.control-group
+		%label.control-label Número
+		.controls
+			%input.input-small.required.digits.numero{:type => "text", :style => "text-align: right;", :name => "documento_venta[numero]"}
+
+	.control-group
+		%label.control-label Monto
+		.controls.input-prepend{:style => "width: 127px;"}
+			%span.add-on $
+			%input.monto.input-small{:type => "text", :style => "text-align: right;", :alt => "dinero", :disabled => "disabled", :value => 0}
+
+	%button.btn.verificar-validez-documento{:type => "submit"}
+		%i.icon-zoom-in
+		Búscar documento
+
+
+	%button.btn.btn-info.cambiar-documento{:type => "submit", :style => "display: none"}
+		%i.icon-white.icon-refresh
+		Cambiar documento
+
+
+	%label.contenedor-mensaje{:style => "margin-bottom: 0; color: green; display: none;"}
+		%i.icon-thumbs-up
+		%span
+
+	%input.monto{:type => "hidden", :name => "documento_venta[monto]", :value => 0}
+	%input{:type => "hidden", :name => "documento_venta[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+	%input.required.integridad-documento-venta.n1{:type => "hidden", :name => "integridad_documento_venta"}
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor_documento = $("#documento-venta");
+
+		$contenedor_documento.on("click", "button.verificar-validez-documento", function(e) {
+			e.preventDefault();
+			
+			var $tipo = $contenedor_documento.find(":radio.tipo-documento:checked");
+			var $numero = $contenedor_documento.find("input.numero");
+			var $institucion_sede_plan = $contenedor_documento.find("input.institucion-sede-plan-id");
+			var $monto = $contenedor_documento.find("input:hidden.monto");
+
+			if( $monto.val() > 0 ) {
+				try {
+					if( ! $tipo.val() || ! $numero.val() || ! $institucion_sede_plan.val() ){
+						throw "Por favor, Verifique que ha seleccionado algún tipo de documento de venta a emitir, y su número";
+					}
+					alertify.success("Por favor, espera mientras verificamos la disponibilidad del documento");
+					ocultar_mensaje();
+					$.getJSON(
+						"#{ajax_alumno_verificar_validez_documento_venta_path @ejecutivo_matriculas.id, 'ispi', 'td', 'nd'}"
+							.replace("ispi", $institucion_sede_plan.val())
+							.replace("td", $tipo.val())
+							.replace("nd", $numero.val()),
+						function(data) {
+							notify_close();
+							if( data.exito ) {
+								mostrar_mensaje(data.mensaje)
+								documento_seleccionado();
+								documento_integro();
+							} else {
+								alertify.error( data.mensaje , 12000);
+								documento_no_integro();
+							}
+						}
+					);
+				} catch(e) {
+					alertify.error(e , 7000);
+					documento_no_integro();
+				}
+			}
+		});
+
+		$contenedor_documento.on("click", "button.cambiar-documento", function(e) {
+			e.preventDefault();
+			documento_no_seleccionado();
+		})
+
+		function documento_no_seleccionado() {
+			$contenedor_documento.find("button.verificar-validez-documento").show();
+			$contenedor_documento.find("button.cambiar-documento").hide();
+
+			/* |El numero y tipo de documento|
+			 */
+			$contenedor_documento.find("input.numero").removeAttr("readonly").val("").focus();
+			$contenedor_documento.find(":radio").removeAttr("disabled");
+
+			ocultar_mensaje();
+			documento_no_integro();
+		}
+
+		function documento_seleccionado() {
+			$contenedor_documento.find("button.verificar-validez-documento").hide();
+			$contenedor_documento.find("button.cambiar-documento").show();
+
+			/* |El numero y tipo de documento|
+			 */
+			$contenedor_documento.find("input.numero").attr("readonly", "readonly");
+			$contenedor_documento.find(":radio:not(:checked)").attr("disabled", "disabled");
+		}
+
+		function ocultar_mensaje() { $contenedor_documento.find("label.contenedor-mensaje").css("display", "none"); }
+		function mostrar_mensaje(mensaje) { 
+			$contenedor_documento.find("label.contenedor-mensaje").css("display", "inline"); 
+			$contenedor_documento.find("label.contenedor-mensaje span").text(mensaje);
+		}
+		function documento_integro() { $contenedor_documento.find("input.integridad-documento-venta").val("OK"); }
+		function documento_no_integro() { $contenedor_documento.find("input.integridad-documento-venta").removeAttr("value"); }
+	})

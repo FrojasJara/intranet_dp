@@ -1,0 +1,213 @@
+.navbar { display: none !important; }
+.container-fluid .row-fluid .span2 { display: none !important; }
+form.carreras-estudiadas-periodo, 
+form.carreras-estudiadas,
+form.secciones-docente,
+form.form-inline,
+form.periodos-habiles
+{ display: none !important; }
+footer { display: none !important; }
+legend { display: none !important; }  
+fieldset { border: none !important; }
+div.dataTables_length, 
+div.dataTables_filter,
+div.dataTables_info,
+div.dataTables_paginate
+ { display: none !important; }
+* { color: black !important; font-family: Arial !important; background: none !important; }
+body { padding: 0; }
+table.table thead tr { 
+	border-top: 1px solid black !important; 
+	border-bottom: 1px solid black !important;
+}
+h1 { 
+	font-size: 15pt !important; 
+	text-align: center !important; 
+	margin-bottom: 10pt;
+}
+h2 { 
+	font-size: 14pt !important; 
+	margin-bottom: 5pt;
+}
+table.table tbody tr { border-bottom: 1px solid gray !important; }
+table.table tbody td, table.table thead th { padding-top: 4px; padding-bottom: 4px; color: black !important; font-size: 14px !important; border: none !important; }
+table.table tfoot th, table.table tfoot td { font-size: 9px !important; }
+table.table thead th { text-transform: uppercase; }
+/*form.informacion-tabulada li { overflow: hidden; line-height: 100% !important; }
+form.informacion-tabulada div.contenedorelemento { width: 110pt !important; font-size: 9px !important; }*/
+form.informacion-tabulada label.etiqueta { font-size: 10pt !important; }
+form.informacion-tabulada div.contenedorelemento span { font-size: 11pt !important; margin-left: 150px !important; }
+form.informacion-tabulada > fieldset > ul > li { width: 320px !important; }
+
+.table-condensed th { padding: 3px !important; }
+div.logo-img span { display: block; }
+div.logo-img { 
+	display: block !important; 
+	text-align: center;
+	font: 7pt;
+	margin-bottom: 10pt;
+	margin-top: 1px;
+}
+.not-print { display: none !important; }
+div.items-container div.item { width: 280px; }
+div.item { line-height: 9px !important; }
+div.item label { font-size: 9px !important; line-height: 9px !important; }
+div.item span {  font-size: 9px !important; margin-left: 150px !important; line-height: 9px !important; }
+div.items-container div.page-header { border: 0 !important; padding: 0 !important; }
+div.items-container div.page-header h2 { font-size: 14px !important; border: 1px solid black; border-style: solid none; }
+div.items-container div.page-header h3 { font-size: 11px !important; }
+caption { font-size: 9px !important; }
+table.table tfoot tr { background-color: transparent; }
+div.alert{ display: none; }
+
+table.table-condensed tbody td { padding: 2px !important; font-weight: normal; }
+
+/*Acta final de notas*/
+.btn-group,.Well{
+	display: none !important;	
+}
+div.firma-acta-profesor { 
+	display: block !important; 
+	width: 1000px; 
+	height: 100px; 
+	margin-top: 10px; 
+}
+div.firma-acta-profesor h1 {
+	margin-left: 700px;
+	margin-right: 35px;
+	font-size: 16px !important;
+	margin-bottom: 0px;
+	height: 10px;
+	float: right;
+}
+div.firma-acta-profesor h2 {
+	margin-left: 690px;
+	margin-right: 35px;
+	font-size: 16px !important;
+	margin-top: 5px;
+	height: 50px;
+	float: right;
+}
+div.firma-acta-profesor p {
+	float: right;
+	width: 200px;
+	margin-left: 685px;
+}
+div.firma-acta-director { 
+	display: block !important; 
+	width: 1000px; 
+	height: 100px; 
+	margin-top: 100px; 
+}
+div.firma-acta-director h1 {
+	margin-left: 400px;
+	margin-right: 100px;
+	font-size: 16px !important;
+	float: left;
+}
+div.firma-acta-director p {
+	float: left;
+	width: 200px;
+	margin-left: 390px;
+}
+div.firma-acta-convalidacion-left { 
+	float: left;
+	display: block !important; 
+	width: 300px; 
+	height: 100px; 
+	margin-top: 70px; 
+}
+div.firma-acta-convalidacion-left h1 {
+	margin-left: 40px;
+	font-size: 16px !important;
+	float: left;
+}
+div.firma-acta-convalidacion-left p {
+	float: left;
+	width: 360px;
+	margin-left: 30px;
+}
+div.firma-acta-convalidacion-right { 
+	float: right;
+	display: block !important; 
+	width: 300px; 
+	height: 100px; 
+	margin-top: 70px; 
+}
+div.firma-acta-convalidacion-right h1 {
+	margin-left: 20px;
+	font-size: 16px !important;
+	float: left;
+}
+div.firma-acta-convalidacion-right p {
+	float: left;
+	width: 360px;
+	margin-left: 10px;
+}
+@page { margin: 2cm 1cm; }
+
+div.solo-imprimir {
+	display: block !important;
+	font-size: 7pt!important;
+	margin-top: 40px;
+}
+
+div.firma-avance{
+	font-size: 16px!important;
+	margin-top: 100%;
+}
+
+/*print del felipe*/
+
+#filtro-secciones{display: none;}
+.no-imprimir{display: none !important;}
+.no-imprimir-bordes{border: none!important;}
+.DTTT_container{display: none;}
+.leyenda { 
+	display: block !important;
+	font-size: 15px; 
+	background-color: #EEE;
+	width: auto;
+	padding: 5px;
+	line-height: 1.2em;
+	margin-bottom: 0 !important;
+}
+.nota{ display: block !important; }
+
+/*print diego*/
+ 
+span.nota{font-size: 7pt;}
+span.periodo{font-size: 7pt;}
+span.estado{font-size: 7pt;}
+span.descuento{font-size: 7pt;}
+span.horario{font-size: 7pt;}
+span.nombre{font-size: 7pt;}
+span.carrera{font-size: 7pt;}
+span.asignatura{font-size: 7pt;}
+span.seccion{font-size: 7pt;}
+
+.txLeft.nombre{font-size: 7pt!important;}
+.txRight.nombre{font-size: 7pt!important;}
+.txCenter.nombre{font-size: 7pt!important;}
+.txCenter.codigo{font-size: 7pt!important;}
+.txCenter.semestre{font-size: 7pt!important;}
+
+.horario{font-size: 7pt!important;}
+.horario.horario{font-size: 7pt!important;}
+
+.TxtLft.nombre{font-size: 7pt!important;}
+.TxtLft.rut{font-size: 7pt!important;}
+.listado.nombre{font-size: 7pt!important;}
+
+.TxtLft.BgNP{font-size: 7pt!important;}
+.TxtLft.BgNE{font-size: 7pt!important;}
+.TxtLft.BgNREP{font-size: 7pt!important;}
+.TxtLft.BgNF{font-size: 7pt!important;}
+
+.ponderacion{font-size: 7pt!important;}
+.notas{font-size: 7pt!important;}
+.BgNP{font-size: 7pt!important;}
+.BgNF{font-size: 7pt!important;}
+
+.separadorTitulo{ margin-top: 300px;}
+

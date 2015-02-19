@@ -1,0 +1,111 @@
+.sectionHeader
+	%h1  Avance Curricular
+- unless @alumno_plan_estudio.blank?
+	%form.informacion-tabulada
+		%fieldset.well
+			%legend Información 
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre:
+						%span.horario= @usuario.nombre	
+					%div.contenedorElemento.separador
+						%label.etiqueta Rut:
+						%span.horario= @usuario.rut	
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera
+						%span.horario= @alumno_plan_estudio.plan_estudio.nombre
+					- if @intermedio
+						%div.contenedorElemento.separador
+							%label.etiqueta
+							%span= "(Salida intermedia de #{@alumno_plan_estudio.plan_estudio.titulo_tecnico})"
+					%div.contenedorElemento.separador
+						%label.etiqueta Institución
+						%span.horario= @alumno_plan_estudio.institucion_sede
+		%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+			%i.icon-white.icon-print
+			Imprimir
+		%tbody
+			= render "alumnos/alumnos/partials/assets_estados_asignaturas"
+			%table.table.table-condensed#asignaturas
+				%colgroup
+					%col.semestre
+					%col.codigo
+					%col.asignatura
+					%col.nota
+					%col.periodo
+					%col.historial
+				%thead
+					%tr
+						%th.txCenter.nombre
+							Semestre
+						%th.txCenter.nombre
+							Código
+						%th.txLeft.nombre
+							Asignatura
+						%th.txCenter.nombre
+							Nota
+						%th.txCenter.nombre
+							Período
+						%th.txLeft.nombre
+							Historial
+				%tbody
+					- @data.each do |item|
+						- estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado
+						- item[:inscripciones].each do |inscripcion|
+							%tr{:class => "#{get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado}"}
+								%td.txCenter.semestre= item[:asignatura].semestre
+								%td.txCenter.codigo= item[:asignatura].codigo
+								%td.txLeft.asignatura
+									= item[:asignatura].nombre
+								%td.txCenter.nota
+									%span= inscripcion[:estado].nota_final
+								%td.txCenter.periodo
+									%span= inscripcion[:periodo].nombre
+								%td.txLeft.historial
+									%span= get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripciones].last[:estado].estado 
+		%div.solo-imprimir.firma-avance-curricular
+			- if @usuario.sede.id == Sede::CONCEPCION 
+				%p ___________________________________
+				%h1
+					= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE ESCUELA' : 'DIRECTOR DE ESCUELA'	
+			- else
+				%p ________________________
+				%h1
+					= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE SEDE' : 'DIRECTOR DE SEDE'
+				
+= datatable_src
+= datatable "asignaturas"
+
+:css
+	semestre    { width: 30px }
+	codigo 		{ width: 80px }
+	asignatura  { width: 450px}
+	nota        { width: 50px }
+	periodo     { width: 30px }
+	historial   { width: 80px }
+	@media print{
+		table.table tbody td, table.table thead th {
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 9pt !important;
+		}
+		form.informacion-tabulada div.contenedorelemento span { 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;	
+			margin-left: 150px !important; 
+		}
+		div.firma-avance-curricular{ 
+			margin-top: 150px;
+		}
+		div.firma-avance-curricular h1{ 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 11pt !important;	
+			width: 100%;
+			text-align: center;	
+		}
+		div.firma-avance-curricular p{ 
+			width: 100%;
+			text-align: center;	
+		}
+	}

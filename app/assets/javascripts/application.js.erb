@@ -1,0 +1,298 @@
+// This is a manifest file that'll be compiled into including all the files listed below.
+// Add new JavaScript/Coffee code in separate files in this directory and they'll automatically
+// be included in the compiled file accessible from http://example.com/assets/application.js
+// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+// the compiled file.
+
+//= require libjquery
+//= require ./date-es-CL
+//= require jquery.chosen
+//= require_tree ./bootstrap
+//= require alertify.min
+//= require blockUI
+function notify_close() {
+	$.pnotify_remove_all();
+}
+
+function notify_loader(titulo, mensaje) {
+	notify_close();
+	$.pnotify({
+		pnotify_title: titulo,
+		pnotify_text: mensaje,
+		pnotify_info_icon: 'picon picon-loader'
+	});
+}
+
+function notify_notice(titulo, mensaje, icono) {
+	notify_close();
+	$.pnotify({
+		pnotify_title: titulo,
+		pnotify_text: mensaje,
+		pnotify_notice_icon: "ui-icon ui-icon-circle-check"
+	});
+}
+
+function notify_info(titulo, mensaje, icono) {
+	notify_close();
+	$.pnotify({
+	    pnotify_title: titulo,
+	    pnotify_text: mensaje,
+	    pnotify_type: "info",
+	});
+}
+function notify_success(titulo, mensaje, icono) {
+	notify_close();
+	$.pnotify({
+	    pnotify_title: titulo,
+	    pnotify_text: mensaje,
+	    pnotify_type: "success",
+	    pnotify_info_icon: "ui-icon ui-icon-check"
+	});
+}
+
+function notify_error(titulo, mensaje, icono) {
+	notify_close();
+	$.pnotify({
+	    pnotify_title: titulo,
+	    pnotify_text: mensaje,
+	    pnotify_type: "error"
+	});
+}
+
+function mascaraDinero() {
+	$("input[alt='dinero']").setMask({mask: "999.999.999.999", type: "reverse"});
+}
+
+function rut_valido(campo) {
+	if ( campo.length == 0 ){ return false; }
+	if ( campo.length < 8 ){ return false; }
+ 
+	campo = campo.replace('-','')
+	campo = campo.replace(/\./g,'')
+ 
+	var suma = 0;
+	var caracteres = "1234567890kK";
+	var contador = 0;    
+	for (var i=0; i < campo.length; i++){
+		u = campo.substring(i, i + 1);
+		if (caracteres.indexOf(u) != -1)
+		contador ++;
+	}
+	if ( contador==0 ) { return false }
+	
+	var rut = campo.substring(0,campo.length-1)
+	var drut = campo.substring( campo.length-1 )
+	var dvr = '0';
+	var mul = 2;
+	
+	for (i= rut.length -1 ; i >= 0; i--) {
+		suma = suma + rut.charAt(i) * mul
+                if (mul == 7) 	mul = 2
+		        else	mul++
+	}
+	res = suma % 11
+	if (res==1)		dvr = 'k'
+                else if (res==0) dvr = '0'
+	else {
+		dvi = 11-res
+		dvr = dvi + ""
+	}
+	if ( dvr != drut.toLowerCase() ) { return false; }
+	else { return true; }
+}
+
+function fecha_valida_cuota(fecha) {
+	// Valida el formado AAAA/MM/DD
+	//if( /^[0-9]{4}\/(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])/.test(fecha) ) {
+
+	// Valida el formato DD/MM/AAAA
+	if( /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(fecha) ) {
+		f = Date.parse(fecha)
+		if( f != null ) {
+			var dia = f.getDate();
+			return $.inArray(dia, <%= Rails.configuration.dias_vencimiento_cuotas.to_s %>) != -1;
+		} else {
+			return false
+		}
+	} else {
+		return false;
+	}
+}
+
+function fecha_valida(fecha) {
+	if( /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test(fecha) ) {
+		f = Date.parse(fecha)
+		return f != null
+	} else {
+		return false;
+	}
+}
+
+function es_calificacion_valida(str) { return !isNaN(str) && str.length < 4 && str >= 1 && str <= 7; }
+function es_calificacion_valida2(str) { return !isNaN(str) && str.length < 4 && str >= 0 && str <= 7; }
+
+function esEntero(str) { return /^\d{1,12}$/.test(str); }
+
+//$.noConflict();
+
+$(document).ready(function() {
+
+	$('.cargar').click(function() { 
+        $.blockUI({ css: { 
+            border: 'none', 
+            padding: '15px', 
+            backgroundColor: '#000', 
+            '-webkit-border-radius': '10px', 
+            '-moz-border-radius': '10px', 
+            opacity: .5, 
+            color: '#fff' 
+        } });
+    });
+
+	/*	Rut	*/
+	/*$("input[name*='rut']").Rut();*/
+	/*	Telefonos	*/
+	
+	/*	Validador	*/
+	$.validator.setDefaults({
+		highlight: function(element, errorClass) {
+			$(element).css("border", "1px solid red");
+		},
+		unhighlight: function(element, errorClass) {
+			$(element).css("border", "1px solid lightgray");
+		},
+		errorClass: "errorValidacion",
+		ignore: []
+	});
+	
+	$.validator.addMethod(
+		"rut", 
+		function(value, element) { 
+  			return this.optional(element) || rut_valido(value); 
+		}, 
+		"Ingrese un rut válido"
+	);
+
+	$.validator.addMethod(
+		"fecha", 
+		function(value, element) { 
+  			return this.optional(element) || fecha_valida(value); 
+		}, 
+		"Ingrese una fecha válida"
+	);
+
+	$.validator.addMethod(
+		"fecha-valida-cuota", 
+		function(value, element) { 
+  			return this.optional(element) || fecha_valida_cuota(value); 
+		}, 
+		"Ingrese una fecha válida"
+	);
+
+	$.validator.addMethod(
+		"sin_enie", 
+		function(value, element) { 
+  			return this.optional(element) || ( value.lastIndexOf("Ñ") == -1 && value.lastIndexOf("ñ") == -1 ); 
+		}, 
+		"Ingrese un valor válido"
+	);
+
+	$.validator.addMethod(
+		"notEqualTo", 
+		function(value, element, param) {
+ 			return this.optional(element) || value != $(param).val();
+ 		}, 
+ 		"Tiene que ser distinto"
+ 	)
+
+	$.validator.addMethod(
+		"positivo", 
+		function(value, element) {
+ 			return this.optional(element) || parseInt(value) > 0;
+ 		}, 
+ 		"Tiene que ser mayor a 0"
+ 	)
+
+	$.validator.addMethod(
+		"equalToSum", 
+		function(value, element, param) {
+			var suma = 0;
+			$(param).each(function(i, v) { suma += parseInt(v.value); });
+ 			return this.optional(element) || value == suma;
+ 		}, 
+ 		"Al sumarse tienen que dar lo mismo"
+ 	)
+
+	$.validator.addMethod(
+		"calificacion_con_0", 
+		function(value, element) {
+ 			return this.optional(element) || es_calificacion_valida2(value);
+ 		}, 
+ 		"Ingrese una calificacion valida"
+ 	)
+
+ 	$.validator.addMethod(
+		"calificacion", 
+		function(value, element) {
+ 			return this.optional(element) || es_calificacion_valida(value);
+ 		}, 
+ 		"Ingrese una calificacion valida"
+ 	)
+	
+	/*	Notificaciones	*/
+	$.pnotify.defaults.pnotify_history = false;
+	$.pnotify.defaults.pnotify_delay = 5000;
+	$.pnotify.defaults.pnotify_closer = true;
+	$.pnotify.defaults.pnotify_sticker = false;
+	$.pnotify.defaults.pnotify_closer_hover = true;
+	$.pnotify.defaults.pnotify_hide =  true;
+
+	$('.dropdown-toggle').dropdown();
+
+	// Para mover los submenues laterales al lado que corresponde ...
+	$("div.sidebar-nav a").click(function() {
+		var offset = $(this).parent().parent().width();
+		$(this).find("+ ul.inner-list").css("left", offset + "px");
+	})
+
+	$("div.sidebar-nav h2").click(function() {
+		var $lista = $(this).find("+ ul.nav-list");
+		var esta_oculta = $lista.is(":hidden");
+		var cookie_name = $lista.attr("data-cookie-name");
+		(esta_oculta) ? $lista.show() : $lista.hide();
+		$.cookie(cookie_name, !esta_oculta, { expires: 365, path: '/' });
+	})
+
+	$("div.sidebar-nav ul.nav-list").each(function(i, v) {
+		var cookie_name = $(v).attr("data-cookie-name");
+		var cookie_value = $.cookie(cookie_name);
+		( cookie_value &&  cookie_value == "true" ) ? $(v).hide() : $(v).show();
+	})
+
+	$(".anchor").each(function(i, v) {
+		var anchor = $(this).attr("data-anchor");
+		$(this).css("position", "relative");
+		$(this).prepend("<div id='" + anchor + "' style='position: absolute; top: -45px;' />");
+	})
+
+	// Impresión
+	$("a.impresion").click(function(e) { e.preventDefault(); window.print(); });
+
+	$('.usa_tooltip').tooltip();
+
+	$("a.html_tooltip").each(function(i, v) {
+		var html_content = $(this).attr("data-html-content");
+		var $html_content = $(html_content)[0]
+		$(v).tooltip({ title : $html_content.outerHTML });
+	})
+
+	$(".habilitar_campo").change(function() {
+		$(this).prev().attr("disabled", ! this.checked);
+	});
+	/*
+	$('button[data-loading-text]').click(function () {
+	    $(this).button('loading');
+	});
+	*/
+
+});

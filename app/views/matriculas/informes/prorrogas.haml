@@ -1,0 +1,52 @@
+.page-header
+    %h1
+        Informe de prórrogas
+        = @institucion_sede.nombre.gsub("Casa matriz ", "").gsub("Sede ", "")
+    %h2    
+        = PlanEstudio.nombre_item_malla params[:malla]
+        = @f_i
+        = "hasta #{@f_t}" unless @f_t.blank?
+    %table#lista.table.table-condensed.table-bordered
+        %thead
+            %tr
+                %th # 
+                %th Rut
+                %th Nombre
+                %th Apellido
+                %th Carrera
+                %th Ejecutivo Prórroga
+                %th % Prórroga
+                %th Ingreso Prórroga
+                %th Nº Cuota
+                %th Monto
+                %th Fecha Vencimiento
+                %th Fecha Prórroga
+                %th Pagaré
+        %tbody
+            - if @prorrogas.blank? or @prorrogas.count.eql? 0
+                %tr
+                    %td{colspan: 13} No hay registros
+            - else
+                - @prorrogas.each_with_index do |prorroga,index|
+                    - alumno = prorroga.pago_comprometido.plan_pago.matricula_plan.alumno_plan_estudio.alumno
+                    - matricula = prorroga.pago_comprometido.plan_pago.matricula_plan
+                    - plan = prorroga.pago_comprometido.plan_pago.matricula_plan.alumno_plan_estudio
+                    - cuota = prorroga.pago_comprometido 
+
+                    %tr
+                        %td{align: 'middle'}= index + 1
+                        %td= alumno.datos_personales.rut
+                        %td= alumno.datos_personales.nombres
+                        %td= alumno.datos_personales.apellidos
+                        %td= plan.plan_estudio.nombre
+                        %td= prorroga.ejecutivo_matriculas.nombre
+                        %td= prorroga.porcentaje.to_s+"%"
+                        %td= (l prorroga.created_at)[0..10]
+                        %td= cuota.numero_cuota unless cuota.numero_cuota.blank?
+                        %td= cuota.monto unless cuota.monto.blank?
+                        %td= cuota.fecha_vencimiento unless cuota.fecha_vencimiento.blank?
+                        %td= prorroga.fecha
+                        %td= cuota.pagare.numero unless cuota.pagare_id.blank?
+
+= datatable_src
+= datatable "lista"

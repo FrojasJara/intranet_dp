@@ -1,0 +1,40 @@
+#revisar-propuesta-asignaturas
+    :css
+        col.semestre { width: 90px; }
+        col.estado { width: 90px; }
+        col.inscripcion { width: 90px; }
+
+    %h1 
+        Propuesta/inscripción de asignaturas vigente 
+        =current_period.nombre
+
+    - if @alumno.tiene_propuesta_asignaturas?
+        = render "alumnos/partials/seleccion_plan"
+        = render "alumnos/partials/informacion_tabulada_alumno"
+
+        %table.table
+            %colgroup
+                %col.semestre
+                %col.estado
+                %col.asignatura
+                %col.inscripcion
+            %thead
+                %tr
+                    %th.txCenter
+                        Semestre
+                    %th.txCenter
+                        Estado  
+                    %th.txLeft
+                        Asignatura
+            %tbody
+                - @propuesta_asignaturas.each do |item|
+                    %tr
+                        %td.txCenter= item[:asignatura].semestre
+                        %td.txCenter
+                            - if not item[:es_atrasada]
+                                %span.label.label-success
+                                    Vigente
+                            - else
+                                %span.label.label-important
+                                    Atrasada
+                        %td.txLeft= item[:asignatura].nombre           

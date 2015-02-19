@@ -1,0 +1,40 @@
+.sectionHeader
+	%h1  Asistencia Sección
+
+%div.well
+	- # El filtro de secciones se encuentra en coordianacion de carrera 
+	- url_metodo = apoyo_docente_asistencia_seccion_path
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => url_metodo, :texto_boton => "Ver", :filtro => @filtro}
+
+= notificaciones
+
+- unless  @alumnos.size > 0 
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	:css 
+		.select-tabla{margin-bottom:4px !important;}
+	%form.informacion-tabulada
+		%fieldset
+			%legend Información de la seccion
+			%ul.ui-helper-clearfix
+				%li.ui-helper-clearfix.cuatro-columnas
+					%div.contenedorElemento.separador
+						%label.etiqueta Carrera:
+						%span= @seccion.asignatura_base.plan_estudio.nombre
+					%div.contenedorElemento.separador
+						%label.etiqueta Asignatura:
+						%span= @seccion.asignatura_base.nombre			
+					%div.contenedorElemento.separador
+						%label.etiqueta Jornada:
+						%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%div.contenedorElemento.separador
+						%label.etiqueta Codigo Asignatura:
+						%span= @seccion.asignatura_base.codigo
+					%div.contenedorElemento.separador
+						%label.etiqueta Nombre Profesor:
+						- if @seccion.docente.blank?
+							%span Docente no asignado 
+						- else
+							%span= @seccion.docente.datos_personales.nombre

@@ -1,0 +1,105 @@
+- if opts[:tools].blank?
+    - opts[:tools] = true
+:css
+    th.not-sorting{ 
+        cursor: auto !important; background: none !important; 
+    }
+    .ColVis_collection li label span{
+        font-size: 13px !important;
+    }
+    .ColVis_collection li label input{
+        float:left;
+    }
+
+- if opts[:tools]
+    = stylesheet_link_tag 'TableTools'
+    = stylesheet_link_tag 'dataTables.colVis'
+    = javascript_include_tag "TableTools.min"
+    = javascript_include_tag "dataTables.colVis"
+    :javascript
+        $(function(){
+            $.extend( true, $.fn.DataTable.TableTools.classes, {
+                "container": "btn-group DTTT_container",
+                "buttons": {
+                    "normal": "btn btn-primary",
+                    "disabled": "btn disabled"
+                },
+                "collection": {
+                    "container": "DTTT_dropdown dropdown-menu",
+                    "buttons": {
+                        "normal": "",
+                        "disabled": "disabled"
+                    }
+                }
+            } );
+
+            // Have the collection use a bootstrap compatible dropdown
+            $.extend( true, $.fn.DataTable.TableTools.DEFAULTS.oTags, {
+                "collection": {
+                    "container": "ul",
+                    "button": "li",
+                    "liner": "a"
+                }
+            } );
+        })
+        
+
+:javascript
+    /* Inicialización de datatable */
+    $(document).ready(function() {
+        var nombre = "";
+        nombre = "##{model}" ;
+        $(nombre).dataTable( {
+            "sPaginationType": "bootstrap",
+            "iDisplayLength" : 100,
+            #{'"aaSorting": [],' if opts[:nosort]}
+            #{
+                %{
+            "oTableTools": {
+                "sSwfPath": "/swf/copy_csv_xls_pdf.swf",
+                "aButtons": [
+                    {
+                        "sExtends":    "xls",
+                        "sButtonText": '<i class="icon-th-list icon-white"></i> Excel ',
+                        "sPdfOrientation": "landscape",
+                        "mColumns": "visible",
+                        'sTitle': $('#TituloExport').val(),
+                    },
+                    {
+                        "sExtends":    "pdf",
+                        "sButtonText": '<i class="icon-download-alt icon-white"></i> PDF ',
+                        "sPdfOrientation": "landscape",
+                        "mColumns": "visible",
+                        'sTitle': $('#TituloExport').val(),
+                    }
+                ],
+
+            },
+            "sDom": 'CT<"clear">lfrtip'
+                } if opts[:tools]
+            },
+            //Aparecer o desaparecer columnas
+            "colVis": {
+                "buttonText": "Agregar / Ocultar columnas"
+            },
+            "oLanguage": {
+                "sLengthMenu": "_MENU_ #{model}",
+                "sSearch": "Buscar:",
+                "sZeroRecords": "#{opts[:msg_zero]}",
+                "sInfo": "Mostrando _START_ de _END_ de _TOTAL_ #{model}", 
+                /*Paginador titulos*/
+                "oPaginate": {
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior",
+                }
+            },
+        });
+
+        $('.ColVis_MasterButton').addClass('btn btn-primary');
+        $('.ColVis_MasterButton').css({'width' :'200px','float' : 'right', 'margin-left' : '20px'});
+        $('.ColVis_MasterButton').removeClass('ColVis_Button');
+        $('.ColVis_MasterButton').addClass('not-print');
+
+        // Para evitar que algunas columnas sean ordenadas
+        $("th.not-sorting").off();
+    });

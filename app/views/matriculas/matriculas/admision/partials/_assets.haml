@@ -1,0 +1,251 @@
+= render "matriculas/matriculas/admision/partials/assets_css"
+:javascript
+	$(document).ready(function() {
+		$(".fixed-header").affix({
+			offset: {
+				top: 200
+			}
+		})
+
+		$("form.admision").validate({
+			rules : {
+				"rut_alumno" 										: { notEqualTo	: "[name='rut_apoderado']" },
+				"usuario_alumno[telefono_fijo]" 					: { 
+					required			: function(element) { return $("select[name='usuario_alumno[codigo_area_telefono]']").val() != ""; },
+					minlength 			: 5
+				},
+				"documentos_alumno[]" 								: { minlength 	: 1 },
+				"usuario_alumno[telefono_movil]" 					: { minlength 	: 8 },
+				"usuario_apoderado[telefono_fijo]"					: { 
+					required			: function(element) { return $("select[name='usuario_apoderado[codigo_area_telefono]']").val() != ""; },
+					minlength 			: 5 
+				},
+				"usuario_apoderado[telefono_movil]" 				: { minlength 	: 8 },
+				"matricula_plan[monto_reconocido]" 					: { maxlength	: 100 },
+				"monto-documentado-#{PagoComprometido::ARANCEL}"	: { equalTo		: "[name='monto-pagar-#{PagoComprometido::ARANCEL}']" },
+				"monto-documentado-#{PagoComprometido::MATRICULA}"	: { equalTo		: "[name='monto-pagar-#{PagoComprometido::MATRICULA}']" },
+				"monto-documentado-#{PagoComprometido::NORMATIVA}"	: { equalTo		: "[name='monto-pagar-#{PagoComprometido::NORMATIVA}']" },
+
+				// Documento de venta
+				"documento_venta[tipo]" 							: {
+					required 			: function(element) { return $("input[name='documento_venta[monto]']").val() > 0 ; }
+				},
+				"documento_venta[numero]" 							: {
+					required 			: function(element) { return $("input[name='documento_venta[monto]']").val() > 0 ; }
+				},
+				"integridad_documento_venta" 						: {
+					required 			: function(element) { return $("input[name='documento_venta[monto]']").val() > 0 ; }
+				}
+
+			},
+			invalidHandler: function(form, validator) {
+				alertify.error(
+					"Existe información errónea, " +
+					"Por favor, ingrese información en todos los campos requeridos como obligatorios." + 
+					"Por favor, verifique:" +
+					"<ol style='list-style-type: decimal; padding-left: 15px;'>" +
+						"<li>Que el alumno/postulante y el apoderado estén bien ingresados.</li>" +
+						"<li>Que se haya seleccionado un plan de estudio.</li>" +
+						"<li>Que se haya ingresado descuentos y calculado el arancel.</li>" +
+						"<li>Que se haya seleccionado un periodo de matricula.</li>" +
+						"<li>Que se hayan confeccionado adecuadamente los planes de pago.</li>" +
+						"<li>Que se haya seleccionado y emitido un documento de venta.</li>" +
+					"</ol>"
+				,20000);
+				setTimeout($.unblockUI, 300);
+			}
+			,submitHandler: function(form) {
+				if( confirm("¿Está seguro que desea proseguir con la matrícula?") ) {
+					// Correcion de nombres
+					$(form).find(":input.cambiar-nombre").each(function(i, v) { $(v).attr("name", $(v).attr("data-nombre-real")); });
+					// Eliminar elementos para que no se envien
+					$(form).find(":input.n1").each(function(i, v) { $(v).attr("disabled", "disabled"); });
+					alertify.success("Aguarde un momento mientras el alumno es matrículado ..." , 12000)
+					$(form).find(":input.loading-button").button('loading');
+					form.submit();
+				}
+			}
+		})
+
+		$("input.rut").change(function() { $(this).siblings().val(this.value); })
+	})
+	
+	function calcular_cuotas(monto, q_cuotas, interes) {
+		var cuotas = new Array();			
+		var i;
+		var obj_cuotas = new Object();
+		obj_cuotas.cuotas = new Array();
+		obj_cuotas.monto = parseInt(monto*(1+interes));
+		var resto = obj_cuotas.monto;
+		var cuota = parseInt(obj_cuotas.monto/q_cuotas);
+
+		for(i = 1; i <= q_cuotas; ++i ) { obj_cuotas.cuotas.push(cuota); resto -= cuota; }
+		if(resto > 0) obj_cuotas.cuotas[i-2] = cuota + resto;
+
+		return obj_cuotas;
+	}
+
+	function limpiar_plan_pago_arancel() {
+		var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::ARANCEL}");
+		$contenedor_plan_pago.find("a.pago-combinado").attr("disabled", true);
+		$contenedor_plan_pago.find("a.pago-combinado").popover("destroy");
+		$contenedor_plan_pago.find("ol.pagos").attr("class", "pagos").find("> li:visible").remove();
+
+		/*
+		 *	Monto documentado, monto pagar (:hiddens)
+		 * 	Monto documentado, (:visible)
+		 *
+		 **/
+		$contenedor_plan_pago.find("input.r1").val("0");
+	}
+
+	function habilitar_plan_pago_arancel(arancel) {
+		if(arancel) {
+			var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::ARANCEL}");
+			$contenedor_plan_pago.find("input.monto-pagar").val(arancel);
+			$contenedor_plan_pago.find("a.pago-combinado").removeAttr("disabled");
+			$contenedor_plan_pago.find("a.pago-combinado").popover({
+				html : true,
+				title : "Pago combinado",
+				content : 
+						"<div class='control-group'>" +
+							"<label class='control-label'>Monto</label>" +
+							"<div class='controls'>" +
+								"<input type='text' class='monto' style='text-align: right;'>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='margin-bottom 5px;'>" +
+							"<label class='control-label'>Medio</label>" +
+							"<div class='controls'>" +
+								"<select class='medios-pago'>" +
+									"#{ @medios_pagos.map do |medio| 
+											raw "<option value='#{medio.id}' class='medio-#{medio.id}'>#{medio.nombre}</option>" 
+										end.join }" +
+								"</select>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='text-align: center'>" +
+							"<a href='#' class='btn btn-info agregar-pago-#{PagoComprometido::ARANCEL}'>" +
+								"Añadir" +
+							"</a>" +
+						"</div>"
+					
+			});
+			mascaraDinero();
+		}
+	}
+
+	function limpiar_plan_pago_matricula() {
+		var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::MATRICULA}");
+		$contenedor_plan_pago.find("a.pago-combinado").attr("disabled", true);
+		$contenedor_plan_pago.find("a.pago-combinado").popover("destroy");
+		$contenedor_plan_pago.find("ol.pagos").attr("class", "pagos").find("> li:visible").remove();
+
+		/*
+		 *	Monto documentado, monto pagar (:hiddens)
+		 * 	Monto documentado, (:visible)
+		 *
+		 **/
+		$contenedor_plan_pago.find("input.r1").val("0");
+	}
+
+	// Habilitar el plan de pago del arancel
+	function habilitar_plan_pago_matricula(matricula) {
+		if(matricula > 0) {
+			var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::MATRICULA}");
+			$contenedor_plan_pago.find("input.monto-pagar").val(matricula);
+			$contenedor_plan_pago.find("a.pago-combinado").removeAttr("disabled");
+			$contenedor_plan_pago.find("a.pago-combinado").popover({
+				html : true,
+				title : "Pago combinado",
+				content : 
+						"<div class='control-group'>" +
+							"<label class='control-label'>Monto</label>" +
+							"<div class='controls'>" +
+								"<input type='text' class='monto' style='text-align: right;'>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='margin-bottom 5px;'>" +
+							"<label class='control-label'>Medio</label>" +
+							"<div class='controls'>" +
+								"<select class='medios-pago'>" +
+									"#{ @medios_pagos.map do |medio| 
+											raw "<option value='#{medio.id}' class='medio-#{medio.id}'>#{medio.nombre}</option>" 
+										end.join }" +
+								"</select>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='text-align: center'>" +
+							"<a href='#' class='btn btn-info agregar-pago-#{PagoComprometido::MATRICULA}'>" +
+								"Añadir" +
+							"</a>" +
+						"</div>"
+					
+			});
+			mascaraDinero();
+		}
+	}
+
+	function limpiar_plan_pago_normativa() {
+		var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::NORMATIVA}");
+		$contenedor_plan_pago.find("a.pago-combinado").attr("disabled", true);
+		$contenedor_plan_pago.find("a.pago-combinado").popover("destroy");
+		$contenedor_plan_pago.find("ol.pagos").attr("class", "pagos").find("> li:visible").remove();
+
+		/*
+		 *	Monto documentado, monto pagar (:hiddens)
+		 * 	Monto documentado, (:visible)
+		 *
+		 **/
+		$contenedor_plan_pago.find("input.r1").val("0");
+	}
+
+	// Habilitar el plan de pago del arancel
+	function habilitar_plan_pago_normativa(normativa) {
+		if(normativa > 0) {
+			var $contenedor_plan_pago = $("#plan-pago-#{PagoComprometido::NORMATIVA}");
+			$contenedor_plan_pago.find("input.monto-pagar").val(normativa);
+			$contenedor_plan_pago.find("a.pago-combinado").removeAttr("disabled");
+			$contenedor_plan_pago.find("a.pago-combinado").popover({
+				html : true,
+				title : "Pago combinado",
+				content : 
+						"<div class='control-group'>" +
+							"<label class='control-label'>Monto</label>" +
+							"<div class='controls'>" +
+								"<input type='text' class='monto' style='text-align: right;'>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='margin-bottom 5px;'>" +
+							"<label class='control-label'>Medio</label>" +
+							"<div class='controls'>" +
+								"<select class='medios-pago'>" +
+									"#{ @medios_pagos.map do |medio| 
+											raw "<option value='#{medio.id}' class='medio-#{medio.id}'>#{medio.nombre}</option>" 
+										end.join }" +
+									"<option value='7' class='medio-7'>En pagaré del arancel</option>" +
+								"</select>" +
+							"</div>" +
+						"</div>" +
+						"<div class='control-group' style='text-align: center'>" +
+							"<a href='#' class='btn btn-info agregar-pago-#{PagoComprometido::NORMATIVA}'>" +
+								"Añadir" +
+							"</a>" +
+						"</div>"
+					
+			});
+			mascaraDinero();
+		}
+	}
+
+	function actualizar_monto_documento() {
+		var $montos = $("#documento-venta input.monto");
+		// Todos los montos que pueden ser expresados en un documento de venta
+		var suma = 0;
+		$("div.cabecera:visible :input.sdv, td:visible :input.sdv").each(function(i, v) { 
+			suma += parseInt(v.value); 
+		})
+		$montos.val(suma);
+		mascaraDinero();
+
+	}

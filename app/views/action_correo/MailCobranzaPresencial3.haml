@@ -1,0 +1,27 @@
+%html
+    %head
+        %title
+    %body
+        %p 
+            = @user.nombres.upcase+" "+@user.apellidos.upcase
+            %br
+            = @user.rut.upcase
+            %br
+            %br
+            Junto con saludarlo(a) recuerdo a usted que a la fecha mantiene una deuda con la institución que asciende a 
+            - suma = 0
+            - @saldos.each do |saldo|
+                - suma += saldo 
+            %strong='$'+suma.to_s+" más intereses y gastos de cobranza externa. "
+            Le informamos que deuda fue informada a Dicom a través de la empresa de cobranza externa AGNICOL LTDA.
+        %p 
+            Favor de presentarse a nuestras oficinas
+            %strong='antes del '+@fecha_fin.to_s+'.'
+        %p Saluda cordialmente
+        %p
+            %strong{style: 'float:left;width:100%;text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO DE COBRANZA
+                %br
+                ='e-mail '+@usuario.email

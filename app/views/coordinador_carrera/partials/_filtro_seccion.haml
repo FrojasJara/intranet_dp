@@ -1,0 +1,118 @@
+:css
+	.inline{float: left; margin-right: 10px;}
+
+%h3 Filtrar Sección
+%form.form.form-inline#filtro-secciones{:action => url_metodo ,:method => "post"}
+	%div.control-group.inline
+		.control-label
+			%label Sede
+		.controls
+			%select{:name => "filtro[sede_id]",style: "width: 160px;"}
+				%option{value: ""} .: Elija Una Sede :.
+				- @sedes.each do |i|
+					- sede_selected = ((not filtro.blank?) and filtro[:sede_id].to_i == i.id) ? true : false
+					%option{value: i.id, :selected => sede_selected}= i.nombre
+	%div.control-group.inline
+		.control-label
+			%label Carrera
+		.controls
+			%select.required{:name => "filtro[plan_estudio_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+				- unless @carrera.blank? 
+					- @carrera.each do |p|
+						%option{:value => p.id , :selected => filtro[:plan_estudio_id].to_i == p.id ? true : false}= "#{p.nombre} - [#{p.revision}]"
+	%div.control-group.inline
+		.control-label
+			%label Asignaturas
+		.controls
+			%select.required{:name => "filtro[asignatura_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+				- unless @asignaturas.blank? 
+					- @asignaturas.each do |a|
+						%option{:value => a.id , :selected => filtro[:asignatura_id].to_i == a.id ? true : false}= "#{a.nombre} - [#{a.semestre}]"
+
+	%div.control-group.inline
+		.control-label
+			%label Periodo
+		.controls
+			%select.required{:name => "filtro[periodo_id]",style: "width: 150px;"}
+				%option{value: ""} ..: Elija Una Opción :.
+				- Periodo.all(:fields => [:id], :order => [:anio.desc, :semestre.desc]).each do |i|
+					- periodo_selected = ((not filtro.blank?) and filtro[:periodo_id].to_i == i.id) ? true : false
+					%option{value: i.id, :selected => periodo_selected}= i.nombre
+	
+	%div.control-group.inline
+		.control-label
+			%label Seccion
+		.controls
+			%select.required{:name => "filtro[seccion_id]",style:"width:150px;" }
+				%option{value: ""} .: Elija Una Opción :.
+				- unless @secciones.blank? 
+					- @secciones_f.each do |s|
+						%option{:value => s.id , :selected => filtro[:seccion_id].to_i == s.id ? true : false}= "#{s.nombre}"
+	%div.form-actions
+		%button.btn.btn-primary{type: "submit"}
+			%i.icon.icon-white.icon-search
+			= texto_boton
+
+:javascript
+	$(document).ready(function(){
+		$("#filtro-secciones").validate({
+			invalidHandler: function(form, validator) {
+				notify_info("Ver Actas", "Por favor, compruebe que ha ingresado la información necesaria.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+		/*Actualiza el combo de carreras segun sede*/
+		$("select[name='filtro[sede_id]']").change(function(){
+			var sede_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_apoyo_docente_buscar_carreras_path}",
+				type: 'POST',
+				data: {sede_id : sede_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Carrera :.</option>";
+					$.each(data.carreras, function(k,v){
+						options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + " [Malla " + v.siaa_id_ma + "] </option>"
+					});
+					$("select[name='filtro[plan_estudio_id]']").html(options);
+				}
+			});
+		});
+
+		$("select[name='filtro[plan_estudio_id]']").change(function(){
+			var plan_estudio_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_apoyo_docente_buscar_asignaturas_path}",
+				type: 'POST',
+				data: {plan_estudio_id :  plan_estudio_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Asignatura :.</option>";
+					$.each(data.asignaturas, function(k,v){
+						options = options +  "<option value='" + v.asignatura_id + "'>" + v.nombre + " [Nivel " + v.semestre + "] </option>"
+					});
+					$("select[name='filtro[asignatura_id]']").html(options);
+				}
+			});
+		});
+
+		$("select[name='filtro[periodo_id]']").change(function(){
+			var periodo_id = $(this).val();
+			var asignatura_id = $("select[name='filtro[asignatura_id]']").val();
+			var sede_id = $("select[name='filtro[sede_id]']").val();
+			$.ajax({
+				url: "#{ajax_apoyo_docente_buscar_secciones_por_periodo_path}",
+				type: 'POST',
+				data: {periodo_id :  periodo_id, asignatura_id: asignatura_id,sede_id : sede_id },
+				success: function(data) {
+					var options = "<option value=''>.: Elija Una Sección :.</option>";
+					$.each(data.secciones, function(k,v){
+						options = options +  "<option value='" + v.seccion_id + "'>" + v.nombre + "</option>"
+					});
+					$("select[name='filtro[seccion_id]']").html(options);
+				}
+			});
+		});
+	});

@@ -1,0 +1,60 @@
+:css
+	.inline{float: left; margin-right: 10px;}
+
+
+%form.form.form-inline#filtro-institucion{:action => url_metodo ,:method => "post"}
+	%div.control-group.inline
+		.control-label
+			%label Institucion
+		.controls
+			%select{:name => "filtro[sede_id]"}
+				%option{value: ""} .: Elija Una Institución :.
+				- @sedes.each do |i|
+					%option{:value => i.id}= i.nombre 
+	%div.control-group.inline
+		.control-label
+			%label Carrera
+		.controls
+			%select.required{:name => "filtro[plan_estudio_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+	%div.control-group.inline
+		.control-label
+			%label Periodo
+		.controls
+			%select{:name =>"filtro[periodo_id]"}
+				%option{value: ""} .: Elija un periodo :.
+				- @periodos.each do |i|
+					%option{:value => i.id}= i.nombre
+	
+	%div.form-actions
+		%button.btn.btn-primary{type: "submit"}
+			%i.icon.icon-white.icon-search
+			= texto_boton
+
+
+:javascript
+	$(document).ready(function(){
+		$("#filtro-institucion").validate({
+				invalidHandler: function(form, validator) {
+				},
+				submitHandler: function(form) {
+					form.submit();
+				}
+			})
+		/*Actualiza el combo de carreras segun sede*/
+		$("select[name='filtro[sede_id]']").change(function(){
+			var sede_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_apoyo_docente_buscar_carreras_path}",
+				type: 'POST',
+				data: {sede_id :  sede_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Carrera :.</option>";
+					$.each(data.carreras, function(k,v){
+						options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + " [Malla " + v.siaa_id_ma + "] </option>"
+					});
+					$("select[name='filtro[plan_estudio_id]']").html(options);
+				}
+			});
+		});
+	});

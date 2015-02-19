@@ -1,0 +1,105 @@
+.sectionHeader
+    %h1= "Alumnos de la seccion #{@seccion.asignatura.nombre} seccion # #{@seccion.numero} "
+
+:javascript
+    $(document).ready(function(){ 
+        $('#listaAlumnos').typeahead({
+            source : #{@items}
+        });
+        $("#listaAlumnos").Rut();
+
+        $("#buscarAlumno").live("click",function(){
+            var rut = $("#listaAlumnos").val();
+
+            if( rut == ""){
+
+                $('#errorAlumnoRutMsg').show();
+            
+            }else{
+                    
+                $.post(
+
+                    "#{obtener_planes_por_institucion_sede_path}",
+                    {
+                        "rut" : rut
+                    },
+                    function(data) {
+                    /*Response*/
+                     }       
+                    );
+
+                $('#detallesAlumno').modal();
+            }
+        });
+
+        $('#detallesAlumno').on('shown', function () {
+            console.log($("#listaAlumnos").val());
+        });
+
+        $('#detallesAlumno').on('hidden', function () {
+            $("#listaAlumnos").val("");
+        });
+
+        //$('#detallesAlumno').on('show', function () {
+            //if($("#listaAlumnos").val() == ""){
+                //alert("Debe Buscar un alumno");
+                //return false;
+            //}
+        //});
+
+
+    });  
+%form  
+    %fieldset
+        %legend Agregar alumnos a la sección
+        %br
+        %input.input-xlarge{:type => "text", "data-provide" => "typeahead", :id => "listaAlumnos"}
+        %div.alert.alert-error{:id => "errorAlumnoRutMsg", :style => "display:none;"}
+            %button.close{"data-dismiss" =>  "alert", "data-target" => "#errorAlumnoRutMsg"} x
+            %p Debe completar el campo rut!
+
+%p
+    %button.btn.btn-primary.btn-large{:id => "buscarAlumno"} Buscar Alumno
+
+        
+    -#= link_to 'Agregar Sección', new_mantenedores_seccione_path, :class => 'btn'
+%br 
+%br
+%form{:method => "post"}
+    %button.btn.btn-success Inscribir alumnos
+    %br
+    %table.table
+        %thead
+            %tr
+                %th ID
+                %th Rut
+                %th Nombre
+                %th Carrera
+                %th Acciones
+        %tbody
+            - @alumnos.each do |i|
+                %tr
+                    %td= i.id
+                    %td= i.rut
+                    %td= i.nombre
+                    %td= "carrera" #i.alumno.alumno_plan_estudio.plan_estudio.nombre 
+                    %td
+                        %input{:type => "checkbox", :name => "alumnos[id][]", :value => i.id }
+    
+
+    %div.modal.hide.fade{:id => "detallesAlumno" , :style => "display:none;" }
+        %div.modal-header
+            %button.close{"data-dismiss" => "modal", "data-target" => "#detallesAlumno"} x
+            %h3 Detalles Alumno
+        %div.modal-body
+            %p 
+                %strong Nombre
+            %p
+                %strong Edad
+            %p
+                %strong Carrera
+            %p
+                %strong Periodo
+        %div.modal-footer
+            %button.btn.btn-danger{"data-dismiss" => "modal", "data-target" => "#detallesAlumno"} Cancelar
+            %a.btn.btn-primary{:id => "btnGuardarInscrpcion", :href => "#" } Inscribir en asignatura

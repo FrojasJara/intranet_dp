@@ -1,0 +1,101 @@
+.sectionHeader
+	%h1  Acta Final de Notas
+
+%div.well
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => coordinador_carrera_ver_acta_notas_path, :texto_boton => "Ver Acta de Notas", :filtro => @filtro}
+
+= notificaciones
+
+- unless  @alumnos.size > 0 
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	%div.informe-acta-notas
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Rut Profesor:
+							- if @seccion.docente.blank?
+								%span Docente no asignado 
+							- else
+								%span= @seccion.docente.datos_personales.rut	
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Asignatura:
+							%span= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura.codigo
+						
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%li.ui-helper-clearfix.cuatro-columnas	
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Carrera:
+							%span= @asignatura.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre Asignatura:
+							%span= @asignatura.semestre
+						%div.contenedorElemento.separador
+							%label.etiqueta Sede:
+							%span= @usuario.sede.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Direccion:
+							%span= @usuario.sede.direccion					
+						%div.contenedorElemento.separador
+							%label.etiqueta cantidad de alumnos:
+							%span= @alumnos.size									
+					%li.ui-helper-clearfix.cuatro-columnas
+						%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+							%i.icon-white.icon-print
+							Imprimir
+		%div.firma-acta-profesor
+			%p ________________________
+			%h1 Firma del Profesor
+			- if @seccion.docente.blank?
+				%h2 Docente no asignado
+			- else
+				%h2= @seccion.docente.datos_personales.nombre
+
+		%table.table.table-striped#alumnos
+			%thead
+				%tr
+					%th.TxtLft Rut
+					%th.TxtLft Nombre
+					%th.TxtLft NF
+			%tbody
+				- @alumnos.each_with_index do |i, index|
+					%tr
+						%td= i.alumno.datos_personales.rut
+						%td= i.alumno.datos_personales.nombre
+						%td= i.nota_final
+
+		%div.firma-acta-director		
+			- if @usuario.sede.id == 1
+				%p ________________________
+				%h1 Director de Escuela
+			- else 
+				%p ___________________________
+				%h1 Coordinador de Carrera 
+		
+		
+
+= datatable_src
+= datatable("alumnos") 
+:javascript
+		$(document).ready(function(){
+			$(".marcar_asistencia").change(function() {
+				$(this).prev().attr("disabled", ! this.checked);
+				$(this).prev().prev().attr("disabled", ! this.checked);
+			});
+		});

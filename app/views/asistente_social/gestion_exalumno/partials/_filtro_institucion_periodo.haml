@@ -1,0 +1,9 @@
+%div.well
+	= form_for :filtro, html: {class: 'form-inline informacion-tabulada'} do |f|
+		%select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+			- @instituciones_sedes.each do |item|
+				%option{:value => item.id}= item.nombre
+		%select{name: "periodo_id"}
+			- @periodos.each do |item|
+				%option{value: item.id}= item.nombre
+		= f.submit 'Filtrar'

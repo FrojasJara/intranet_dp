@@ -1,0 +1,150 @@
+.sectionHeader
+	%h1.no-imprimir Acta Final de Trabajo de Título
+	%h1.leyenda ACTA FINAL DE TRABAJO DE TÍTULO
+	%div.div-separador
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información del alumno
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Carrera:
+							%span= @carrera.nombre
+						- if @intermedio
+							%div.contenedorElemento.separador
+								%label.etiqueta
+								%span= "(Salida intermedia de #{@alumno_plan_estudio.plan_estudio.titulo_tecnico})"
+						%div.contenedorElemento.separador
+							%label.etiqueta Cedula de Identidad:
+							%span= @alumno.rut_humanizado
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Alumno:
+							%span= @alumno.nombre_1
+						%div.contenedorElemento.separador
+							%label.etiqueta Fecha:
+							%span= @trabajo_titulo.fecha
+						%div.contenedorElemento.separador.salto-titulo
+							%label.etiqueta Título de Tema:
+							%span= @trabajo_titulo.nombre
+	%a.not-print.btn.btn-info.impresion{:href => "#"}
+		%i.icon-white.icon-print
+		Imprimir
+	%div.div-separador
+		%legend Docentes Evaluadores
+		%legend.leyenda{:style => "font-weight:bold;"} DOCENTES EVALUADORES
+		%table.table.table-striped#alumnos
+			%thead			
+				%tr
+					%th.TxtLft Docente
+					%th.TxtLft Tipo
+					%th.TxtLft Nota
+					%th.TxtLft Firma
+			%tbody
+				- suma = 0.0
+				- @docentes.each do |d|
+					%tr
+						%td.espacio-firma
+							%span= d.docente.datos_personales.nombre_1
+						%td.espacio-firma
+							%span= d.tipo == DocenteTrabajoTitulo::GUIA ? 'Guía' : 'Informante'
+						%td.espacio-firma
+							%span= d.nota
+						%td.espacio-firma
+							%span
+					- suma = d.nota + suma
+				- nota_final = suma / 2  
+				%tr
+					%td.TxtLft.final Nota Trabajo de Título
+					%td Final
+					%td= nota_final.round(1)
+					%td
+	%div.solo-imprimir.firmas-acta-final
+		- if @usuario.sede.id == 1
+			%p _____________________________
+			%h1= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE ESCUELA' : 'DIRECTOR DE ESCUELA'
+		- else 
+			%p _________________________
+			%h1= current_user_object.sexo == Usuario::FEMENINO ? 'DIRECTORA DE SEDE' : 'DIRECTOR DE SEDE'
+
+:css
+	form.informacion-tabulada > fieldset > ul > li { 
+		width: 100% !important;
+	}
+	.final{ 
+		font-weight: bold;
+		display: inline !important;
+		text-transform: none;
+		font-size: 12px !important;
+		margin: 0;
+		line-height: normal !important;
+	}
+	td.final{
+		width: 180px;
+	}
+	.div-separador{
+		margin-top: 20px;
+	}
+	.leyenda{ display: none !important; }
+	@media print {
+		.leyenda { 
+			display: block !important;
+			font-size: 15px; 
+			background-color: #EEE;
+			width: auto;
+			padding: 5px;
+			line-height: 1.2em;
+			margin-bottom: 0 !important;
+		}
+		table.table tbody .espacio-firma{
+			padding-top: 10px !important;
+			padding-bottom: 10px !important; 
+		}
+		.salto-titulo{
+			margin-top: 10px;
+			text-align : justify;
+		}
+		.div-separador{
+			margin-top: 50px;
+		}
+		div.firmas-acta-final{
+			margin-top: 200px;
+		}
+
+		form.informacion-tabulada > table {
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;
+		}
+		form.informacion-tabulada{
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;
+
+		}
+		form.informacion-tabulada > fieldset > ul > li { 
+			width: 100% !important;
+		}
+		form.informacion-tabulada div.contenedorelemento span { 
+			margin-left: 160px !important; 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;
+		} 
+		form.informacion-tabulada div.contenedorelemento etiqueta { 
+			margin-left: 90px !important; 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;
+		}
+		table.table tbody td, table.table thead th {
+			
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;
+		}
+		div.firmas-acta-final h1{ 
+			font-family: Arial, Helvetica, sans-serif !important;
+			font-size: 10pt !important;	
+			width: 100%;
+			text-align: center;	
+		}
+		div.firmas-acta-final p{ 
+			width: 100%;
+			text-align: center;	
+		}
+	}

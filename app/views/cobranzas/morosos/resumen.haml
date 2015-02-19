@@ -1,0 +1,161 @@
+:css
+    tfoot td label{
+        font-weight: bold !important;
+        color: #DE4945 !important;
+    }
+
+.page-header
+    - titulo = "Resumen Morosidad #{Date.civil(@año.to_i, @mes.to_i, 1)} - #{Date.civil(@año.to_i, @mes.to_i, -1)} #{@sede.nombre}"
+    - if @modalidad == "All"
+        - titulo += "Presencial y Distancia"
+    - elsif @modalidad.to_i == InstitucionSedePlan::PRESENCIAL
+        - titulo += @institucion.nombre+" Presencial"
+    - else
+        - titulo += Distancia
+
+    .box{style: 'float: left; display: inline'}
+        %h3{style: 'color:black'}
+            = titulo
+        %input{type: 'hidden', id: "TituloExport", value: titulo}
+
+
+    .botones{:style => "float: right;"}
+        %a.not-print.btn.btn-info.impresion{:href => "#"}
+            %i.icon-white.icon-print
+            Imprimir
+    .clearfix
+
+%table#lista.table.table-condensed.table-bordered.table-striped
+    %thead
+        %tr
+            %th 
+                %input{type: "checkbox", checked: "true", id: "check0"}
+            %th Carrera
+            %th Total Alumnos
+            %th Alumnos Morosos
+            %th Comprometido
+            %th Cancelado
+            %th Por Cancelar
+            %th Morosidad
+            %th Prorroga
+            %th Índice
+    %tbody
+        - index = 0
+        - suma_alumnos = 0
+        - suma_morosos = 0
+        - suma_comprometido = 0
+        - suma_cancelado = 0
+        - suma_por_cancelar = 0
+        - suma_morosidad = 0
+        - suma_prorroga = 0
+        - suma_indice = 0
+
+        - @resumen.each do |indice,i|
+            - unless i.blank?
+                - index = index + 1
+                - suma_alumnos = suma_alumnos + i[:alumnos]
+                - suma_morosos = suma_morosos + i[:morosos]
+                - suma_comprometido = suma_comprometido + i[:comprometido]
+                - suma_cancelado = suma_cancelado + i[:cancelado]
+                - suma_por_cancelar = suma_por_cancelar + i[:por_cancelar]
+                - suma_morosidad = suma_morosidad + i[:morosidad]
+                - suma_prorroga = suma_prorroga + i[:prorroga]
+                - suma_indice = suma_indice + ((i[:por_cancelar]*100.0)/i[:comprometido]).round(1)
+
+                %tr
+                    %td 
+                        %input{type: "checkbox", checked: "true", value: i, id: "check"+index.to_s}
+                    %td
+                        %a{href: cobranzas_morosos_informe_carrera_path(@institucion.id,@sede.id,@modalidad,@año,@mes,i[:carrera])}
+                            = i[:carrera]
+                    %td.txRight= i[:alumnos]
+                    %td.txRight= i[:morosos]
+                    %td.txRight= decimales i[:comprometido]
+                    %td.txRight= decimales i[:cancelado]
+                    %td.txRight= decimales i[:por_cancelar]
+                    %td.txRight= decimales i[:morosidad]
+                    %td.txRight= decimales i[:prorroga]
+                    %td.txRight= ((i[:por_cancelar]*100.0)/i[:comprometido]).round(1)
+    %tfoot
+        %tr
+            %td
+            %td
+            %td.txRight 
+                %label#alumnos= decimales suma_alumnos 
+            %td.txRight 
+                %label#morosos= decimales suma_morosos 
+            %td.txRight 
+                %label#comprometido= decimales suma_comprometido 
+            %td.txRight 
+                %label#cancelado= decimales suma_cancelado 
+            %td.txRight 
+                %label#por_cancelar= decimales suma_por_cancelar
+            %td.txRight 
+                %label#morosidad= decimales suma_morosidad
+            %td.txRight 
+                %label#prorroga= decimales suma_prorroga
+            %td
+
+= datatable_src
+= datatable 'lista', {nosort: true}  
+
+:javascript
+    $(document).ready(function(){
+        $('#lista_filter label').css({'display' : 'none'});
+
+        $('#check0').change(function(){
+            if($('#check0').is(":checked")) {
+                $('#lista tbody :input').attr({"checked" : true});
+            }
+            else {
+                $('#lista tbody :input').attr({"checked" : false});
+            }
+        });
+
+        $(':input').change(function(){
+            var suma_alumnos      = 0;
+            var suma_morosos      = 0;
+            var suma_comprometido = 0;
+            var suma_cancelado    = 0;
+            var suma_por_cancelar = 0;
+            var suma_morosidad    = 0;
+            var suma_prorroga     = 0;
+
+            $('#lista tbody :input').each(function(index,item){
+                if($(item).is(':checked')){
+                    suma_alumnos = suma_alumnos + parseInt($(item).attr('value-alumnos'));
+                    suma_morosos = suma_morosos + parseInt($(item).attr('value-morosos'));
+                    suma_comprometido = suma_comprometido + parseInt($(item).attr('value-comprometido'));
+                    suma_cancelado = suma_cancelado + parseInt($(item).attr('value-cancelado'));
+                    suma_por_cancelar = suma_por_cancelar + parseInt($(item).attr('value-por-cancelar'));
+                    suma_morosidad = suma_morosidad + parseInt($(item).attr('value-morosidad'));
+                    suma_prorroga = suma_prorroga + parseInt($(item).attr('value-prorroga'));
+                }
+            })
+            $('#alumnos').text(''+format(suma_alumnos));
+            $('#morosos').text(''+format(suma_morosos));
+            $('#comprometido').text(''+format(suma_comprometido));
+            $('#cancelado').text(''+format(suma_cancelado));
+            $('#por_cancelar').text(''+format(suma_por_cancelar));
+            $('#morosidad').text(''+format(suma_morosidad));
+            $('#prorroga').text(''+format(suma_prorroga));
+        });
+
+        function format(n){
+            var number = new String(n);
+            var result ='',isNegative = false;
+
+            if(number.indexOf("-")>-1){ 
+                number=number.substr(1); 
+                isNegative=true;
+            }
+
+            while( number.length > 3 ){
+                result = '.'+ number.substr(number.length - 3)+result;
+                number = number.substring(0, number.length - 3);
+            }
+            result = number + result;
+            if(isNegative) result='-'+result;
+            return result;
+        }
+    });

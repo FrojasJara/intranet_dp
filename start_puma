@@ -1,0 +1,2 @@
+bundle exec puma -C puma.rb
+#puma -b unix:/home/dportales/mnt/sites/dp/current/tmp/sockets/puma.0.sock -t 4:16 -e production

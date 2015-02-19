@@ -1,0 +1,248 @@
+%div#malla-curricular	
+	.page-header
+		%h1 Malla curricular
+	= render "alumnos/alumnos/partials/seleccion_plan"
+	= render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+
+	%ul.leyendas-estados-asignaturas.ui-helper-clearfix
+		%li.inscrita
+			%span.estado-asignatura.inscrita
+			Inscrita
+		%li.aprobada
+			%span.estado-asignatura.aprobada
+			Aprobada
+		%li.reprobada
+			%span.estado-asignatura.reprobada
+			Reprobada
+		%li.renunciada
+			%span.estado-asignatura.abandonada
+			Abandonada
+		%li.aprobada-convalidada
+			%span.estado-asignatura.convalidada
+			Convalidada
+		%li.aprobada-homologada
+			%span.estado-asignatura.homologada
+			Homologada
+
+	= notificaciones
+
+	.malla-curricular.ui-helper-clearfix
+		- duracion_plan			= @malla_curricular[:duracion_plan]
+		- 1.upto(duracion_plan) do |semestre|
+			.periodo
+				%h3= Periodo.obtener_anio_periodo duracion_plan, semestre
+				%ul{:class => "ped_#{semestre}"}
+					- @malla_curricular[:malla_curricular].each do |item|
+					- next if item[:asignatura].semestre != semestre
+						- tipo = get_name Asignatura, "TIPOS", item[:asignatura].tipo
+						%li{:class => "ui-helper-clearfix #{tipo} semestre_#{item[:asignatura].semestre}"}
+
+							-# Preguntamos si tiene inscripciones
+							- if not item[:inscripciones].empty?
+								.historial-grafico
+									- item[:inscripciones].each do |i|		
+										- estado = get_name AlumnoInscritoSeccion, "ESTADOS", i[:inscripcion].estado	
+										%span{:class => "estado-asignatura #{estado}"}
+											%span.inscrita I
+											%span.aprobada A
+											%span.reprobada R
+											%span.abandonada B
+											%span.convalidada C
+											%span.homologada H
+
+								%a{:href => "#modal#{item[:asignatura].id}", :data => {:toggle => "modal"}}
+									%span.nombre-asignatura{:title => item[:nombre_real_asignatura]}
+										= item[:nombre_real_asignatura]
+									%span.codigo-asignatura{:title => item[:nombre_real_asignatura]}
+										= "(#{item[:asignatura].codigo})"	
+
+								= render partial: "alumnos/alumnos/partials/modal_historial_asignatura" , locals: { item: item }
+
+							- else
+								%span.nombre-asignatura{:title => item[:nombre_real_asignatura]}
+									= item[:nombre_real_asignatura]
+								%span.codigo-asignatura= "(#{item[:asignatura].codigo})"
+
+							- if es_periodo_transicion? and current_role_can?(:coordinador_carrera)
+								= render :partial => "transicion/alumnos/inscripciones_asignaturas/partials/modal_nueva_inscripcion", :locals => {:item => item}
+								= render :partial => "transicion/alumnos/inscripciones_asignaturas/partials/modal_editar_inscripcion", :locals => {:item => item}
+
+:css
+	.malla-curricular { padding-bottom: 168px; }
+	.periodo { 
+		float: left; 
+		width: 100px;
+		margin-right: 10px;
+	}
+
+	#{
+		if es_periodo_transicion?
+			%{
+				/* Periodo de transicion */
+				div.periodo-transicion.dropdown.open > a.dropdown-toggle {
+					color: #0088cc;
+					background-color: transparent;
+				}
+				div.periodo-transicion > a { font-size: 10px; }
+				div.periodo-transicion { position: absolute; bottom: 0; right: 0; }
+				div.periodo-transicion a b.caret { margin-top: 7px; }
+				div.periodo-transicion ul.dropdown-menu { 
+					border-radius: 0; 
+					box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3); 
+					border: 1px solid rgba(0, 0, 0, .333);
+				}
+				div.periodo-transicion ul.dropdown-menu > li {
+					height: auto;
+					margin: 1px 0;
+					padding: 0;
+					border: 0; 
+					position: static;
+					font-size: 12px;
+				}
+
+				div.periodo-transicion div.modal.modal-inscripcion { width: 450px; }
+				div.periodo-transicion div.modal.modal-inscripcion h3 { font-size: 15px }
+				div.periodo-transicion div.modal.modal-inscripcion .modal-body .control-group { display: inline-block; margin-right: 5px; }
+				label.error { display: none !important; }
+				div.periodo-transicion .alert.alert-info { border-radius: 0; margin-bottom: 0; }
+
+				/*	Fin periodo de transicion	*/
+			}
+		end
+	}
+
+	.periodo > ul { position: relative; }
+	.periodo li.semestre_5.#{get_name Asignatura, "TIPOS", Asignatura::TERMINAL} { 
+		position: absolute; 
+		left: -55px; 
+		width: 92px;
+		border-color: blue;
+	}
+
+	.periodo > h3 { font-size: 11px; text-align: center; }
+	.periodo li {
+		position: relative;
+		padding: 10px 2px;
+		border: 2px solid #333;
+		margin-bottom: 10px;
+		height: 50px;
+	}
+	.periodo li > a { display: block; }
+	.periodo li span { display: block; text-align: center; font-size: 11px; }
+	.estado-asignatura {
+		width: 10px;
+		height: 10px;
+	}
+	span.estado-asignatura > span { display: none; }
+	span.nombre-asignatura {
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.modal-header h3 span { 
+		font-style: italic !important; 
+		font-size: 18px !important;
+		display: inline !important;
+	}
+	.periodo .historial-grafico { position: absolute; top: 0; right: 0; }
+	.periodo .estado-asignatura { float:left; margin-left: 1px;}
+	.estado-asignatura.aprobada { background: green !important; }
+	.estado-asignatura.reprobada { background: red !important; }
+	.estado-asignatura.inscrita { background: yellow !important; }
+	.estado-asignatura.abandonada { background: orange !important; }
+	.estado-asignatura.convalidada { background: blue !important; }
+	.estado-asignatura.homologada { background: purple !important; }
+	.leyendas-estados-asignaturas {
+		margin-bottom: 10px;
+	}
+	.leyendas-estados-asignaturas li {
+		float: left;
+		text-transform: uppercase;
+		margin-right: 15px;
+	}
+	.leyendas-estados-asignaturas .estado-asignatura {
+		margin: 5px 3px 0 0;
+		float: left;
+	}
+
+	@media print {
+		.malla-curricular { padding: 0; }
+		.periodo li.semestre_5.#{get_name Asignatura, "TIPOS", Asignatura::TERMINAL} { 
+			position: relative;
+			left: auto;
+			top: auto !important;
+			width: auto;
+		}
+		ul.leyendas-estados-asignaturas { 
+			margin: 0 0 10px 0 !important;
+			padding: 3px 0;
+			border: 1px solid #eee;
+			border-style: solid none;
+		}
+		ul.leyendas-estados-asignaturas li { font-size: 7pt !important; }
+
+		.periodo > h3 { line-height: normal; font-size: 7pt; }
+		.periodo { width: 70px !important; margin-right: 5px; }
+		.periodo li { 
+			height: 26px !important; 
+			border-width: 1px !important;
+			margin-bottom: 5px;
+			padding: 12px 2px 8px 2px !important;
+			border-color: black !important;
+		}
+
+		.periodo li a[data-toggle="modal"] span, .periodo li > span { 
+			font-size: 6pt !important; 
+			line-height: normal !important; 
+		}
+
+		.periodo .historial-grafico { top: 1px !important; right: 1px !important; }
+		.estado-asignatura {  }
+		.estado-asignatura span { 
+			line-height: 9px;
+			font-size: 8px; 
+		}
+		.estado-asignatura.aprobada span.aprobada { display: block !important; }
+		.estado-asignatura.reprobada span.reprobada { display: block !important; }
+		.estado-asignatura.inscrita span.inscrita { display: block !important; }
+		.estado-asignatura.abandonada span.abandonada { display: block !important; }
+		.estado-asignatura.convalidada span.convalidada { display: block !important; }
+		.estado-asignatura.homologada span.homologada { display: block !important; }
+
+
+	}
+
+:javascript
+	$(document).ready(function() {
+
+		var offset = 10 + Math.max($("ul.ped_4").height(), $("ul.ped_5").height());
+		$(".periodo li.semestre_5.#{get_name Asignatura, 'TIPOS', Asignatura::TERMINAL}").each(function(i, v) {
+			$(v).css("top", offset);
+			offset += 84;
+		})
+
+		#{
+			if es_periodo_transicion?
+				%{
+					$("a.eliminar-inscripcion").click(function(e) {
+						e.preventDefault();
+						if(confirm("¿Está seguro que desea eliminar esta inscripción? ESTE PROCEDIMIENTO ELIMINARÁ TODAS LAS CALIFICACIONES PARCIALES EN FORMA DEFINITIVA !")) {
+							location.href = this.href;
+						}
+					});
+
+					$("a.editar-inscripcion").click(function(e) {
+						e.preventDefault();
+						var modal_out = $(this).attr("data-modal-out");
+						var modal_in = $(this).attr("data-modal-in");
+
+						$(modal_out).modal("hide");
+						$(modal_in).modal("show");
+					});							
+				}
+			end
+		}
+
+	})
+

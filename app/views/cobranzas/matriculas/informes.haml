@@ -1,0 +1,160 @@
+:css
+    legend{
+        font-weight:bold;
+    }
+    input.fecha{
+        width:150px;
+        text-align: center !important;
+    }
+
+= render "matriculas/matriculas/admision/partials/assets_css"
+.page-header
+    = breadcrumb %w(Cobranzas Matriculas Informes)
+    %h1 Informes de Matrículas
+
+=notificaciones
+
+%div.span10
+    
+    = form_for :filtro, url: cobranzas_matriculas_informe_fechas_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Informe de matrículas por rango de fechas o diarias
+            %br
+            = f.text_field :fecha_inicio, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - @instituciones_sedes.each do |item|
+                    %option{:value => item[:institucion_sede_id]}= item[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :filtro, url: cobranzas_matriculas_informe_pagares_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Libro pagaré - Resumen
+            %br
+            = f.text_field :fecha_inicio2, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino2, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_id", :prompt => 'Seleccione institución', class: 'selectInstitucion'}
+                - @instituciones.each do |institucion|
+                    %option{value: institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+            %input{class: "modalidad", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL}
+            %select{:name => "sede_id", :prompt => 'Seleccione sede'}
+                - @sedes.each do |item|
+                    %option{:value => item[:id]}= item[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :filtro, url: cobranzas_matriculas_informe_pagares_detalle_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Libro pagaré - Detalle
+            %br
+            = f.text_field :fecha_inicio3, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino3, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_id", :prompt => 'Seleccione institución', class: 'selectInstitucion2'}
+                - @instituciones.each do |institucion|
+                    %option{value: institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia2', value: Institucion::IP}= 'Distancia'
+            %input{class: "modalidad2", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL}
+            %select{:name => "sede_id", :prompt => 'Seleccione sede'}
+                - @sedes.each do |item|
+                    %option{:value => item[:id]}= item[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :filtro, url: cobranzas_matriculas_informe_pagares_detalle_anuladas_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Libro pagaré - Detalles anuladas
+            %br
+            = f.text_field :fecha_inicio4, class: 'fecha', placeholder: 'Fecha de inicio'
+            = f.text_field :fecha_termino4, class: 'fecha', placeholder: 'Fecha de término'
+            %select{:name => "institucion_id", :prompt => 'Seleccione institución', class: 'selectInstitucion3'}
+                - @instituciones.each do |institucion|
+                    %option{value: institucion[:id]}= institucion[:nombre]
+                %option{class: 'distancia3', value: Institucion::IP}= 'Distancia'
+            %input{class: "modalidad3", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL}
+            %select{:name => "sede_id", :prompt => 'Seleccione sede'}
+                - @sedes.each do |item|
+                    %option{:value => item[:id]}= item[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :completo, url: cobranzas_matriculas_informe_periodo_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Informe matrículas por período - Todas las sedes
+            %br
+            Período: 
+            %select{name: 'periodo_id'}
+                - @periodos.each do |item|
+                    %option{value: item.id}= item.nombre
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - @instituciones_sedes_all.each do |item|
+                    %option{:value => item[:institucion_sede_id]}= item[:nombre]
+                %option{:value => -1}= "Todas las Instituciones"
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :completo, url: cobranzas_matriculas_informe_apoderados_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Informe matrículas por periodo - Alumnos/Apoderados (Emisión de cartas)
+            %br
+            Período: 
+            %select{name: 'periodo_id'}
+                - @periodos.each do |item|
+                    %option{value: item.id}= item.nombre
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - @instituciones_sedes_all.each do |item|
+                    %option{:value => item[:institucion_sede_id]}= item[:nombre]
+            = f.submit 'Filtrar'
+            %br
+
+    = form_for :completo, url: cobranzas_matriculas_informe_convenios_path, html: {class: 'form-inline informacion-tabulada'} do |f|
+        %fieldset
+            %legend Informe convenios matrículas alumnos nuevos  
+            %br
+            Período: 
+            %select{name: 'periodo_id'}
+                - @periodos.each do |item|
+                    %option{value: item.id}= item.nombre
+            %select{:name => "institucion_sede_id", :prompt => 'Seleccione institución'}
+                - @instituciones_sedes_all.each do |item|
+                    %option{:value => item[:institucion_sede_id]}= item[:nombre]
+                %option{:value => -1}= "Todas las Instituciones"
+            = f.submit 'Filtrar'
+            %br
+
+    :javascript
+        $(document).ready(function(){
+            $('.fecha').datepicker();
+            $('form').submit(function(){
+                notify_info('Generando informe, por favor espere...');
+                $('input[type=submit]').attr('disabled', true);
+            });
+            $('.modalidad').attr({'value' : 1});
+            $('.modalidad2').attr({'value' : 1});
+            $('.modalidad3').attr({'value' : 1});
+            $('.selectInstitucion').change(function(){
+                if($('.selectInstitucion .distancia:selected').val() == 1){
+                    $('.modalidad').attr({'value' : 2});
+                }
+                else{
+                    $('.modalidad').attr({'value' : 1});
+                }
+            });
+            $('.selectInstitucion2').change(function(){
+                if($('.selectInstitucion2 .distancia2:selected').val() == 1){
+                    $('.modalidad2').attr({'value' : 2});
+                }
+                else{
+                    $('.modalidad2').attr({'value' : 1});
+                }
+            });
+            $('.selectInstitucion3').change(function(){
+                if($('.selectInstitucion3 .distancia3:selected').val() == 1){
+                    $('.modalidad3').attr({'value' : 2});
+                }
+                else{
+                    $('.modalidad3').attr({'value' : 1});
+                }
+            });
+        });

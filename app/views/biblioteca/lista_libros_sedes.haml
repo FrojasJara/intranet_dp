@@ -1,0 +1,44 @@
+/ .sectionHeader
+/     %ul.breadcrumb
+/         %li
+/             %a{:href => "#"} Biblioteca
+/             %span.divider /
+/         %li.active
+/             %a{:href => "#"}  
+/                 Inventario de libros
+
+/ %table.table.table-striped.table-bordered{:id => 'libros'}
+/     %thead
+/         %tr
+/             %th Nombre
+/             %th Autor
+/             %th Año      
+/             %th Materia
+/             %th Copias
+/             %th Codigo Dewey
+
+/     %tbody
+/         - @items.each do |i|
+/             %tr
+/                 %td= i.nombre
+/                 %td= i.libro_autor.nombres
+/                 %td= i.anio
+/                 %td= i.libro_tematica.nombre
+/                 %td= i.numero_copias
+/                 %td= i.codigo_dewey
+
+/ #modalGraficos.modal.hide
+/     %div.modal-header
+/         %button.close{:type => "button" , "data-dismiss" => "modal"}x
+/         %h3{}Grafico de alumnos
+/     %div.modal-body
+/         #graficoAlumnos
+/     %div.modal-footer
+/         %a.btn{:href => "#", "data-dismiss" => "modal"} Cerrar
+
+/ = datatable_src
+/ = datatable("libros")                   
+/ = higthcharts_src
+
+%iframe{id: "miFrame", src: "http://190.82.72.124/alumno.php", frameborder: "0", width: "100%", height: "100%", frameborder: "0", transparency: "transparency"}      
+

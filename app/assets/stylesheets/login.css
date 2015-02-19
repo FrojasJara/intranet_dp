@@ -1,0 +1,29 @@
+#login h1 {
+	font-size: 20px;
+	text-align: center;
+}
+
+#login-form li {
+	margin-bottom: 15px;
+}
+
+#login-form {
+	width: 320px;
+	padding: 20px;
+	margin: auto;
+	background: #F1F1F1;
+	border: 1px solid #E5E5E5;
+}
+
+#login-form label {
+	margin-bottom: 2px;
+	font-weight: bold;
+	font-size: 13px;
+	text-transform: none;
+}
+
+#login-form label + input {
+	padding: 5px;
+	border-radius: 0;
+	width: 308px;
+}

@@ -1,0 +1,105 @@
+.sectionHeader
+	%h1 Situaciones Especiales Inscripción Extraordinaria
+	
+%div.well
+	%form.form-search#buscar_alumno{:action => "#",:method => "post"}
+		%select.span4{:name => :plan_estudio}
+			- @alumno_plan_estudios.each do |i|
+				- selected = (!@alumno_plan_estudio.nil? and (@alumno_plan_estudio.id) == i.id ? true : false)
+				%option{:value => i.id, :selected => selected}= "#{i.plan_estudio.nombre} - Malla: #{i.plan_estudio.siaa_id_ma} [#{i.plan_estudio.anio_inicio}-#{i.plan_estudio.anio_fin}]"
+		%select{:name => :periodo_id}
+			%option{:value => ""} Seleccione un periodo
+			- @periodos.each do |p|
+				%option{:value => p.id}= "#{p.nombre}"
+		%button.btn.btn-primary{type: "submit"} 
+			%icon.icon-white.icon-search
+			Ver Asignaturas Plan
+= notificaciones
+- unless @asignaturas.blank?
+	%h2
+		= "Periodo - #{@periodo.nombre}"
+	:css
+		#generar_inscripcion{margin-bottom: 10px;}
+	%button.btn.btn-primary#generar_inscripcion{type: "submit"}
+		%icon.icon-white.icon-ok
+		Generar Inscripción
+
+	%form.form#inscribir_asignaturas{:action => registrar_inscripcion_extraordinaria_path, :method => "post"}
+		%input{type:"hidden", name: "alumno_plan_estudio_id", :value => @alumno_plan_estudio.id}
+		%input{type:"hidden", name: "alumno_id", :value => @alumno_actual.id}
+		%table.table.table-striped
+			%thead
+				%tr
+					:css 
+						.txtLeft{text-align: left !important;}
+					%th.txtLeft Nivel
+					%th.txtLeft Código
+					%th.txtLeft Asignatura
+					%th.txtLeft Secciones Disponibles
+					%th.txtLeft Acciones
+			%tbody
+				- @asignaturas_secciones.each do |i|
+					%tr
+						%td= i[:nivel_asignatura]
+						%td= i[:codigo]
+						%td= i[:nombre]
+						%td
+							- result = i[:secciones].detect{|s| s[:estado] == true}
+							- if result.nil?
+								- i[:secciones].each do |s|
+									%input{type: "radio", :name => "asignaturas[#{i[:asignatura_id]}]", :value => s[:seccion_dictada_id]} 
+										= s[:numero_seccion]
+										= jornada_en_palabras s[:jornada_seccion].to_i
+							- else
+								%icon.icon-ok
+								= "Sección #{result[:numero_seccion]} "
+								= jornada_en_palabras result[:jornada_seccion].to_i
+						%td
+							- result = i[:secciones].detect{|s| s[:estado] == true}
+							- if result.nil?
+								%input{type:"hidden", :name => "asignatura_id", :value => i[:asignatura_id]}
+								%a.btn.btn-primary.abrir_seccion{} 
+									%icon.icon-white.icon-ok
+									Abrir Sección
+							- else
+								%input{type: "hidden", :name => "alumno_inscrito_id", :value => result[:alumno_inscrito_seccion_id]}
+								%a.btn.btn-warning.eliminar_inscripcion{type: "submit"}
+									%i.icon.icon-white.icon-remove
+									Eliminar 
+
+- else
+	%p{} Seleccione un Plan de Estudios
+
+= render :partial => "coordinador_carrera/gestion_inscripciones/partials/modal_abrir_secciones", :locals => {:alumno_id => @alumno_actual.id}
+:javascript
+	$(document).ready(function(){
+		$("#buscar_alumno").validate();
+		$(".abrir_seccion").on("click",function(){
+			var id_asignatura = $(this).prev().val();
+			var $formulario = $("#modal_abrir_seccion").find("input[name='seccion[asignatura_id]']");
+			$formulario.val(id_asignatura);
+			$("#modal_abrir_seccion").modal("show");
+		});
+
+		$("#generar_inscripcion").on("click", function(){
+			$("#inscribir_asignaturas").submit();
+		});
+		$(".eliminar_inscripcion").on("click", function(){
+			if( confirm("Está seguro de eliminar la inscripción del alumno?"))
+			{
+				$.post("#{eliminar_inscripcion_path}", 
+					{
+						alumno_inscrito_seccion_id: $(this).prev().val()
+
+					}, function(data){
+						if(data.status == true )
+						{
+							notify_info('Elimininación Exitosa!','La Eliminacion de Inscripcion fue realizada exitosamente.');
+							location.reload();
+						}
+						else
+							location.reload();
+					});
+			}
+		});
+	});

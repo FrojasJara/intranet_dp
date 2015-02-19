@@ -1,0 +1,135 @@
+#generar-propuesta-asignaturas
+    .page-header
+        %h1 
+            Inscripción de asignaturas 
+            = periodo_en_curso[:nombre]
+        
+    = render "alumnos/alumnos/partials/seleccion_plan"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+    
+    - if @puede_inscribir and @existen_secciones
+        %p.importante
+            Ud. registra una matrícula 
+            %strong= get_name MatriculaPlan, "TIPOS", @plan_vigente.tipo
+            como vigente. Recuerde que sólo puede inscribir 
+            - if not @matricula_cobro_especial
+                %strong= "como máximo #{@limite_asignaturas_inscribibles} asignaturas. "
+            - else
+                %strong= "solo #{@limite_asignaturas_inscribibles} asignaturas. "
+
+            - if @incluye_normativas
+                Luego de este procedimiento, diríjase donde su coordinador de carrera o director de escuela, para inscribir la(s) 
+                %strong= @plan_vigente.normativas_propuestas
+                normativa(s) que ha solicitado.
+
+        = form_tag "#{alumno_registrar_inscripcion_asignaturas_path @usuario.id, @plan_consultado[:inscripcion].id}", :class => "inscripciones", :method => "post" do
+            %input{:type => "hidden", :name => "carrera_inscrita[id]", :value => @plan_consultado[:inscripcion].id}
+            %input{:type => "hidden", :name => "carrera_inscrita[estado]", :value => Alumno::REGULAR}
+            %fielset.campos
+                %table.table.table-condensed.estrecha#asignaturas
+                    %colgroup
+                        %col.semestre
+                        %col.codigo
+                        %col.asignatura
+                        %col.inscripcion
+                    %thead
+                        %tr
+                            %th.txCenter Semestre
+                            %th.txCenter Código
+                            %th.txLeft Asignatura
+                            %th.txLeft Sección
+                            %th.txCenter Inscripción
+                    %tbody
+                        - @propuesta_asignaturas[:asignaturas].each do |item|
+                            - unless item[:seccion_dictada].blank?
+                                - item[:seccion_dictada].each do |i|
+                                    %tr{:class => item[:estado]}
+                                        %td.txCenter= item[:asignatura].semestre
+                                        %td.txCenter= item[:asignatura].codigo
+                                        %td.txLeft= item[:asignatura].nombre
+                                        %td.txLeft= i.seccion.numero
+                                        %td.txCenter
+                                            %input.required{:type => "checkbox", :name => "secciones_dictadas[]", :value => "#{i.id}", :maxlength => @limite_asignaturas_inscribibles}
+                            / - else
+                            /   = item.inspect
+            
+            %fieldset.botones
+                %button.btn.btn-primary.cargar{:input => "submit"}
+                    %i.icon-check.icon-white
+                    Inscribir asignaturas
+    - else
+        = notificaciones
+
+        #editar_nivel.modal.hide.fade{role: "dialog"}
+            .modal-header
+                %h3 Editar nivel alumno
+            .modal-body
+                Ingrese el nivel al cual el alumno inscribirá asignaturas
+                %form.editar_nivel
+                    .well
+                        - (1..8).each do |n|
+                            %label.radio.input-small{style: 'float: left'}
+                                %input{name: 'nivel', type: 'radio', value: n}
+                                = n
+                        .clearfix
+                    .form-action
+                        %button.btn.btn-primary{type: 'submit'} 
+                            %i.icon-pencil.icon-white
+                            Guardar
+
+
+:css
+    p.importante {
+        font-size: 15px;
+        padding: 3px;
+        border-bottom: 1px solid red;
+        border-top: 1px solid red;
+        line-height: 130%;
+    }
+    col.asignatura { width: 350px; }
+    col.inscripcion { width: 90px; }
+    tr.vigente td { font-weight: bold; }
+    tr.atrasada { background-color: #FFEBE6; }
+    tr.selected { background-color: #CCFFCC; }
+
+:javascript
+    $(document).ready(function() {
+        $("form.inscripciones").validate({
+            invalidHandler: function(form, validator) {
+                alertify.error("Por favor, seleccione una cantidad adecuada de asignaturas para su inscripción.");
+                setTimeout($.unblockUI, 300);
+             
+            },
+            submitHandler: function(form) {
+                if( confirm("¿Está seguro que desea inscribir estas asignaturas?") )
+                    form.submit()
+            }
+        });
+
+        $("#asignaturas td :checkbox").change(function() {
+            var $fila = $(this).parent().parent();
+            if( this.checked ) $fila.addClass("selected"); else $fila.removeClass("selected");
+        })
+
+        $("form.editar_nivel").submit(function(){
+            if( $("input[name='nivel']:checked").size() == 0)
+            {
+                alert("Debe seleccionar un nivel");
+            }
+            else
+
+                if( confirm("Este es un proceso irreversible. ¿Está seguro de guardar este nivel?"))
+                {
+                    $.post("#{coordinador_carrera_inscripcion_asignaturas_nivel_path}", {
+                        plan_pago_id: $("input.#plan_pago_hidden").val(),
+                        nivel: $("input[name='nivel']:checked").val(),
+                    }, function(data){
+                        if(data['status'] != 'ok')
+                            alert(data['message']);
+                        else
+                            location.reload();
+                    })
+                }
+            return false;
+        })
+    })

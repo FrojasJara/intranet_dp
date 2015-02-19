@@ -1,0 +1,162 @@
+.page-header
+    %h1 Bitácora
+- unless @alumno_plan_estudio_seleccionado.blank?
+    %form.informacion-tabulada
+        %fieldset
+            %legend Información Exalumno
+            - if @usuario_al.nil?
+                %h3 El alumno no existe
+            - else
+                %ul
+                    %li.ui-helper-clearfix.cuatro-columnas
+                        %h3 Alumno
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Rut:
+                            %span= @usuario_al.rut
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Nombre:
+                            %span.nombre= @usuario_al.nombre
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Carrera:
+                            %span.nombre= @alumno_plan_estudio_seleccionado.plan_estudio.nombre
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Fonos:
+                            %span
+                                = @usuario_al.telefono_fijo_completo
+                                = "|" unless @usuario_al.telefono_movil.blank?
+                                = @usuario_al.telefono_movil
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Domicilio:
+                            %span= @usuario_al.domicilio_completo
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Comuna:
+                            %span= @usuario_al.comuna.nombre unless @usuario_al.comuna.nil?
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Email:
+                            %span= mail_to @usuario_al.email
+                        
+                        %br
+                    - unless @us_apoderado.blank?
+                        %li.ui-helper-clearfix.cuatro-columnas    
+                            %h3 Apoderado
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Rut:
+                                %span= @us_apoderado.rut
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Nombre:
+                                %span= @us_apoderado.nombre
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Fonos:
+                                %span
+                                    = @us_apoderado.telefono_fijo_completo
+                                    = "|" unless @us_apoderado.telefono_movil.blank?
+                                    = @us_apoderado.telefono_movil
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Domicilio:
+                                %span= @us_apoderado.domicilio_completo
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Comuna:
+                                %span= @us_apoderado.comuna.nombre unless @us_apoderado.comuna.nil?
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Email:
+                                %span= mail_to @us_apoderado.email
+
+    .btn-group
+        - if current_role_can?(:matriculas)
+            = link_to matriculas_pagos_ver_alumno_path(@usuario_al.rut), class: 'btn btn-primary' do
+                %i.icon-search.icon-white
+                Ver Pagos
+        = link_to asistente_social_ingresar_antecedente_path(@alumno_plan_estudio_seleccionado), class: 'btn btn-primary' do
+            %i.icon-search.icon-white
+            Antecedentes Exalumno
+        %a.not-print.btn.btn-info.impresion{:href => "#"}
+            %i.icon-white.icon-print
+            Imprimir
+    %br
+
+    .page-header
+    = form_tag "#", :class => "carreras-estudiadas", :method => "get" do
+        %fieldset
+            %legend Selección del plan de estudios
+            %ul
+                %li.ui-helper-clearfix
+                    %div.contenedorElemento.separador
+                        %label Plan de estudio
+                        %select.required{:name => ""}
+                            %option{:value => ""} :: Seleccione un plan de estudios ::
+                            - @otros_planes.each do |carrera|
+                                %option{:value => "#{current_url carrera.id}"}
+                                    = carrera.plan_estudio.nombre+" "+carrera.periodo.nombre+" ("+carrera.institucion_sede_plan.institucion_sede.sede.nombre+")"
+                    %div.contenedorElemento.separador
+                        %input.btn.btn-primary{:type => "submit", :style => "margin-top: 19px;", :value => "Consultar"}
+
+    = notificaciones
+    .well
+        %h1 Agregar bitácora
+        = simple_form_for :bitacora_cobranza do |f|
+            %input{type: "hidden", name: "al_pl_es", value: @alumno_plan_estudio_seleccionado.id}
+            .row
+                .span3
+                    = f.input :fecha, input_html: {class: 'fecha'}
+                .span4
+                    = f.input :tipo, collection: for_select(BitacoraCobranza, :TIPOS), prompt: 'Seleccione', input_html: {class: 'required'}
+                .span4
+                    = f.input :procedencia, collection: for_select(BitacoraCobranza, :PROCEDENCIAS), prompt: 'Seleccione', input_html: {class: 'required'}
+            = f.input :observacion, label: 'Observación', input_html: {class: 'span6', rows: 8}, as: :text
+
+            %button.btn.btn-primary
+                %i.icon-hdd.icon-white
+                Guardar
+
+
+    = render :partial => 'matriculas/bitacora_cobranzas/partials/lista'
+:javascript
+    $(function(){
+        $('.fecha').datepicker();
+        $("form.bitacora_cobranza").submit(function(){
+            if( $("#bitacora_cobranza_fecha").val().length < 10 || !fecha_valida( $("#bitacora_cobranza_fecha").val() ) )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que la fecha sea correcta");
+                return false;
+            }
+            if( $("#bitacora_cobranza_observacion").val().length < 1)
+            {
+                notify_error("Datos incorrectos", "Por favor ingrese una observación");
+                return false;
+            }
+
+            return true;
+        })
+        $("form.bitacora_cobranza").validate({
+            invalidHandler: function(form, validator) {
+                notify_info("Error", "Por favor, compruebe que ha ingresado la información necesaria.");
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        })
+    })
+    $(document).ready(function() {
+        $("form.carreras-estudiadas").validate({
+            invalidHandler: function(form, validator) {
+                notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+            },
+            submitHandler: function(form) {
+                var url = $('form.carreras-estudiadas select').val();
+                location.href = url;
+            }
+        })
+    })
+:css   
+    @media print{
+        form.informacion-tabulada label.etiqueta { font-size: 7pt !important; }
+        form.informacion-tabulada div.contenedorelemento span { font-size: 7pt !important; margin-left: 150px !important; }
+        div.logo-img { display: none !important; }
+        legend{ display: block !important;
+                font-size: 18px; 
+                background-color: #EEE;
+                width: auto;
+                padding: 5px;
+                line-height: 1.2em;
+                margin-bottom: 0 !important; }
+    }

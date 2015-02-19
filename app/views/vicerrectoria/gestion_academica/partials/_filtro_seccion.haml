@@ -1,0 +1,96 @@
+:css
+	.inline{float: left; margin-right: 10px;}
+
+
+%form.form.form-inline#filtro-institucion{:action => url_metodo ,:method => "post"}
+	%div.control-group.inline
+		.control-label
+			%label Institucion
+		.controls
+			%select{:name => "filtro[institucion_id]"}
+				%option{value: ""} .: Elija Una Institución :.
+				- @institucion_sedes.each do |i|
+					%option{:value => i.id}= i.nombre 
+	%div.control-group.inline
+		.control-label
+			%label Carrera
+		.controls
+			%select.required{:name => "filtro[plan_estudio_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+	%div.control-group.inline
+		.control-label
+			%label Asignaturas
+		.controls
+			%select.required{:name => "filtro[asignatura_id]"}
+				%option{value: ""} .: Elija Una Opción :.
+
+	%div.control-group.inline
+		.control-label
+			%label Seccion
+		.controls
+			%select.required{:name => "filtro[seccion_id]" }
+				%option{value: ""} .: Elija Una Opción :.
+	%div.form-actions
+		%button.btn.btn-primary{type: "submit"}
+			%i.icon.icon-white.icon-search
+			= texto_boton
+
+
+:javascript
+	$(document).ready(function(){
+		$("#filtro-institucion").validate({
+				invalidHandler: function(form, validator) {
+				},
+				submitHandler: function(form) {
+					form.submit();
+				}
+			})
+		/*Actualiza el combo de carreras segun sede*/
+		$("select[name='filtro[institucion_id]']").change(function(){
+			var institucion_sede_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_vicerrectoria_buscar_carreras_path}",
+				type: 'POST',
+				data: {institucion_sede_id :  institucion_sede_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Carrera :.</option>";
+					$.each(data.carreras, function(k,v){
+						options = options +  "<option value='" + v.plan_id + "'>" + v.nombre + " [Malla " + v.siaa_id_ma + "] </option>"
+					});
+					$("select[name='filtro[plan_estudio_id]']").html(options);
+				}
+			});
+		});
+
+		$("select[name='filtro[plan_estudio_id]']").change(function(){
+			var plan_estudio_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_vicerrectoria_buscar_asignaturas_path}",
+				type: 'POST',
+				data: {plan_estudio_id :  plan_estudio_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Asignatura :.</option>";
+					$.each(data.asignaturas, function(k,v){
+						options = options +  "<option value='" + v.asignatura_id + "'>" + v.nombre + " [Nivel " + v.semestre + "] </option>"
+					});
+					$("select[name='filtro[asignatura_id]']").html(options);
+				}
+			});
+		});
+		$("select[name='filtro[asignatura_id]']").change(function(){
+			var institucion_sede_id = $("select[name='filtro[institucion_id]']").val();
+			var asignatura_id = $(this).val();
+			$.ajax({
+				url: "#{ajax_vicerrectoria_buscar_secciones_path}",
+				type: 'POST',
+				data: {asignatura_id :  asignatura_id , institucion_sede_id :  institucion_sede_id},
+				success: function(data) {
+					var options = "<option>.: Elija Una Sección :.</option>";
+					$.each(data.secciones, function(k,v){
+						options = options +  "<option value='" + v.seccion_id + "'>" + v.nombre + "</option>"
+					});
+					$("select[name='filtro[seccion_id]']").html(options);
+				}
+			});
+		});
+	});

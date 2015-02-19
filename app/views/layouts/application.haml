@@ -1,0 +1,27 @@
+%html
+    %head
+        %title Sistema Organización Educacional Diego Portales
+
+        = stylesheet_link_tag   :application, {:media => "all"}
+        = stylesheet_link_tag   "/assets/print.css", {:media => "print"}
+        
+        = javascript_include_tag "application"
+        = csrf_meta_tags
+
+    %body{:data => {:spy => "scroll", :target => ".fixed-header"}}
+        = render "partials/barra_superior"
+
+        .container-fluid
+            .row-fluid
+                .span2
+                    .well.sidebar-nav  
+                        = render "partials/menu_lateral" unless current_user.nil?
+
+                .span10
+                    .row-fluid
+                        .logo-img
+                            %img{:src => "/assets/diego_portales.gif"}
+                        = yield
+
+            = render "partials/pie_pagina"
+        = render "usuarios/partials/modal_cambio_clave"

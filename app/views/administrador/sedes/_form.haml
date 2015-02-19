@@ -1,0 +1,9 @@
+= simple_form_for @item, :url => @item.new? ? administrador_sedes_path : administrador_sede_path(@item)  do |f|
+
+    = f.input :nombre
+    = f.input :direccion
+    = f.input :telefono
+    = f.input :email
+
+    %br
+    = f.submit 'Guardar', :class => 'btn'

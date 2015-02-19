@@ -1,0 +1,72 @@
+
+%form.informacion-tabulada
+	%fieldset
+		%legend Información del plan de pago
+		%ul
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Nº Matrícula:
+					%span= @matricula.id	
+				%div.contenedorElemento.separador
+					%label.etiqueta Alumno:
+					%span= @alumno.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut:
+					%span= @alumno.rut		
+				%div.contenedorElemento.separador
+					%label.etiqueta Carrera:
+					%span= @carrera.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Año de ingreso:
+					%span= @inscripcion.anio_ingreso
+				%div.contenedorElemento.separador
+					%label.etiqueta Institución:
+					%span= @inscripcion.institucion_sede_plan.institucion_sede.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta	Otras acciones:
+					%span.etiqueta
+						- @planes.each_with_index do |plan,index|
+							- if index == 0
+								- if not no_mostrar == :ver
+									%a{:href => matriculas_ver_path(@matricula.id, :anchor => "plan-#{plan.id}")}
+										%i.icon-zoom-in
+										Ver
+						- if not no_mostrar == :generar_documentos
+							%a{:href => "#"}
+								%i.icon-list-alt
+								Generar docs.
+	%table.table.table-condensed
+		%caption Detalle Plan/es de pago
+		%thead
+			%th.txCenter N°
+			%th.txLeft Estado
+			%th.Center Nivel
+			%th.txLeft Tipo
+			%th.txLeft F. Creación
+			%th.txRight Matricula
+			%th.txRight Arancel
+			%th.txRight Normativa
+			%th.txRight Descuento
+			%th.txRight Monto Rec.
+			%th.txRight Arancel total
+			%th.txCenter A. P.
+			%th.txCenter N. P.
+			%th.not-print
+		%tbody
+			- @planes.each do |plan|
+				%tr
+					%td.txCenter= plan.id
+					%td.txLeft= get_name PlanPago, "ESTADOS", plan.estado
+					%td.txCenter= plan.nivel
+					%td.txLeft= get_name MatriculaPlan, "TIPOS", plan.tipo
+					%td.txLeft= plan.created_at.to_s[0..9]
+					%td.txRight= dinero plan.matricula
+					%td.txRight= dinero plan.arancel
+					%td.txRight= dinero plan.normativa
+					%td.txRight
+						= dinero plan.descuento_aplicado
+						%span{:style => "display: block; font-style: italic;"}= plan.nombre_descuento
+					%td.txRight= dinero plan.monto_reconocido
+					%td.txRight= dinero plan.arancel_total
+					%td.txCenter= plan.asignaturas_propuestas
+					%td.txCenter= plan.normativas_propuestas

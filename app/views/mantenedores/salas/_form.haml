@@ -1,0 +1,9 @@
+= simple_form_for @item, :url => @item.new? ? mantenedores_salas_path : mantenedores_sala_path(@item) do |f|
+    %fieldset
+        = f.input :nombre
+        = f.input :piso
+        = f.input :capacidad
+        = f.input :es_laboratorio, :as => :boolean
+        = f.input :sede_id, :collection => Sede.all.map {|i| [i.nombre, i.id]}
+
+    = f.submit 'Enviar', :class => 'btn btn-primary'

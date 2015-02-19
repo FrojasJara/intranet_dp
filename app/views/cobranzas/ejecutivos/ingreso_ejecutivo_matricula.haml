@@ -1,0 +1,117 @@
+:css
+    input{
+        width:250px !important;
+    }
+    legend{
+        font-weight: bold;
+    }
+
+.page-header
+    %form{:method => "post" , :action => cobranzas_ejecutivos_guardar_ejecutivo_path , :class => "form-ejecutivo"}
+        %h1 Gestión Ejecutivos
+        = notificaciones
+        .control-group
+        %legend Datos Personales del Ejecutivo
+        %label.control-label (*) RUN
+        %input.rut.input-xlarge.required{:type => "text", :name => "ejecutivo[rut]", :maxlength => 10}
+        %label.control-label (*) Primer Nombre
+        %input.required{:type => "text", :name => "ejecutivo[primer_nombre]", :maxlength => 25}
+        %label.control-label Segundo Nombre
+        %input.nombre.input-xlarge{:type => "text", :name => "ejecutivo[segundo_nombre]", :maxlength => 25}
+        %label.control-label (*) Apellido Paterno
+        %input.apellido.input-xlarge.required{:type => "text", :name => "ejecutivo[apellido_paterno]", :maxlength => 25}
+        %label.control-label (*) Apellido Materno
+        %input.apellido.input-xlarge.required{:type => "text", :name => "ejecutivo[apellido_materno]", :maxlength => 25}
+        %label.control-label (*) Sexo
+        %div.controls
+            %select{:name => "ejecutivo[sexo]"}
+                %option{:value => ""} .: Seleccionar Sexo :.
+                %option{:value => Usuario::MASCULINO} Masculino
+                %option{:value => Usuario::FEMENINO} Femenino
+        %label.control-label (*) Estado Civil
+        %div.controls
+            %select{:name => "ejecutivo[estado_civil]"}
+                %option{:value => ""} .: Seleccionar Estado Civil :.
+                %option{:value => Usuario::SOLTERO} Soltero
+                %option{:value => Usuario::CASADO} Casado
+                %option{:value => Usuario::VIUDO} Viudo
+                %option{:value => Usuario::DIVORCIADO} Divorciado
+                %option{:value => Usuario::SEPARADO} Separado
+                
+        .control-group
+        %legend Información de Contacto
+        %label.control-label (*) Domicilio
+        %input.direccion.input-xlarge.required{:type => "text", :name => "ejecutivo[domicilio]", :maxlength => 50}
+        %label.control-label (*) Villa/Población
+        %input.required{:type => "text", :name => "ejecutivo[villa_poblacion]", :maxlength => 255, :disableb => "disabled"}
+        %label.control-label (*) E-mail
+        %input.mail.input-xlarge.required{:type => "text", :name => "ejecutivo[email]", :maxlength => 50}
+        %label.control-label (*) Telefono Fijo
+        %input.telefono.input-xlarge.required{:type => "text", :name => "ejecutivo[telefono_fijo]", :maxlength => 10}
+        %label.control-label (*) Telefono Movil
+        %input.movil.input-xlarge.required{:type => "text", :name => "ejecutivo[telefono_movil]", :maxlength => 15}
+        %label.control-label (*) Sede
+        %select.required{:id => "sede-id", :name => "ejecutivo[sede_id]"}
+            %option{:value => ""} .:Seleccione Sede:.
+            - Sede.all.each do |sede|
+                %option{value: sede.id}= sede.nombre
+        %legend Procedencia
+        %label.control-label{:for => "select.pais"} (*) Pais
+        %select.required{:id => "select-pais", :name => "ejecutivo[pais_id]"}
+            %option{:value => 1} Chile
+        %label.control-label (*) Región
+        %select.required{:id => "region-id", :name => "ejecutivo[region_id]"}
+            %option{:value => ""} .:Seleccione Región:.
+            - Region.all.each do |region|
+                %option{value: region.id}= region.nombre
+        %label.control-label (*) Comuna
+        %select.required{:id => "comuna-id", :name => "ejecutivo[comuna_id]"}
+            %option{:value => ""} .:Seleccione Comuna:.
+        %div.modal-footer
+        %input{:type => "submit"}
+        %label.control-label.invisible (*) Tipo
+        %div.controls.invisible
+            %select{:name => "ejecutivo[tipo]"}
+                %option{:value => 3} Ejecutivo
+        %label.control-label.invisible (*) Cargo
+        %div.controls.invisible
+            %select{:name => "ejecutivo[rol_id]"}
+                %option{:value => 7} Ejecutivo Cobranza
+
+:javascript
+    $("#region-id").change(function() {
+        var valor = $(this).val();
+        var $comunas = $("#comuna-id");
+        if (valor) {
+            $.getJSON(
+                "#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+                function(data) {
+                    var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+                    $(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+                    $comunas.html(nuevos).removeAttr("disabled");
+                }
+            )
+        } 
+        else{
+            $comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", true);
+        }
+    })
+
+    $("form.form-ejecutivo").validate({
+            invalidHandler: function(form, validator) {
+                notify_info(
+                    "Existen campos sin información",
+                    "Por favor, verifique que todos los campos obligatorios del formulario tengan información."
+                );
+            },
+            submitHandler: function(form) {
+                notify_loader(
+                    "Docentes",
+                    "Se está registrando la información del ejecutivo."
+                );
+                form.submit();
+            }
+        });
+
+
+

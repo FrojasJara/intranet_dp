@@ -1,0 +1,443 @@
+.plan-pago{:id => "plan-pago-#{centro_costo}"}
+	.page-header
+		- if centro_costo == PagoComprometido::ARANCEL
+			%h2 Plan de pago del arancel
+		- if centro_costo == PagoComprometido::MATRICULA
+
+			%h2 Plan de pago de la matrícula
+		- if centro_costo == PagoComprometido::NORMATIVA
+			%h2 Plan de pago de las normativas
+
+	.control-group
+		.controls.input-prepend.monto-dinero{:style => "width: 185px;"}
+			%span.add-on $
+			%input.r1.monto-pagar.input-medium{:type => "text", :disabled => "disabled", :value => "0", :style => "text-align: right;", :alt => "dinero"}
+	.control-group
+		.controls.input-prepend.monto-dinero{:style => "width: 185px;"}
+			%span.add-on $
+			%input.r1.monto-documentado.input-medium{:type => "text", :disabled => "disabled", :value => "0", :style => "text-align: right;", :alt => "dinero"}
+
+	%a.btn.btn-small.btn-success.pago-combinado{:href => "#", 
+		:rel => "popover",
+		:disabled => "disabled",
+		:style => "display: inline-block; padding: 5px;"}
+		%i.icon-white.icon-plus-sign
+
+	%input.monto-documentado.r1.n1{:type => "hidden", :name => "monto-documentado-#{centro_costo}", :value => "0"}
+	%input.monto-pagar.r1.n1{:type => "hidden", :name => "monto-pagar-#{centro_costo}", :value => "0"}
+	%br
+
+	%ol.pagos
+		%li{:style => "display: none;"}
+			%a.btn.btn-mini.btn-danger.quitar{:href => "#"}
+				%i.icon-white.icon-minus-sign
+				Quitar
+			%span.numero
+			.cabecera
+				.control-group{:style => "width: 110px; margin-left: 50px;"}
+					.controls.monto.input-prepend
+						%input.monto.input-medium{:type => "text", :disabled => "disabled", :alt => "dinero", :style => "text-align: left !important;"}
+				.control-group
+					.controls
+						%input.medio-pago.input-medium{:type => "text", :disabled => "disabled"}
+				%input.monto.monto-pago-comprometido.d1.sdv{:type => "hidden", :disabled => "disabled", :name => "pagos_comprometidos[][monto]"}
+				%input.d1{:type => "hidden", :name => "pagos_comprometidos[][ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id, :disabled => "disabled"}
+				%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id, :disabled => "disabled"}
+				%input.monto.monto-abono.d1{:type => "hidden", :disabled => "disabled", :name => "pagos_comprometidos[][abono][monto]"}
+				%input.medio-pago.d1{:type => "hidden", :disabled => "disabled", :name => "pagos_comprometidos[][abono][medio_pago_id]"}
+	.cuerpos{:style => "display: none;"}
+
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_efectivo", :locals => {:centro_costo => centro_costo}
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_cuotas", :locals => {:centro_costo => centro_costo, :forma_cuotas => forma_cuotas}
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_transferencia", :locals => {:centro_costo => centro_costo}
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_deposito", :locals => {:centro_costo => centro_costo}
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_tarjeta_debito", :locals => {:centro_costo => centro_costo}
+		= render :partial => "matriculas/matriculas/admision/partials/cuerpo_tarjeta_credito", :locals => {:centro_costo => centro_costo}
+
+		.cuerpo.medio-7
+
+:css
+	ol.pagos { margin: 15px 0; padding-left: 30px; }
+	ol.pagos li { 
+		/*padding: 7px; */
+		position: relative;
+		padding-left: 0;
+	}
+	ol.pagos li div.cabecera { background-color: #DFECFF; }
+	ol.pagos li > .monto { margin-bottom: 10px; }
+	ol.pagos li > a.quitar {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+	}
+
+	span.numero { 
+		position: absolute;
+		top: 6px;
+		left: 6px;
+		font-size: 15px;
+		font-weight: bold; 
+	}
+
+	div.cuerpo { margin-top: 9px; margin-left: 32px; }
+	div.cuerpo input[type="text"], div.cuerpo input[type="number"] { text-align: right !important; }
+
+	.popover-inner { width: auto !important; }
+	.popover-content { padding: 10px 10px 3px 10px !important; }
+	.popover-content .control-group { margin-right: 0; display: block !important; }
+
+	table.cuotas td { vertical-align: middle !important; }
+	table.cuotas td select { margin-bottom: 0 !important; }
+	table.cuotas col.cuota { width: 50px; }
+	table.cuotas col.monto { width: 100px; }
+	table.cuotas col.f-vencimiento { width: 100px; }
+	tr.pagare.matricula td { background-color: #FEF5CA !important; }
+
+	div.monto-dinero span.add-on {
+		background-color: transparent;
+		border: none;
+		font-size: 20px !important;
+		padding: 0;
+		margin-top: 5px;
+	}
+	div.cabecera { padding: 2px 0; }
+	div.monto-dinero input[alt="dinero"] {
+		border: none;
+		background-color: transparent !important;
+		box-shadow: none;
+		font-size: 20px !important;
+		padding: 0px !important;
+		line-height: 100% !important;
+		width: 120px;
+	}
+
+	div.cabecera input[alt="dinero"] {
+		background-color: transparent;
+		border: none;
+		box-shadow: none;
+		font-size: 15px !important;
+		width: 94px;
+	}
+
+	div.cabecera input.medio-pago {
+		background-color: transparent;
+		border: none;
+		box-shadow: none;
+		font-size: 15px !important;
+		width: 250px;
+		color: blue !important;
+	}
+
+	div.cabecera > div.control-group { margin-bottom: 0; }
+
+:javascript
+	$(document).ready(function() {
+		/************************************************************/
+
+		var $contenedor_pago = $("#plan-pago-#{centro_costo}");
+		var $contenedor_identificacion_alumno = $("#identificacion-alumno");
+
+		var $lista_pagos = $contenedor_pago.find("ol.pagos");
+		var $cuerpos = $contenedor_pago.find("div.cuerpos");
+		var $cuerpo_medio_2 = $cuerpos.find("div.medio-2"); // Cuotas
+		var contenido_original_tabla_cuotas = $cuerpo_medio_2.find("div.cuotas")[0].outerHTML;
+
+		var $monto_documentado = $contenedor_pago.find("input:hidden.monto-documentado");
+		var $monto_pagar = $contenedor_pago.find("input:hidden.monto-pagar");
+
+		/**************************	Cuotas *************************/
+
+		$contenedor_pago.on("click", "a.generar-cuotas", function(e) {
+			e.preventDefault();
+			try {
+				var $contenedor_cuerpo = $(this).parent();
+				var $k1 = $contenedor_cuerpo.find(":input.k1");
+
+				var q_cuotas = parseInt($contenedor_cuerpo.find("select.cuotas option:selected").attr("data-cuotas"));
+				var f_primera_cuota = $contenedor_cuerpo.find("input.f-primera-cuota").val();
+
+				f_primera_cuota = f_primera_cuota.replace("-","/");
+				f_primera_cuota = f_primera_cuota.replace("-","/");
+
+				var partes = f_primera_cuota.split('/');
+				console.log(partes[0]);
+				console.log(partes[1]);
+				console.log(partes[2]);
+				console.log(partes[3]);
+
+				f_primera_cuota = partes[2]+"/"+partes[1]+"/"+partes[0];
+				console.log(f_primera_cuota);
+
+				var numero_primera_cuota = $contenedor_cuerpo.find("input.numero-primera-cuota").val();
+				var cuotas_cheques = parseInt($contenedor_cuerpo.find("input.cuotas-cheques").val());
+				var cuotas_pagare = parseInt($contenedor_cuerpo.find("input.cuotas-pagare").val());
+
+				$contenedor_cuerpo.find("input.pagare").attr("disabled", (cuotas_pagare == 0));
+				if( cuotas_pagare == 0 ) $contenedor_cuerpo.find("input.pagare").val("");
+				var numero_pagare = $contenedor_cuerpo.find("input.pagare").val();
+
+				if( isNaN(q_cuotas) ) throw "Seleccione una cantidad de cuotas";
+				if( !f_primera_cuota || !fecha_valida_cuota(f_primera_cuota)  ) throw "Ingrese una fecha válida para el primer pago.";
+				if( q_cuotas != (cuotas_cheques + cuotas_pagare) ) throw "Verifique la cantidad de cuotas de cheques y pagaré.";
+				if( cuotas_pagare > 0 && !numero_pagare ) throw "Ingrese un número de pagaré.";
+			} catch(e) {
+				alertify.error("Existe información errónea " + e);
+				plan_no_integro();
+				$k1.attr("style", "border: 1px solid red");
+				setTimeout(function() {
+					$k1.removeAttr("style")
+				}, 5000)
+				return;
+			}
+			var $contenedor_cabecera = $contenedor_cuerpo.prev();
+			$k1.removeAttr("style").not("select, :radio").attr("readonly", "readonly");
+			$k1.find("option.ros").not("option:selected").attr("disabled", "disabled");
+			$contenedor_cuerpo.find("div.cuotas").replaceWith(contenido_original_tabla_cuotas);
+			var $contenedor_cuotas = $contenedor_cuerpo.find("div.cuotas");
+			$contenedor_cuotas.find(":input.d1").not("table :input.d1").removeAttr("disabled");
+			var $tabla = $contenedor_cuotas.find("table.cuotas");
+			
+			var objDate = Date.parse(f_primera_cuota);
+			console.log(objDate);
+			
+			var dia = objDate.getDate();
+			var monto_pago = parseInt($contenedor_cuerpo.prev().find("input.monto:hidden").val());
+			var interes = parseFloat($contenedor_cuerpo.find("select.cuotas option:selected").attr("data-interes"));
+			var obj_cuotas = calcular_cuotas(monto_pago, q_cuotas, interes);
+			var primero = $contenedor_cuerpo.find(":radio.seleccion-cuota:checked").val();
+			
+			$contenedor_cuotas.find("input:hidden.cuotas").val(q_cuotas);
+			$contenedor_cuotas.find("input.monto-documentado-con-interes").val(obj_cuotas.monto);
+
+			// Elementos del pagare (:input.y1)
+			if( cuotas_pagare == 0 ) { $contenedor_cuotas.find(":input.y1").remove(); }			
+
+			var fechas = new Array();
+
+			for(var i = 0; i < obj_cuotas.cuotas.length; ++i) {
+				var $fila_nueva = $tabla.find("tbody tr:hidden:first-child").clone(true, true);
+
+				// Todos los campos (ocultos o no, del pago comprometido o abono) del monto de la cuota
+				$fila_nueva.find(":input.mo").val(obj_cuotas.cuotas[i]);
+				fechas.push(objDate.toString("dd/MM/yyyy"));
+
+				if( cuotas_cheques > 0 ) {
+					$fila_nueva.find("input.tipo-cuota").val(#{PagoComprometido::CHEQUE});
+					$fila_nueva.find("input.saldo").remove();
+
+					// Los cheques pueden ser a cualquier dia del mes
+					$fila_nueva.find("input.f-vencimiento").removeClass("fecha-valida-cuota");
+
+					$fila_nueva.find("td:nth-child(4)").append("<input class='required cambiar-nombre numero-serie input-medium' type='text' placeholder='Número Serie' name='numero_documento_" + i + "' maxlength='100' data-nombre-real='pagos_comprometidos[][abono][numero_documento]'>");
+					$fila_nueva.find("td:nth-child(5)").append($("select.banco:first").clone(true, true));
+					$fila_nueva.addClass("cheque");
+					--cuotas_cheques;
+				} else {
+
+					$fila_nueva.find("input.tipo-cuota").val(#{PagoComprometido::PAGARE});
+					$fila_nueva.find("td:nth-child(1)").append("<input name='pagos_comprometidos[][numero_pagare]' type='hidden' value='" + numero_pagare + "'>");
+					// "a1": informacion sobre el abono: No corresponde cuando es pagare
+					$fila_nueva.find(":input.a1").remove();
+					$fila_nueva.addClass("pagare");
+				}
+				
+				objDate.moveToMonth(objDate.getMonth() + 1);
+				try {
+					objDate.set({ day: dia });
+				} catch(e) {
+					// Para frebrero 30
+					try {
+						objDate.set({ day: dia - 1 });
+					} catch(e) {
+						// Para febrero 29
+						try {
+							objDate.set({ day: dia - 2 });
+						} catch(e) {
+							try {
+								// Al fin ! Febrero 28
+								objDate.set({ day: dia - 3 });
+							} catch(e) {
+								// Error desconocido. Que se inicie el proceso nuevamente
+								location.href = window.location.href
+							}
+						}
+					}
+				}
+				$fila_nueva.find(":input.d1").removeAttr("disabled");
+				$fila_nueva.appendTo($tabla.find("tbody")).show();
+			}
+
+			if( primero != "cheque" ) {
+				var $cuerpo_tabla = $tabla.find("tbody");
+				$cuerpo_tabla.find("tr.cheque").appendTo($cuerpo_tabla);				
+			}
+
+			/* Para corregir el numero de cuota, y la fecha de vencimiento, en caso se cambie el orden de generacion
+			 * Ademas se corrige los nombres a motivo de validacion:
+			 *	- Fecha de vencimiento
+			 *	- Numero de serie (Solo de cheques)
+			 * 	- Documentos de venta
+			 */
+			var sufijo;
+			var numero_cuota = numero_primera_cuota;
+			$tabla.find("tbody tr[class]").each(function(i, v) { 
+
+				sufijo = numero_cuota + "_" + #{centro_costo} + "_" + (+new Date);
+				$(v).find("input.numero-cuota").val(numero_cuota++).attr("name", "numero_cuota_"+ sufijo);
+				$(v).find("input.f-vencimiento").val(fechas[i]).attr("name", "f_vencimient_" + sufijo);
+
+				// La fila es de un cheque
+				if( $(v).is("tr.cheque") )
+					$(v).find("input.f-vencimiento").after("<input type='hidden' name='pagos_comprometidos[][abono][fecha_documento]' value='" + fechas[i] + "'>");
+
+				$(v).find("input.numero-serie").attr("name", "numero_serie_"+ sufijo);
+			})
+			
+			// El plan se creo
+			plan_integro();
+
+			$contenedor_cuotas.show();
+			actualizar_monto_documento();
+
+		})
+
+		/***************************************************************************/
+
+		$contenedor_pago.on("click", "a.pago-combinado", function(e) {
+			e.preventDefault();
+
+			// Solo habra un popover en la pantalla
+			$("a.pago-combinado").not($(this)).popover("hide");
+
+			var monto_documentado = parseInt($monto_documentado.val());
+			var monto_pagar = parseInt($monto_pagar.val());
+
+			if( !isNaN(monto_documentado) && !isNaN(monto_pagar) ) {
+				var $monto = $("div.popover-content input.monto");
+				$monto.val(monto_pagar - monto_documentado);
+				$monto.select();
+			}			
+		})
+
+		$contenedor_pago.on("click", "a.quitar", function(e) {
+			e.preventDefault();
+			var cantidad_items = $lista_pagos.find("> li:visible").length;
+			$lista_pagos.toggleClass($(this).data("medio-pago"));
+			$(this).parents("li:first").remove();	
+
+			var suma = 0;
+			$items_visibles = $lista_pagos.find("> li:visible");
+			$items_visibles.find("> div.cabecera input.monto-pago-comprometido:hidden").each(function(i, v) { suma += parseInt(v.value); });
+			$items_visibles.find("span.numero").each(function(i, v) { $(v).text((i + 1) + ")"); })
+
+			$contenedor_pago.find("input.monto-documentado").val(suma);	
+			
+			actualizar_monto_documento();		
+		})
+
+		function es_monto_valido_#{centro_costo}() {
+
+			var monto_pagar = parseInt($monto_pagar.val());
+			var $contenedor_popup = $("div.popover-content");
+
+			if ( ! isNaN($contenedor_popup.find("input.monto").val()) ) {
+				var monto = parseInt($contenedor_popup.find("input.monto").val());
+				var suma = monto;
+				$lista_pagos.find("> li:visible > div.cabecera input.monto-pago-comprometido:hidden").each(function(i, v) { suma += parseInt(v.value); })
+
+				return monto > 0 && suma <= monto_pagar;
+			} else {
+				return false;
+			}
+		}
+
+		$("body").on("click", "a.agregar-pago-#{centro_costo}", function(e) {
+
+			e.preventDefault();
+			var $contenedor_popup = $(this).parents("div.popover-content");
+			var $medio = $contenedor_popup.find("select.medios-pago option:selected");
+
+			/*	No se admite ingresar un pago con medio de pago repetido	*/
+			if ( ! $lista_pagos.is("." + $medio.attr("class")) && es_monto_valido_#{centro_costo}() ) 
+
+			{				
+				var $monto = $contenedor_popup.find("input.monto");				
+				var $template = $lista_pagos.find("> li:hidden");
+				var $nuevo_item = $template.clone(true, true);
+				var $cabecera = $nuevo_item.find("div.cabecera");
+				$nuevo_item.find("input.monto").val($monto.val());
+				$nuevo_item.find("input.medio-pago").val($medio.text());
+				$nuevo_item.find("input.medio-pago[type='hidden']").val($medio.val());
+				$nuevo_item.find("a.quitar").data("medio-pago", $medio.attr("class"));
+				$nuevo_item.find("span.numero").text(($lista_pagos.find("li:visible").length + 1) + ")");
+
+				var $nuevo_cuerpo = $cuerpos.find("." + $medio.attr("class")).clone(true, true);
+				$nuevo_cuerpo.appendTo($nuevo_item);
+				$nuevo_item.find(":input.d1").removeAttr("disabled");
+				$nuevo_item.appendTo($lista_pagos).show();
+				$contenedor_pago.find("a.pago-combinado").popover("hide");
+				$lista_pagos.toggleClass($medio.attr("class"));
+
+				var suma = 0;
+				$lista_pagos.find("> li:visible > div.cabecera input.monto-pago-comprometido:hidden").each(function(i, v) { suma += parseInt(v.value); });
+				$contenedor_pago.find("input.monto-documentado").val(suma);
+
+				$nuevo_item.find("input.fecha-transferencia, input.fecha-deposito").change(function() {
+					$(this).siblings().val($(this).val());
+				})
+
+				// Solo si es esta pagando en cuotas
+				if( $medio.val() == "2" ){ $cabecera.find("> :hidden").addClass("n1").removeClass("sdv"); }
+
+				//mascaraDinero();
+				actualizar_monto_documento();
+			}
+			else
+			{
+				$contenedor_popup.find(":input").css("border", "1px solid red");
+			}
+		})
+
+		$contenedor_pago.on("click", "a.modificar-contenido", function(e) {
+			e.preventDefault();
+
+			var $contenedor_cuerpo = $(this).parent();
+
+			/*
+			*	Remover el atributo "value"
+			*	|pagare, fecha_primera_cuota|
+			*/
+			$contenedor_cuerpo.find(":input.vn").val("").removeAttr("readonly");
+
+			/*
+			*	Dejar "value" en 0
+			*	|numero_primera_cuota, cheques, cuotas_pagare|
+			* 	El numero de primera cuota no puede ser 0
+			*/
+			$contenedor_cuerpo.find(":input.v0").val(0).removeAttr("readonly");
+			$contenedor_cuerpo.find(":input.v0").filter("input.numero-primera-cuota").val(1);
+
+			/*
+			*	|cantidad_cuotas|
+			*/
+			$contenedor_cuerpo.find("option.ros").removeAttr("disabled");
+
+			$contenedor_cuerpo.find("div.cuotas").replaceWith(contenido_original_tabla_cuotas); 
+			$contenedor_cuerpo.find("div.cuotas").find(":input.d1").not("table :input.d1").removeAttr("disabled");
+
+			// El plan no esta generado
+			plan_no_integro();
+
+		})
+
+		$contenedor_pago.on("change", "tr.cheque input.f-vencimiento", function(){ 	$(this).siblings().val(this.value); });
+
+		$("body").on("focus", "div.popover-content :input", function() {
+			var $contenedor_popup = $(this).parents("div.popover-content");
+			$contenedor_popup.find(":input").css("border", "1px solid #CCC");
+		})
+
+		function plan_integro() { $("input:hidden.plan-cuotas-generado-#{centro_costo}").val("OK"); }
+		function plan_no_integro() { $("input:hidden.plan-cuotas-generado-#{centro_costo}").removeAttr("value"); }
+	})
+	

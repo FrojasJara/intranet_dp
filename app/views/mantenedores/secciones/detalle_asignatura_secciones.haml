@@ -1,0 +1,82 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            = link_to "Asignaturas", asignaturas_secciones_path 
+            %span.divider /
+        %li
+            %a{:href => "#"}  Secciones
+            %span.divider / 
+        %li.active
+            %a{:href => "#"}  
+                = @asignatura.nombre
+         
+%div#resultados{:style => "margin-top:20px"}
+    = notificaciones
+    %table.table.table-striped.table-bordered{:id => 'secciones'}
+        %thead
+            %tr
+                %th ID
+                %th Estado
+                %th Profesor
+                %th Institución
+                %th Periodo
+                %th Numero
+                %th Cupos
+                %th Jornada
+                
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td
+                        = i.id
+                    %td.dropdown
+                        - if current_user[:sede_id] == i.institucion_sede.sede.id
+                            %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                                = get_name Seccion, :ESTADOS, i.estado
+                                %b.caret
+                            %ul.dropdown-menu
+                                -if current_role_can?(:coordinador_carrera)
+                                    %li
+                                        %a{:href => edit_mantenedores_seccione_path(i.id)}
+                                            %i.icon-pencil
+                                            Modificar
+                                    %li.divider
+                                -#-if current_role_can?(:vicerrectoria_academica)
+                                -#    %li
+                                -#       %a{:href => "editar_seccion_path(i[:idAsignatura])"}
+                                -#            %i.icon-pencil
+                                -#            Editar 
+                                -#   %li.divider
+                                -if current_role_can?(:apoyo_docente)                          
+                                    %li
+                                        %a{:href => edit_mantenedores_seccione_path(i.id)}
+                                            %i.icon-user
+                                            Asignar profesor 
+                                    -#%li
+                                    -#    %a{:href => ""}
+                                    -#        %i.icon-time
+                                    -#        Asignar Horario y Sala
+                                    %li
+                                        %a{:href => fusion_seccion_path(i)}
+                                            %i.icon-resize-small
+                                            Fusionar Sección
+                        - else 
+                            = get_name Seccion, :ESTADOS, i.estado
+                    %td
+                        = i.docente.blank? ? "No posee información" : i.docente.datos_personales.nombre 
+                    %td 
+                        = i.institucion_sede.nombre_corto
+                    %td 
+                        = i.periodo.nombre
+                    %td
+                        = i.numero 
+                    %td
+                        = i.cupos
+                    %td
+                        = i.nombre
+                    
+= datatable_src
+= datatable("secciones")   
+:css
+    table.table thead th{color:#333 !important;}
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important; }

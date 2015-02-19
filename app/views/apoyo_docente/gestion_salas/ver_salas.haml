@@ -1,0 +1,31 @@
+%button.btn.btn-primary#ingresar_sala
+    %i.icon.icon-white.icon-plus
+    Ingresar Sala
+%br
+%br
+= notificaciones
+%table.table.table-striped.table-bordered#salas
+    %thead
+        %tr
+            %th Sede
+            %th Nombre
+            %th Sala
+            %th Piso   
+            %th Capacidad
+
+    %tbody
+        - @items.each do |i|
+            %tr
+                %td= i.sede.nombre
+                %td= i.nombre_largo
+                %td= i.nombre
+                %td= i.piso
+                %td= i.capacidad
+
+= render :partial => "apoyo_docente/gestion_salas/partials/modal_ingresar_sala"
+= datatable_src
+= datatable("salas") 
+
+:javascript
+    $("#ingresar_sala").on("click", function(){ $("#modal_nueva_sala").modal("show")}); 
+

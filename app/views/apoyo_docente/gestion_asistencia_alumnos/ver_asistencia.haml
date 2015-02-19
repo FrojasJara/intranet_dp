@@ -1,0 +1,54 @@
+.sectionHeader
+	%h1  Asistencia Notas Carrera
+
+%div.well
+	= render :partial => "apoyo_docente/gestion_asistencia_alumnos/partials/filtro_carrera", :locals => {:url_metodo => apoyo_docente_ver_asistencia_path, :texto_boton => "Ver Asistencia y Notas"}
+
+= notificaciones
+
+
+- if @secciones_inscritas.size > 0
+	%table.table.table-striped#alumnos
+		%thead
+			%tr
+				%th.TxtLft{colspan: "#{@total_planificaciones + 6}"} Información Asignatura (A= % Asistencia /  I= % Inasistencia)
+				%th.TxtLft{colspan: "#{@total_planificaciones + 4}"} Evaluciones
+
+			%tr
+				%th.TxtLft Rut
+				%th.TxtLft Alumno
+				%th.TxtLft Asignatura
+				%th.TxtLft % A
+				%th.TxtLft % I
+				- 0..@total_planificaciones.times do |i|
+					%th.TxtLft= "E-#{i+1}"
+				%th.TxtLft NP
+				%th.TxtLft NE
+				%th.TxtLft NRep.
+				%th.TxtLft NF
+		%tbody
+			- @secciones_inscritas.each do |i|
+				%tr
+					- porcentaje_asistencia = i.asistencias.blank? ? 0 : (100.0 * (i.asistencias.map(&:horas_asistidas).reduce(:+).to_f / i.seccion.total_horas_seccion.to_f)).round 
+					- porcentaje_inasistencia = i.asistencias.blank? ? 0 : (100.0 * (i.asistencias.map(&:horas_ausentadas).reduce(:+).to_f / i.seccion.total_horas_seccion.to_f)).round
+					%td= i.alumno.datos_personales.rut
+					%td= i.alumno.datos_personales.nombre
+					%td= i.asignatura.nombre
+					%td= porcentaje_asistencia
+					%td
+						= porcentaje_inasistencia
+					-  if i.calificaciones_parciales.size <= @total_planificaciones
+						-  i.calificaciones_parciales.each do |i|
+							%td= i.calificacion
+						- tmp = @total_planificaciones - i.calificaciones_parciales.size
+						- 0..tmp.times do
+							%td --
+
+					%td.BgNP= i.nota_presentacion
+					%td.BgNE= i.nota_examen
+					%td.BgNRep= i.nota_examen_repeticion
+					%td.BgNF= i.nota_final
+						
+
+= datatable_src
+= datatable("alumnos") 

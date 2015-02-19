@@ -1,0 +1,24 @@
+%h2 
+	%i.icon-white.icon-chevron-right
+	Dirección de Docencia
+%ul.nav.nav-list				
+	%li.nav-header Gestión Bibliográfica 
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Biblioteca
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to 'Recursos Bibliográficos', lista_libros_sedes_path
+	%li.nav-header Gestión Docente 
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} 
+			%i.icon.icon-chevron-right
+			Docentes
+		%ul.hide.dropdown-menu.inner-list
+			%li
+				= link_to  "Ingresar Docente", new_mantenedores_docente_path 
+			%li
+				= link_to 'Planilla Docentes', mantenedores_docentes_path
+ 
+

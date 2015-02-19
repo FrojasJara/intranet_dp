@@ -1,0 +1,10 @@
+.sectionHeader
+	%h1 Buscar Alumno
+%div.well
+	%form.form-search#buscar_alumno{:action => buscar_alumno_path ,:method => "post"}
+		%input.input-large.search-query.required{type: "text", :placeholder => "Rut Alumno", style: 'height: 28px', :name => "busqueda"}
+		%button.btn.btn-primary{type: "submit"} 
+			%icon.icon-white.icon-search
+			Buscar Planes
+	= notificaciones
+

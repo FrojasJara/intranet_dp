@@ -1,0 +1,48 @@
+%form.informacion-tabulada
+	%fieldset
+		%legend Información del proceso de matrículas
+		%ul
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Nº Matricula:
+					%span= @matricula.id
+				%div.contenedorElemento.separador
+					%label.etiqueta Estado:
+					%span= get_name MatriculaPlan, "ESTADOS", @matricula.estado			
+				%div.contenedorElemento.separador
+					%label.etiqueta F. Creación:
+					%span= fecha_humana @matricula.created_at
+				%div.contenedorElemento.separador
+					%label.etiqueta Planes de pago emitidos:
+					%span= @planes.size
+				%div.contenedorElemento.separador
+					%label.etiqueta	Otras acciones:
+					%span.etiqueta
+						- if not no_mostrar == :ver
+							%a{:href => "#{matriculas_ver_path @matricula.id}"}
+								%i.icon-zoom-in
+								Detalle
+						- if not no_mostrar == :planes
+							%a{:href => "#{matriculas_planes_path @matricula.id}"}
+								%i.icon-trash
+								Planes
+						- if not no_mostrar == :editar
+							%a{:href => "#{matriculas_editar_path @matricula.id}"}
+								%i.icon-trash
+								Editar
+			%li.ui-helper-clearfix.cuatro-columnas
+				%div.contenedorElemento.separador
+					%label.etiqueta Alumno:
+					%span= @usuario_alumno.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Rut:
+					%span= @usuario_alumno.rut		
+				%div.contenedorElemento.separador
+					%label.etiqueta Carrera:
+					%span= @carrera.nombre
+				%div.contenedorElemento.separador
+					%label.etiqueta Año de ingreso:
+					%span= @inscripcion.anio_ingreso
+				%div.contenedorElemento.separador
+					%label.etiqueta Institución:
+					%span= @institucion_sede_plan.institucion_sede.nombre

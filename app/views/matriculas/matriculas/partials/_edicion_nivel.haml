@@ -1,0 +1,17 @@
+- if @es_ip_cft
+	#edicion-nivel
+		.page-header
+			%h2 Nivel
+		.control-group
+			.controls
+				%input.required.input-small.positivo{:type => "text", :value => @plan_vigente.nivel, :name => "nivel", :style => "text-align: right", :maxlength => 1}
+				%a.html_tooltip{:href => "#", :data => {:toggle => "tooltip", "html-content" => "#tooltip-nivel"}}
+					%i.icon-warning-sign.jicon-info
+
+		#tooltip-nivel.contenido-tooltip
+			%h3 
+				%i.icon-white.icon-ok-sign
+				Sobre el nivel en las matrículas
+			%p 
+				El nivel es usado en los procedimientos académicos para determinar hasta qué semestre el alumno puede inscribir asignaturas. Tenga precausión en su modificación, y apóyese en la información académcia proveída en el 
+				%strong Pase de Matrículas. 

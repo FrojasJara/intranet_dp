@@ -1,0 +1,166 @@
+:css
+    legend{
+        font-weight:bold;
+    }
+
+    label{
+        float: left;
+        width:125px;
+        font-weight: bold;
+    }
+    input{
+        width:80px !important;
+        margin-left: 125px;
+    }
+    .no-mostrar{
+        display:none;
+    }
+
+.page-Header
+    %h1 Envío de mails de matriculas
+
+= notificaciones
+
+= render partial: 'partials/notificaciones/warning', locals: {:mensaje => 'Para el correcto envío de mails de matriculas debe solicitar un código al Departamento de Sistemas y luego validarlo, si ya lo hizo favor de omitir este aviso. El código utilizado en este modulo es el mismo utilizado para el envío de mails de cobranzas.'}
+
+%h3 Datos de Envío
+%br
+- if @usuario.sede_id.to_i == Sede::CONCEPCION
+    %strong="Email: distancia.concepcion@dportales.cl"
+- elsif @usuario.sede_id.to_i == Sede::CHILLAN
+    %strong="Email: distancia.chillan@dportales.cl"
+- elsif @usuario.sede_id.to_i == Sede::NUNOA
+    %strong="Email: distancia.nunoa@dportales.cl"
+- elsif @usuario.sede_id.to_i == Sede::BOSQUE
+    %strong="Email: distancia.santiago@dportales.cl"
+- elsif @usuario.sede_id.to_i == Sede::VIÑA
+    %strong="Email: distancia.vina@dportales.cl"
+%br
+- unless @usuario.telefono_fijo_completo.blank?
+    %strong="Fono: "+@usuario.telefono_fijo_completo
+- else
+    %strong="No tiene"
+%br
+%br
+
+%form{id: 'listado-matriculas', method: 'post', action: matriculas_cobranzas_envio_mails_listado_mails_matricula_path}
+    %fieldset
+        %br
+        .control-group
+            %label.control-label Institución:
+            .controls
+                %select.required{:name => "institucion", :id => "institucion", :prompt => 'Seleccione institución', class: 'selectInstitucion'}
+                    %option{value: ""} .: Seleccione una Institución :.
+                    / - @instituciones.each do |institucion|
+                    /     %option{value: institucion[:id]}= institucion.nombre
+                    %option{class: 'distancia', value: Institucion::IP}= 'Distancia'
+        %input{class: "modalidad", type: "hidden", name: "modalidad", value: InstitucionSedePlan::PRESENCIAL, id: "modalidad"}
+        .control-group
+            %label.control-label Periodo:
+            .controls
+                %select{name: "periodo", id: "periodo"}
+                    - @periodos.each do |periodo|
+                        %option{value: periodo.id}= periodo.nombre
+        .control-group
+            %label.control-label Carrera:
+            .controls
+                %select.required{name: "carrera", id: "carrera"}
+                    %option{value: ""} .: Seleccionar una Carrera :.
+        %br
+        %input.btn.btn-success{type: 'submit', value: 'Filtrar', id: 'boton'}
+
+:javascript
+    $(document).ready(function() {
+        
+        $('.selectInstitucion').change(function(){
+            if($('.selectInstitucion .distancia:selected').val() == 1){
+                $('.modalidad').attr({'value' : 2});
+            }
+            else{
+                $('.modalidad').attr({'value' : 1});
+            }
+        });
+
+        $("#institucion").change(function(){
+            $('#carrera').val('');
+
+            var institucion_id = $(this).val();
+            var periodo_id = $('#periodo').val();
+            var modalidad = $('#modalidad').val();
+
+            $.ajax({
+                url: "#{ajax_matriculas_buscar_carreras_path}",
+                type: 'POST',
+                data: {
+                    institucion_id: institucion_id,
+                    periodo_id: periodo_id,
+                    modalidad: modalidad
+                },
+
+                success: function(data) {
+                    var options = "<option value=''>.: Seleccione una Carrera :.</option>";
+                    $.each(data.carreras, function(key,carrera){
+
+                        var car = "'"+carrera.nombre+"'"
+
+                        options = options +  
+                                "<option value="+car+">"+ 
+                                    carrera.nombre+
+                                "</option>"
+                    });
+                    $("#carrera").html(options);
+                }
+            });
+        });
+
+        $("#periodo").change(function(){
+            $('#carrera').val('');
+
+            var periodo_id = $(this).val();
+            var institucion_id = $('#institucion').val();
+            var modalidad = $('#modalidad').val();
+
+            $.ajax({
+                url: "#{ajax_matriculas_buscar_carreras_path}",
+                type: 'POST',
+                data: {
+                    institucion_id: institucion_id,
+                    periodo_id: periodo_id,
+                    modalidad: modalidad
+                },
+
+                success: function(data) {
+                    var options = "<option value=''>.: Seleccione una Carrera :.</option>";
+                    $.each(data.carreras, function(key,carrera){
+
+                        var car = "'"+carrera.nombre+"'"
+
+                        options = options +  
+                                "<option value="+car+">"+ 
+                                    carrera.nombre+
+                                "</option>"
+                    });
+                    $("#carrera").html(options);
+                }
+            });
+        });
+    
+        $("#boton").click(function()
+        {
+            if(confirm("¿Está seguro que los datos de envío corresponden a sus datos institucionales? En caso contrario presione cancelar y comuniquese con el Departamenento de Sistemas para actualizar su información.")){
+                
+                $("#listado-matriculas").validate({
+                    invalidHandler: function(form, validator) {
+                        notify_error("Error al Filtrar", "Por favor, seleccione una Institución  y su carrera asociada.");
+                    },
+                    submitHandler: function(form) {
+                        form.submit();
+                    }
+                });
+            }  
+            else{
+                return false;
+            }  
+        });
+
+    });

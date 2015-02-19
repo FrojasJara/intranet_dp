@@ -1,0 +1,63 @@
+:ruby
+    @f_i        = session[:ficha_fecha_inicio]
+    @f_t        = session[:ficha_fecha_termino]
+    
+    f_i         = Time.parse(@f_i)
+    f_t         = Time.parse(@f_t+' 23:59:59')
+    cond        = {:fecha.gte => f_i, :fecha.lte => f_t, rut: params[:rut]}
+    
+    @items      = Dedo.all(cond).group_by {|i| i.fecha.day}
+    total_horas = 0
+
+.well
+    %h2 Tarjeta de asistencia
+
+    %table
+        %tr
+            %td.span2.txRight
+                %strong Rut
+            %td= params[:rut] 
+        %tr
+            %td.txRight
+                %strong Nombre
+            %td= DedoPersonas::busca params[:rut]
+        %tr
+            %td.txRight
+                %strong Período
+            %td
+                = @f_i
+                al
+                = @f_t
+    
+
+
+
+
+%table.table
+    %thead
+        %tr
+            %th Día
+            %th 
+            %th.txLeft Entrada
+            %th.txLeft Salida
+            %th.txLeft Entrada
+            %th.txLeft Salida
+            %th Total
+
+        %tbody
+        - @items.each do |day|
+            %tr
+                %td= day[0]
+                %td= l day[1].first.fecha, format: :abbr_dayname
+                - (0..3).each do |n|
+                    %td
+                        - unless (entrada = day[1][n]).blank?
+                            = l entrada.fecha, format: :hora
+                - hora = calculo_horas(day[1])
+                - total_horas += hora
+                %td= minutos_a_tiempo_en_palabras hora
+        %tr
+            %td.txRight(colspan=6) 
+                %strong Tiempo total:
+            %td
+                %strong= minutos_a_tiempo_en_palabras total_horas

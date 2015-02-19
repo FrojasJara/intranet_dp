@@ -1,0 +1,173 @@
+:css
+    #busquedaPlan{
+        font-size:17px !important;
+        margin-right: 5px;
+    }
+.page-header
+    = breadcrumb [["Recepción de pagos", matriculas_pagos_buscar_alumno_path], "Detalle cuotas"]
+    %h1 Detalle de cuotas
+
+= render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+/ %table.table.table-condensed
+/     %thead
+/         %tr
+/             %th.txLeft #
+/             %th.txLeft Carrera
+/             %th.txLeft Sede
+/             %th.txLeft Año ingreso
+/             %th.txLeft Tipo ingreso
+/             %th.txLeft ¿Trabajador?
+/     %tbody
+/         - @alumno_plan_estudio.each_with_index do |item, index|
+/             %tr
+/                 %td.txCenter= index + 1
+/                 %td.txLeft= item.plan_estudio.nombre
+/                 %td SEDE
+/                 %td= item.anio_ingreso
+/                 %td= get_name Alumno, :TIPOS_INGRESO, item.tipo_ingreso
+/                 %td= item.es_trabajador ? 'Si' : 'No'
+
+/ %h3= @alumno_plan_estudio_actual.plan_estudio.nombre
+
+
+%br
+
+%strong#busquedaPlan Buscar entre planes de pago del alumno:
+
+- if @planes_pago.blank?
+    = render partial: "partials/notificaciones/info", locals: { mensaje: raw('<h4 class="alert-heading">No tiene planes de pago asociados</h4> Por favor revise el sistema antiguo para ver si tiene pagos pendientes')}
+- else 
+    = select_tag( :plan_select, options_for_select(@planes_pago.map{|x|["#{l x.created_at, format: :fecha} - #{(pags = x.pagares(:estado.not => Pagare::ANULADO)).blank? ? 'Sin pagare' : pags.map{|p| p.numero}.join(", ")}", x.id]}, @plan_pago_id) )
+
+    - unless (cant = @planes_pago_anteriores.map{|x| x.pendientes.length}.inject(:+)).eql?(0)
+        - unless cant.blank?
+            %br
+            %br
+            = render partial: 'partials/notificaciones/important', :locals => {mensaje: "El alumno tiene <strong>#{cant} cuota#{'s' if cant > 1} pendientes</strong> en otros planes de pago.", titulo: 'Atención'}
+    - else
+        %br
+        %br
+
+    - unless (cant = @planes_pago.map{|x| x.atrasados.length}.inject(:+)).eql?(0)
+        = render partial: 'partials/notificaciones/important', :locals => {mensaje: "El alumno tiene <strong>#{cant} cuota#{'s' if cant > 1} atrasadas</strong> en sus planes de pago.", titulo: 'Atención'}
+
+    %h3 Pagos pendientes
+    - unless @plan_pago.blank?
+        = form_tag matriculas_pagos_abonar_path(params[:rut], @plan_pago.id), method: :post, id: 'form-abono' do
+            = render partial: 'matriculas/pagos/partials/lista_pagos_pendientes', locals: {seleccion: true, pagos_pendientes: @pagos_pendientes}
+            .btn-group
+                %button.btn.btn-success
+                    %i.icon-plus.icon-white
+                    Pagar
+                
+                / - @medios_pago.each do |mp|
+                /     %button.btn{name: 'abono[tipo]', value: mp.id}= mp.nombre
+                / %button.btn Invertir
+                / %button.btn Resetear
+                / %button.btn Cobranza externa
+    %h3 Detalle de pagos
+    %table.table.table-condensed.pagare
+        %thead
+            %tr
+                %th.txLeft Nº
+                %th.txLeft Pagaré
+                %th.txLeft Cuota
+                %th.txLeft Nominal
+                %th.txLeft Interés
+                %th.txLeft Pagado
+                %th.txLeft Saldo
+                %th.txLeft Fecha
+                %th.txLeft Tipo Documento
+                %th.txLeft Nº Documento
+                %th.txLeft Tipo Pago
+                %th.txLeft Nº Serie
+                %th.txLeft Ejecutivo
+        %tfoot
+            %tr
+                %th{colspan: 2}
+                %th Total:
+                %th= number_to_currency( t_nominal = ((pcm = @pagos_comprometidos.map{|x| x[:pago_comprometido].monto}).blank? ? 0 : pcm.inject(:+))  )
+                %th= number_to_currency( t_interes = (pca = @pagos_comprometidos.map{|x| x[:interes]}).blank? ? 0 : pca.inject(:+) )
+                %th= number_to_currency( t_saldo = ((pcm = @pagos_comprometidos.map{|x| x[:pago_comprometido].total_abonos}).blank? ? 0 : pcm.inject(:+))  )
+                %th= number_to_currency( t_saldo = ((pcm = @pagos_comprometidos.map{|x| x[:pago_comprometido].saldo}).blank? ? 0 : pcm.inject(:+))  )
+                %th{colspan: 6}
+
+        %tbody
+            - if @pagos_comprometidos.size.eql? 0
+                %tr
+                    %th.txCenter Sin registros
+            - else
+                - @pagos_comprometidos.each_with_index do |pc, index|
+                    - abonos = pc[:abonos]
+                    - estado, atrasada = estado_cuota_class(pc[:pago_comprometido])
+                    %tr{class: "#{estado}"}
+                        %td= index + 1
+                        %td
+                            %button.show_pago.btn{href: ".pc_#{pc[:pago_comprometido].id}"}
+                                = pc[:pago_comprometido].pagare.numero unless pc[:pago_comprometido].pagare.blank?
+                        %td.estado_td.b.txRight{:class => "#{estado} #{atrasada}", :style => "#{atrasada}"}
+                            %i.icon-warning-sign
+                            %i.icon-ok
+                            = pc[:pago_comprometido].numero_cuota
+                        %td.b= number_to_currency pc[:pago_comprometido].monto
+                        %td.b= number_to_currency pc[:interes]
+                        %td.b= number_to_currency pc[:pago_comprometido].total_abonos
+                        %td.b= number_to_currency( abonos.last.blank? ? pc[:pago_comprometido].monto : abonos.last.saldo )
+                        %td.b= l pc[:pago_comprometido].fecha_vencimiento unless pc[:pago_comprometido].fecha_vencimiento.blank?
+                        %td{colspan: 5}
+                    - if abonos.size.eql? 0
+                        %tr.hidden_detail{class: "pc_#{pc[:pago_comprometido].id}"}
+                            %td.txCenter{colspan: '14'} No hay registros
+                    - abonos.each_with_index do |abono, ind|
+                        %tr.hidden_detail{class: "pc_#{pc[:pago_comprometido].id} #{'error' if abono.estado.eql?(PagoComprometido::ANULADO)}"}
+                            %td{colspan: 2}
+                            %td= "#{ind + 1}º"
+                            %td
+                            %td= number_to_currency abono.interes
+                            %td= number_to_currency abono.monto
+                            %td= number_to_currency abono.saldo
+                            %td= l(abono.fecha, format: :fecha) unless abono.fecha.blank?
+                            %td
+                                = get_name DocumentoVenta, :TIPOS, abono.documento_venta.tipo
+                                = value abono.documento_venta, :numero
+                                (
+                                = get_name(PagoComprometido, :ESTADOS, abono.estado)
+                                )
+                            %td= abono.numero_documento
+                            %td= (mpn = abono.medio_pago.nombre).eql?('Pagaré/Cheque') ? 'Cheque' : mpn
+                            %td
+                            %td= abono.ejecutivo_matriculas.datos_personales.nombre_corto
+                
+    :css
+        table.pagare .estado_td i { display: none; }
+        table.pagare .#{get_name PagoComprometido, "ESTADOS", PagoComprometido::PAGADO} { background-color: #D0FFCA; }
+        table.pagare .#{get_name PagoComprometido, "ESTADOS", PagoComprometido::ATRASADO} { background-color: #FBEED5; }
+        table.pagare .#{get_name PagoComprometido, "ESTADOS", PagoComprometido::ATRASADO}  i.icon-warning-sign { display: inline-block; }
+        table.pagare .#{get_name PagoComprometido, "ESTADOS", PagoComprometido::PAGADO}  i.icon-ok { display: inline-block; }
+
+    :javascript
+        $(function(){
+            $('.show_pago').click(function(){
+                $($(this).attr('href')).toggle();
+            })
+            $('#plan_select').change(function(){
+                window.location = '#{matriculas_pagos_ver_alumno_path(params[:rut])}/'+$(this).val();
+            });
+            $("form").submit(function(){
+                if($("#form-abono input[type=checkbox]").is(':checked') == false)
+                {
+                    notify_info("Información", "Por favor seleccione uno o más pagos pendientes.");
+                    return false;
+                }
+                return true;
+            });
+            $("input[type='checkbox']").change(function(){
+                tr = $(this).parent().parent();
+                if(tr.hasClass('success'))
+                    tr.removeClass('success');
+                else
+                    tr.addClass('success');
+            });
+        })
+            

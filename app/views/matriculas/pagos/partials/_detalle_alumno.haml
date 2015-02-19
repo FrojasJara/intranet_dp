@@ -1,0 +1,214 @@
+%form.informacion-tabulada
+    %fieldset
+        %legend Información del alumno
+        - if @us_alumno.nil?
+            %h3 El alumno no existe
+        - else
+            %ul
+                %li.ui-helper-clearfix
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Rut:
+                        %span= @us_alumno.rut
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Nombre:
+                        %span= @us_alumno.nombre
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Fonos:
+                        %span
+                            = @us_alumno.telefono_fijo_completo
+                            = "|" unless @us_alumno.telefono_movil.blank?
+                            = @us_alumno.telefono_movil
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Domicilio:
+                        %span= @us_alumno.domicilio_completo
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Comuna:
+                        %span= @us_alumno.comuna.nombre unless @us_alumno.comuna.nil?
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Email:
+                        %span= mail_to @us_alumno.email
+                    
+                    %br
+                    - unless @us_apoderado.blank?
+                        %legend Información del apoderado
+                        %div.contenedorElemento.separador
+                            %label.etiqueta 
+                                %strong Apoderado
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Rut:
+                            %span= @us_apoderado.rut
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Nombre:
+                            %span= @us_apoderado.nombre
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Fonos:
+                            %span
+                                = @us_apoderado.telefono_fijo_completo
+                                = "|" unless @us_alumno.telefono_movil.blank?
+                                = @us_apoderado.telefono_movil
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Domicilio:
+                            %span= @us_apoderado.domicilio_completo
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Comuna:
+                            %span= @us_apoderado.comuna.nombre unless @us_alumno.comuna.nil?
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Email:
+                            %span= mail_to @us_apoderado.email
+            
+            - if !@matriculas_planes.blank? && !@plan_pago.blank?
+                .contenedorElemento.separador
+                    %label.etiqueta Institución:
+                    %span= @plan_pago.matricula_plan.alumno_plan_estudio.institucion_sede_plan.institucion_sede.institucion.nombre
+                .contenedorElemento.separador
+                    %label.etiqueta Tipo:
+                    %span= get_name MatriculaPlan, :TIPOS, @plan_pago.tipo
+                .contenedorElemento.separador
+                    %label.etiqueta Plan de Estudios:
+                    %span= @plan_pago.matricula_plan.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre
+                
+                .contenedorElemento.separador
+                    %label.etiqueta Matrícula:
+                    %span= dinero @plan_pago.matricula
+                
+                .contenedorElemento.separador
+                    %label.etiqueta Arancel:
+                    %span= dinero @plan_pago.arancel_total
+
+                .contenedorElemento.separador
+                    %label.etiqueta Nº Pagaré:
+                    %span
+                        - @plan_pago.pagares.each do |pg|
+                            = pg.numero
+                .contenedorElemento.separador
+                    %label.etiqueta Fecha de Matrícula:
+                    %span
+                        = l @plan_pago.matricula_plan.created_at, format: :fecha
+                        (
+                        = @plan_pago.matricula_plan.periodo.nombre
+                        )
+                .contenedorElemento.separador
+                    %label.etiqueta Jornada:
+                    %span= get_name(InstitucionSedePlan,:JORNADAS,@plan_pago.matricula_plan.alumno_plan_estudio.institucion_sede_plan.jornada)
+                .contenedorElemento.separador
+                    %label.etiqueta Ejecutivo:
+                    %span= @plan_pago.ejecutivo_matriculas.datos_personales.nombre_corto
+
+                - unless @us_apoderado.blank?
+                    %br
+                    %br
+                
+                - @matriculas_planes.planes_pagos.each do |plan|
+                    - unless plan.situaciones.last(tipo: Situacion::ACADEMICO).blank?  
+                        .contenedorElemento.separador
+                            %label.etiqueta
+                                ="Últ. Sit. Académica"
+                                - unless plan.pagares.blank? 
+                                    ="Pagaré - #{plan.pagares.last.numero}:"
+                                - else
+                                    ="(Sin Pagaré):"
+                            - sit = plan.situaciones.last(tipo: Situacion::ACADEMICO)
+                            %span
+                                - unless sit.blank?
+                                    = l(sit.fecha) 
+                                    \|
+                                    Nº
+                                    = value sit, :resolucion
+                                    \|
+                                    Estado:
+                                    = get_name Alumno, :ESTADOS_ACADEMICOS, sit.estado
+                                    %br
+                                    Obs:
+                                    = value sit, :observacion
+                    
+                    - unless plan.situaciones.last(tipo: Situacion::ADMINISTRATIVO).blank?      
+                        .contenedorElemento.separador
+                            %label.etiqueta
+                                ="Últ. Sit. Administrativa"
+                                - unless plan.pagares.blank? 
+                                    ="Pagaré - #{plan.pagares.last.numero}:"
+                                - else
+                                    ="(Sin Pagaré):"
+                            - sit = plan.situaciones.last(tipo: Situacion::ADMINISTRATIVO)
+                            %span
+                                - unless sit.blank?
+                                    = l(sit.fecha) 
+                                    \|
+                                    Nº
+                                    = value sit, :resolucion
+                                    \|
+                                    Tipo:
+                                    = value sit.tipo_situacion, :nombre
+                                    %br
+                                    
+                                    Obs:
+                                    = value sit, :observacion
+                                
+                %br                
+                - if current_role_can?(:cobranzas)
+                    .contenedorElemento.separador
+                        %span
+                            = link_to cobranzas_matriculas_edicion_path(@us_alumno.rut), class: 'btn btn-warning' do
+                                %i.icon-pencil.icon-white
+                                Edición de Matrícula
+
+                    
+
+- if (defined?(botones) ? botones : true) == true && !@us_alumno.blank?
+    .btn-group
+
+        = link_to alumno_obtener_informe_curricular_path(@us_alumno.id), class: 'btn btn-primary' do
+            %i.icon-search.icon-white
+            Ver situación académica
+        - unless @alumno_plan_estudio.blank?
+            = link_to matriculas_pagos_bitacora_cobranzas_path(@alumno_plan_estudio.id), class: 'btn btn-success' do 
+                %i.icon-book.icon-white
+                Ver bitácora de cobranza
+        - if !@matriculas_planes.blank? && !@plan_pago.blank?
+            %a.btn.btn-info{href: matriculas_pagos_listado_path(@us_alumno.rut)}
+                %i.icon-list-alt.icon-white
+                Lista completa de pagos
+            = link_to matriculas_buscar_por_rut_path + "?q=#{@us_alumno.rut}", class: 'btn btn-warning' do
+                %i.icon-search.icon-white
+                Buscar matrículas
+            %a.btn.btn-info{href: '#plan_pago_detail', 'data-toggle' => "modal"}
+                %i.icon-list-alt.icon-white
+                Listado de matrículas y planes de pagos
+    - if !@matriculas_planes.blank? && !@plan_pago.blank?
+        #plan_pago_detail.modal.hide.fade{role: "dialog", style: 'width: 1000px; left: 40%'}
+            = render partial: 'matriculas/pagos/partials/detalle_alumno_plan_pago'
+    %br
+    
+
+
+- unless @matriculas.blank?
+    %form.informacion-tabulada
+        %fieldset
+            %legend Detalle matrículas
+            - @matriculas.each do |i|
+                %ul.ui-helper-clearfix
+                    %li
+                        .contenedorElemento.separador
+                            %label.etiqueta Carrera:
+                            %span
+                                = i[:plan_estudio].nombre_completo
+                    %li.ui-helper-clearfix.seis-columnas
+                        .contenedorElemento.separador
+                            %label.etiqueta Período:
+                            %span
+                                = i[:periodo].nombre
+                    %li.ui-helper-clearfix.seis-columnas
+                        .contenedorElemento.separador
+                            %label.etiqueta Monto Matrícula
+                            %span= number_to_currency i[:plan_pago].matricula
+                    %li.ui-helper-clearfix.seis-columnas
+                        .contenedorElemento.separador
+                            %label.etiqueta Monto Arancel
+                            %span= number_to_currency i[:plan_pago].arancel
+                    %li.ui-helper-clearfix.seis-columnas
+                        .contenedorElemento.separador
+                            %label.etiqueta Descuento/Beneficio/Beca
+                            %span= i[:descuento].blank? ? 'Ninguno' : i[:descuento].nombre
+
+
+

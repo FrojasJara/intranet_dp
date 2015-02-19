@@ -1,0 +1,43 @@
+%div.modal.hide.fade#modal_convalidar_asignatura{tabindex:"-1",role: "dialog", "aria-labelledby"=>"myModalLabel", "aria-hidden"=>"true"}
+	%div.modal-header
+		%button.close{:type => "button", "data-dismiss" => "modal", "aria-hidden" => true}×
+		%h3{id: "myModalLabel"} Convalidar Asignatura
+	%div.modal-body
+		%form.form-horizontal#crear_seccion{action: "", :method => "post"}
+			%input{:type => "hidden", :name => "asignatura[periodo_id]", :value => periodo_en_curso[:id]}
+			%div.control-group
+				%label.control-label Asignatura
+				%div.controls
+					%input.required{:type => "text", :name => "asignatura[cupos]"}
+			%div.control-group
+				%label.control-label Jornada
+				%div.controls
+					%input.required{:type => "text", :name => "asignatura[cupos]"}
+			%div.control-group
+				%label.control-label Cupos
+				%div.controls
+					%input.required{:type => "text", :name => "asignatura[cupos]"}
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input.required{:type => "text", :name => "asignatura[numero]"}
+
+	%div.modal-footer
+		%button.btn{"data-dismiss" => "modal", "aria-hidden" => true} Cancelar
+		%button.btn.btn-primary#registrar_nueva_seccion{} Guardar
+  
+:javascript
+	$(document).ready(function(){
+		$("#registrar_nueva_seccion").on("click", function(){
+			$("#crear_seccion").submit();
+		});
+		$("#crear_seccion").validate({
+
+			invalidHandler: function(form, validator) {
+				notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+			},
+			submitHandler: function(form) {
+				form.submit();
+			}
+		})
+	});

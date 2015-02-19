@@ -1,0 +1,55 @@
+#libro-calificaciones
+	.page-header
+		%h1 Cierre de secciones
+
+	= render "docentes/docentes/partials/seleccion_seccion_abierta" if @existen_secciones	
+
+	= render "docentes/docentes/partials/informacion_tabulada_docente" if not @seccion.nil?
+
+	= notificaciones
+
+	- if not @seccion.nil? and @existen_datos
+		= form_tag "#{docente_cerrar_seccion_path current_user[:id], @seccion.id}", :class => "cerrar-seccion", :method => :post do
+			.alert.alert-info
+				%a.close{:href => "#", :data => {:dismiss => "alert"}}
+					×
+				%p 
+					Esta a punto de cerrar la seccion. Tenga en consideración que este 
+					%strong ESTE PROCEDIMIENTO ES IRREVERSIBLE. 
+					Al hacer esto:
+				%ol
+					%li Calculará estadísticas relativas a la sección.
+					%li 
+						Expirará las matrículas de los alumnos que fueron creadas el periodo anterior al 
+						%strong= "#{periodo_en_curso[:nombre]}."
+			%button.btn.btn-primary.btn-loading{:type => "submit", :data => {"loading-text" => "... cerrando sección ..."}}
+				%i.icon-white.icon-lock
+				Cerrar sección
+	:css
+		form.cerrar-seccion { text-align: center; }
+		.alert.alert-info { text-align: left }
+		.alert.alert-info p {
+			margin-bottom: 5px;
+		}
+		.alert.alert-info ol {
+			padding-left: 15px;
+			list-style-type: decimal;
+		}
+
+		.alert.alert-info ul {
+			padding-left: 16px;
+			margin-top: 3px;
+			list-style-type: circle;
+		}
+
+		.alert.alert-info li { margin-bottom: 3px; }
+
+	:javascript
+		$(document).ready(function() {
+			$("form.cerrar-seccion").submit(function() {
+				if( ! confirm("¿Está seguro que desea cerrar la sección?"))
+					return false;
+
+				$(this).find("button.btn-loading").button("loading");
+			})
+		})

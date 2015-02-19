@@ -1,0 +1,24 @@
+= simple_form_for @item, :url => @item.new? ? administrador_roles_path : administrador_role_path(@item)  do |f|
+
+    = f.input :nombre
+    
+    = f.input :por_defecto, label: 'Es el rol por defecto (alumnos)', as: :boolean
+
+    %h3 Permisos:
+
+    = f.input :alumno, 			as: :boolean
+    .well
+    = f.input :academico, 		as: :boolean
+    .well
+        = f.input :matriculas,      as: :boolean
+        = f.input :docente,         as: :boolean
+        = f.input :ac_mantenedores, as: :boolean
+    = f.input :administrativo,  as: :boolean
+    .well
+        Contenido
+    = f.input :administrador, 	as: :boolean
+    .well
+    = f.input :mensajero, 		as: :boolean
+
+    %br
+    = f.submit 'Save'

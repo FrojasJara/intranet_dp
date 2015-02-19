@@ -1,0 +1,31 @@
+.sectionHeader
+    %h1 Bloques Horarios
+
+= notificaciones
+
+%button.btn.btn-primary#ingresar_bloque
+    %i.icon.icon-white.icon-plus
+    Nuevo Bloque
+
+%table.table.table-striped.table-bordered#bloques
+    %thead
+        %tr
+            %th Sede
+            %th Numero
+            %th Hora Inicio
+            %th Hora Término
+
+    %tbody
+        - @bloques_horarios.each do |i|
+            %tr
+                %td= i.sede.nombre
+                %td= i.numero
+                %td= i.hora_inicio
+                %td= i.hora_termino
+= datatable_src
+= datatable("bloques") 
+
+= render :partial => "apoyo_docente/gestion_bloques_horarios/partials/modal_ingresar_bloque_horario"
+:javascript
+    $("#ingresar_bloque").on("click", function(){ $("#modal_nuevo_bloque").modal("show")}); 
+

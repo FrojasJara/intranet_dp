@@ -1,0 +1,66 @@
+#libro-clases
+	= datatable_src
+	= datatable "clases", {msg_zero: "No se han encontrado clases"}
+
+	:css
+		col.numero { width: 52px; }
+		col.origen { width: 120px; }
+		col.estado { width: 120px; }
+		col.horas { width: 65px; }
+		col.fecha { width: 200px; }
+
+		#libro-clases tr.realizada { background-color: #defcff !important; }
+		#libro-clases tr.suspendida { background-color: #ffcccc !important; }
+		td i { display: none !important; }
+		td.planificacion i.icon-list-alt { display: inline-block !important; }
+		td.reprogramacion i.icon-share-alt { display: inline-block !important; }
+
+	.page-header
+		%h1 Libro de clases
+
+	= render "docentes/docentes/partials/seleccion_periodo_seccion" if @existe_seccion
+
+	= notificaciones
+
+	- if not @seccion.nil? and @existen_datos
+		= render "docentes/docentes/partials/informacion_tabulada_seccion"
+		%table.table.table-condensed#clases
+			%colgroup
+				%col.numero
+				%col.origen
+				%col.estado
+				%col.horas
+				%col.fecha
+				%col.fecha
+				%col.fecha
+			%thead
+				%tr
+					%th.txCenter #
+					%th.txLeft Origen
+					%th.txLeft Estado
+					%th.txLeft Horas
+					%th.txLeft.not-sorting Fecha planificada
+					%th.txLeft.not-sorting Fecha Reg. Asistencia
+					%th.txLeft.not-sorting Fecha suspensión
+			%tbody
+				- @libro.each do |item|
+					%tr{:class => "#{get_name Clase, 'ESTADOS', item.estado}"}
+						%td.txCenter= item.numero
+						%td.txLeft{:class => "#{get_name Clase, "ORIGENES", item.origen}"}
+							%i.icon-list-alt
+							%i.icon-share-alt
+							= get_name Clase, "ORIGENES", item.origen
+						%td.txLeft= get_name Clase, "ESTADOS", item.estado
+						%td.txCenter= item.horas
+						%td.txLeft= l item.fecha_planificada, format: :humana1
+						- if not item.fecha_registro_asistencia.nil?
+							%td.txLeft= l item.fecha_registro_asistencia, format: :humana1
+						- else
+							%td
+						- if not item.fecha_suspension.nil?
+							%td.txLeft= l item.fecha_suspension, format: :humana1
+						- else
+							%td
+			
+
+

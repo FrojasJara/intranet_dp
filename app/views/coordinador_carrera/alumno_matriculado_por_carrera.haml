@@ -1,0 +1,209 @@
+%script{:type => "text/javascript",
+        :src  => "https://www.google.com/jsapi"}
+.page-header
+    %h1 
+        Informe de matrículas por carrera
+        - unless @periodo.blank?
+            =@periodo.nombre
+        - unless @institucion_sede.blank?
+            ="- "+@institucion_sede.nombre
+= form_for :filtro, html: {class: 'form-inline informacion-tabulada', id: 'filtro'} do |f|
+    %fieldset
+        %select.required{name: 'periodo_id'}
+            %option{:value => ""} ... Seleccione un Periodo ...
+            - @periodos.each do |item|
+                %option{value: item.id}= item.nombre
+        %select.required#sl{:name => "institucion_sede_id"}
+            %option{:value => ""} ... Seleccione una Institución ...
+            - @instituciones_sedes.each do |item|
+                %option{:value => item.id}= item.nombre
+        %select.required{:name => "plan_estudio_id"}
+            %option{:value => ""} ... Seleccione una Carrera ...
+            - @carreras.each do |c|
+                %option{:value => c.id}= "#{c.nombre} - [#{c.revision}]"
+        = f.submit 'Filtrar', :class => 'cargar'
+        %br
+= notificaciones
+:javascript
+    $(function(){
+        $("#filtro").validate({
+            invalidHandler: function(form, validator) {
+                alertify.error("Por favor, compruebe que ha ingresado la información necesaria.");
+                setTimeout($.unblockUI, 300);
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        })
+
+    });
+
+- unless @matriculas.blank?
+    %h3 
+        Alumnos matriculados 
+        = "#{@institucion_sede.institucion.nombre} - #{@plan_estudio_seleccionado.nombre}"
+    
+    %div{id: 'png'}
+    %form.informacion-tabulada
+        %fieldset
+            %legend Información 
+            %ul.ui-helper-clearfix
+                %li.ui-helper-clearfix.cuatro-columnas
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Total alumnos:
+                        %span= @estadisticas[:total]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Desertores:
+                        %span= @estadisticas[:desertores]  
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Retirados
+                        %span= @estadisticas[:retirados]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Regulares:
+                        %span= @estadisticas[:regulares]
+                %li.ui-helper-clearfix.cuatro-columnas  
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Sin Inscripción:
+                        %span= @estadisticas[:s_inscripcion]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Sin Matricula:
+                        %span= @estadisticas[:s_matricula]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Egresados:
+                        %span= @estadisticas[:egresados]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Congelados:
+                        %span= @estadisticas[:congelados]
+                    %div.contenedorElemento.separador
+                        %label.etiqueta Titulados:
+                        %span= @estadisticas[:titulados]                                   
+                %li.ui-helper-clearfix.cuatro-columnas
+                    %a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+                        %i.icon-white.icon-print
+                        Imprimir
+                    %a.btn.btn-success{:style => "margin-top: 19px;",:href=>"#estadisticas",:data => {:toggle => "modal"}}
+                        %i.icon.icon-white.icon.icon-align-right
+                        Grafico Torta
+                    %a.btn.btn-success{:style =>"margin-top: 19px;",:href=>"#estadisticas2",:data => {:toggle => "modal"}}
+                        %i.icon.icon-white.icon-align-right
+                        Grafico Barra
+    %table#informe.table.table-condensed
+        %thead
+            %tr
+                %th Nº
+                %th Rut
+                %th Nombres
+                %th Apellidos
+                %th Fecha de Matrícula
+                %th Año de Ingreso
+                %th Carrera
+                %th Asignaturas Inscritas
+                %th Nº Asignaturas
+                %th Nivel
+                %th Estado
+        %tbody
+            - if @matriculas.blank? or @matriculas.count.eql? 0
+                %tr
+                    %td{colspan: 10} No hay registros
+            - else
+                - @matriculas.each_with_index do |item, index|
+                    - usuario, matricula, alumno_plan_estudio, plan_estudio, inscripciones = item[:usuario], item[:matricula], item[:alumno_plan_estudio], item[:plan_estudio], item[:inscripciones]
+                    %tr
+                        %td.txCenter= index + 1
+                        %td.txCenter= usuario.rut
+                        %td.txCenter= usuario.nombres
+                        %td.txCenter= usuario.apellidos
+                        %td.txCenter= l matricula.created_at, format: :fecha
+                        %td.txCenter= alumno_plan_estudio.anio_ingreso
+                        %td.txCenter= "#{plan_estudio.nombre} - [#{plan_estudio.revision}]"
+                        %td.txCenter= inscripciones.blank? ? 'No' : 'Si'
+                        %td.txCenter= inscripciones.length
+                        %td.txCenter 
+                            - if inscripciones.blank? 
+                                - unless item[:plan_pago].blank?
+                                    - unless item[:plan_pago].nivel.blank?
+                                        = (item[:plan_pago].nivel)
+                                    - else
+                                        = "-"
+                                - else
+                                    = "-"
+                            - else
+                                - unless item[:plan_pago].blank?
+                                    - unless item[:plan_pago].nivel.blank?
+                                        = (item[:plan_pago].nivel - 1)
+                                    - else
+                                        = "-"
+                                - else
+                                    = "-"
+                        %td.txCenter= get_name Alumno, :ESTADOS_ACADEMICOS, alumno_plan_estudio.estado  
+    .modal.fade{:style=>" width: 900px; height: 550px; margin-left:-440px;",:id => "estadisticas",:tabindex=>"-1",:role=>"dialog", :aria=>{:labelledby=>"myLargeModalLabel",:hidden=>"true"}}
+        %div{:id => "estadisticas" , :style =>"width: 900px; height: 500px;"}
+    .modal.fade{:style=>" width: 900px; height: 550px; margin-left:-440px;",:id => "estadisticas2",:tabindex=>"-1",:role=>"dialog", :aria=>{:labelledby=>"myLargeModalLabel",:hidden=>"true"}}
+        %div{:id => "estadisticas2" , :style =>"width: 900px; height: 500px;"}
+    %div{:id => "imprimible" , :style =>"width: 900px; height: 500px;"}
+    = datatable_src
+    = datatable 'informe'
+    :javascript
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var desertores      = #{((@estadisticas[:desertores]*100).to_f/@estadisticas[:total]).round(1)}
+            var regulares       = #{((@estadisticas[:regulares]*100).to_f/@estadisticas[:total]).round(1)}
+            var s_inscripcion   = #{((@estadisticas[:s_inscripcion]*100).to_f/@estadisticas[:total]).round(1)}
+            var s_matricula     = #{((@estadisticas[:s_matricula]*100).to_f/@estadisticas[:total]).round(1)}
+            var egresados       = #{((@estadisticas[:egresados]*100).to_f/@estadisticas[:total]).round(1)}
+            var retirados       = #{((@estadisticas[:retirados]*100).to_f/@estadisticas[:total]).round(1)}
+            var congelados      = #{((@estadisticas[:congelados]*100).to_f/@estadisticas[:total]).round(1)}
+            var titulados       = #{((@estadisticas[:titulados]*100).to_f/@estadisticas[:total]).round(1)}
+
+            var data = google.visualization.arrayToDataTable([
+                ['Estados', 'Cantidad'],
+                ['Desertores        = ' + desertores    + '%',#{@estadisticas[:desertores]}],
+                ['Regulares         = ' + regulares     + '%',#{@estadisticas[:regulares]}],
+                ['Sin Inscripción   = ' + s_inscripcion + '%',#{@estadisticas[:s_inscripcion]}],
+                ['Sin Matricula     = ' + s_matricula   + '%',#{@estadisticas[:s_matricula]}],
+                ['Egresados         = ' + egresados     + '%',#{@estadisticas[:egresados]}],
+                ['Retirados         = ' + retirados     + '%',#{@estadisticas[:retirados]}],
+                ['Congelados        = ' + congelados    + '%',#{@estadisticas[:congelados]}],
+                ['Titulados         = ' + titulados     + '%',#{@estadisticas[:titulados]}]
+            ]);
+            var data2 = google.visualization.arrayToDataTable([
+                ['Estados', 'Porcentaje', { role: 'style' }],
+                ['Desertores',desertores,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: 0066FF'],
+                ['Regulares',regulares,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: FF3300'],
+                ['Sin Inscripción',s_inscripcion,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: FF9900'],
+                ['Sin Matricula',s_matricula,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: 33CC00'],
+                ['Egresados',egresados,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: 9900CC'],
+                ['Retirados',retirados,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: 00CCFF'],
+                ['Congelados',congelados,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: #C5A5CF'],
+                ['Titulados',titulados,'stroke-color: #C0C0C0 ; stroke-width: 2; fill-color: 0066FF'],
+            ]);
+
+            var view = new google.visualization.DataView(data2);
+            view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
+
+            var options = {
+                title: 'Alumnos Según Estado - #{@plan_estudio_seleccionado.nombre} #{@periodo.nombre}',
+                is3D: true,
+            };
+            var options2 = {
+                title: 'Alumnos Según Estado - #{@plan_estudio_seleccionado.nombre} #{@periodo.nombre}',
+                legend: { position: "none" },
+                bar: {groupWidth: "95%"},
+            };
+            var chart_div = document.getElementById('estadisticas');
+            var chart_div2 = document.getElementById('estadisticas2');
+            var chart = new google.visualization.PieChart(chart_div);
+            var chart2 = new google.visualization.ColumnChart(chart_div2);
+            chart2.draw(view, options2);
+            chart.draw(data, options);
+        }
+    :css
+        div.modal-backdrop {
+            background-color: black !important;
+        }

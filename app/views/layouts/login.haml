@@ -1,0 +1,16 @@
+%html
+    %head
+        %title Sistema Organización Educacional Diego Portales
+
+        = stylesheet_link_tag :application
+        = javascript_include_tag "login"
+
+        = csrf_meta_tags
+
+    %body
+        = render "partials/login/barra_superior"
+
+        .container-fluid
+            .row-fluid
+                = notificaciones
+                = yield

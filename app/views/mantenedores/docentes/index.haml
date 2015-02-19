@@ -1,0 +1,57 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            Mantenedores
+            %span.divider / 
+        %li.active
+            %a{:href => "#"}  
+                Docentes
+
+= notificaciones
+
+= link_to  "Nuevo Docente", new_mantenedores_docente_path , class: "btn btn-primary"
+
+%div#resultados
+    %table#docentes.table.table-striped.table-bordered
+        %thead
+            %tr
+                %th RUT
+                %th Nombre
+                %th En Ejercicio
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i[:rut]
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                            = full_name_from_hash(i)
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => edit_mantenedores_docente_path(i[:id_usuario])}
+                                    %i.icon-pencil
+                                    Editar                            
+                            %li
+                                %a{:href => mantenedores_docente_path(i[:id_usuario])}
+                                    %i.icon-list-alt
+                                    Ver Detalles
+                            %li
+                                %a{:href => mantenedores_docente_contrato_path(i[:id_usuario])}
+                                    %i.icon-list-alt
+                                    Generar contrato
+                            
+                            %li.divider
+                            %li
+                                %a{:href => "#"}
+                                    %i.icon-plus
+                                    Agregar Estudios
+                    %td= i[:en_ejercicio]
+
+= datatable_src               
+= datatable "docentes", {:msg_zero => "No se encontraron profesores"}
+
+:css
+    table.table thead th{color:#333 !important;}
+    td .dropdown-menu { left: 200px !important; top: 34px !important; }
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important;
+

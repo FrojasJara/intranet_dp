@@ -1,0 +1,47 @@
+.navbar { display: none !important; }
+.container-fluid .row-fluid .span3 { display: none !important; }
+form.carreras-estudiadas-periodo, 
+form.carreras-estudiadas,
+form.secciones-docente,
+form.periodos-habiles
+{ display: none !important; }
+footer { display: none !important; }
+legend { display: none !important; }  
+fieldset { border: none !important; }
+div.dataTables_length, 
+div.dataTables_filter,
+div.dataTables_info,
+div.dataTables_paginate
+ { display: none !important; }
+* { color: black !important; font-family: Arial !important; background: none !important; }
+body { padding: 0; }
+.table thead tr { 
+	border-top: 2pt solid black !important; 
+	border-bottom: 2pt solid black !important;
+}
+h1 { 
+	text-align: center !important; 
+	margin-bottom: 25pt;	
+}
+
+/*	Alineaciones	*/
+.txRight { text-align: right !important;}
+.txLeft { text-align: left !important;}
+.txCenter { text-align: center !important;}
+.txJustify { text-align: justify !important;}
+
+.table tbody tr { border-bottom: 1pt solid gray !important; }
+.table tbody td, .table thead th { padding: 3px !important; color: black !important; font-size: 9px !important; }
+form.informacion-tabulada li { overflow: hidden; line-height: 100% !important; }
+form.informacion-tabulada div.contenedorelemento { width: 110pt !important; font-size: 9px !important; }
+form.informacion-tabulada label.etiqueta { font-size: 7pt !important; }
+div.logo-img span { display: block; }
+div.logo-img { 
+	display: block !important; 
+	text-align: center;
+	font: 7pt;
+	margin-bottom: 25pt;
+}
+
+.not-print { display: none !important; }
+@page { margin: 2cm 1cm; }

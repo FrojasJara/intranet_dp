@@ -1,0 +1,34 @@
+%h2
+	%i.icon-white.icon-chevron-right
+	Docente
+%ul.nav.nav-list{:data => {"cookie-name" => "#{current_user[:rut]}_docente"}}
+	%li.nav-header Gestión académica
+	%li
+		%a{:href => "#{docente_preparar_libro_calificaciones_path current_user[:id]}"}
+			Registrar libro de calificacaciones
+	%li
+		%a{:href => "#{docente_preparar_libro_asistencia_path current_user[:id]}"}
+			Registrar libro de asistencia
+	%li
+		%a{:href => "#{docente_preparar_cierre_seccion_path current_user[:id]}"}
+			%i.icon-lock
+			Cerrar sección
+	%li.nav-header Gestión académica
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} Asignaturas
+		%ul.hide.dropdown-menu.inner-list
+			%li{:class => controller_is?('docentes') && action_is?("obtener_asignaturas_abiertas") ? 'active' : '' }
+				= link_to 'Asignaturas abiertas', docente_obtener_asignaturas_abiertas_path(current_user[:id])
+			%li{:class => controller_is?('docentes') && action_is?("obtener_asignaturas_dictadas") ? 'active' : '' }
+				= link_to 'Asignaturas dictadas', docente_obtener_asignaturas_dictadas_path(current_user[:id])
+	%li.dropdown
+		%a{:href => "#", :data => {:toggle => "dropdown"}} Libros
+		%ul.hide.dropdown-menu.inner-list
+			%li{:class => controller_is?('docentes') && action_is?("obtener_listado_alumnos") ? 'active' : '' }
+				= link_to 'Listado de alumnos', docente_obtener_listado_alumnos_path(current_user[:id])
+			%li{:class => controller_is?('docentes') && action_is?("obtener_libro_asistencia") ? 'active' : '' }
+				= link_to 'Libro de asistencia', docente_obtener_libro_asistencia_path(current_user[:id])
+			%li{:class => controller_is?('docentes') && action_is?("obtener_libro_calificaciones") ? 'active' : '' }
+				= link_to 'Libro de calificaciones', docente_obtener_libro_calificaciones_path(current_user[:id])
+			%li{:class => controller_is?('docentes') && action_is?("obtener_libro_clases") ? 'active' : '' }
+				= link_to 'Libro de clases', docente_obtener_libro_clases_path(current_user[:id])

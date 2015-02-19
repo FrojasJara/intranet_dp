@@ -1,0 +1,14 @@
+.cuerpo.medio-6	
+	.control-group
+		%label.control-label Tarjeta
+		.controls
+			%select.d1.cambiar-nombre.tarjeta-credito.required{:name => "tarjetas_credito_#{centro_costo}", :disabled => "disabled", :data => {"nombre-real" => "pagos_comprometidos[][abono][tarjetas_credito_id]"}}
+				%option{:value => ""} :: Seleccione una tarjeta ::
+				- @tarjetas_credito.each do |tarjeta|
+					%option{:value => "#{tarjeta.id}"}= tarjeta.nombre
+	%br
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][centro_costo]", :value => "#{centro_costo}", :disabled => "disabled"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][fecha_pago_realizado]", :disabled => "disabled", :value => "#{@hoy}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][fecha]", :disabled => "disabled", :value => "#{@hoy}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}

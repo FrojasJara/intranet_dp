@@ -1,0 +1,89 @@
+#identificacion-alumno.bloque
+	.page-header
+		%h2 Identificación del alumno
+	.verificar-alumno.form-inline
+		%span Ingresa el rut del alumno
+		%input.input-large{:type => "text"}
+		%button.buscar-alumno.btn{:type => "submit"}
+			%i.icon-search
+			Buscar alumno
+		%input.required.n1.integridad-identificacion-alumno{:type => "hidden", :name => "integridad-identificacion-alumno"}
+	%input{:type => "hidden", :name => "matricula_plan[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor = $("#identificacion-alumno");
+		var $contenedor_descuentos = $("#descuentos");
+		var $contenedor_documento_venta = $("#documento-venta");
+		var contenido_original_descuentos = $contenedor_descuentos.html();
+
+		$contenedor.on("change", "ul.planes input:radio", function() {
+			$contenedor_plan = $contenedor.find("div.plan_inscrito_" + this.value);
+			$contenedor.find("div.template").remove();
+			$contenedor.find("div[class^='plan_inscrito']").not($contenedor_plan).hide();
+			$contenedor_plan.show();
+		})
+		
+		$("button.buscar-alumno").click(function(e) {
+			e.preventDefault();
+			var $rut = $(this).prev()
+			var valor = $rut.val();
+
+			if( valor && rut_valido(valor) ) {
+				alertify.success("Por favor, aguarda un momento mientras realizamos la búsqueda ...");
+				$.get(
+					"#{url_alumno 1}".replace("1", valor),
+					function(data) {
+						// Borrar resultados de una petición previa
+						$contenedor.find(".de").remove();
+						formulario_no_integro();
+						$contenedor_descuentos.html(contenido_original_descuentos);
+												
+						limpiar_plan_pago_arancel();
+						limpiar_plan_pago_matricula();
+						limpiar_plan_pago_normativa();
+
+						if(data) {
+							$contenedor.append(data);															
+							notify_close();
+							formulario_integro()
+						} else {
+							alertify.error(
+								"Proceso de matrículas" + 
+								"No existe ningún alumno registrado con el rut \""+ valor + "\", o su estado académico no le permite matricularse o no pertenece a esta sede."
+							);
+						}
+					}
+				);
+			} else {
+				alertify.error("Por favor, ingrese un rut válido");
+				$rut.focus();
+			}
+		})
+
+		function formulario_integro() { $contenedor.find("input.integridad-identificacion-alumno").val("OK"); }
+		function formulario_no_integro() { $contenedor.find("input.integridad-identificacion-alumno").removeAttr("value"); }
+
+	})
+
+:css
+	ul.planes { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+	ul.planes > li label {
+		float: none;
+		text-transform: none;
+		color: blue;
+		display: block;
+	}
+	div.contacto { margin: 20px 0; }
+
+	div.moroso { color: red; }
+	div.moroso span.carrera { color: blue; margin-left: 0; margin-bottom: 3px; }
+	div.moroso i { font-style: italic; text-decoration: underline; display: block; }
+	div.moroso ul li { margin-bottom: 0; }
+
+	#identificacion-alumno div.alert-error {
+		margin: 10px 0 0 0;
+		border-radius: 0;
+	}
+

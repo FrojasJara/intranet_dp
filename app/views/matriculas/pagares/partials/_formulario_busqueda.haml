@@ -1,0 +1,17 @@
+%form.form-search.busqueda{:action => "#{current_url}", :method => "get"}
+	%fieldset
+		%legend Buscar
+		%label= @etiqueta
+		%input.required{:type => "text", :name => "q", :value => @q}
+		%button.btn{:type => "submit"}
+			%i.icon-search
+			Buscar
+
+:javascript
+	$(document).ready(function() {
+		$("form.busqueda").validate({
+			invalidHandler: function(form) {
+				notify_info("Búsqueda de pagarés", "Por favor, ingrese información para realizar la búsqueda");
+			}
+		})
+	})

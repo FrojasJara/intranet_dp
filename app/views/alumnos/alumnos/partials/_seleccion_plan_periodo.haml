@@ -1,0 +1,52 @@
+- unless @plan_consultado.blank?
+	:javascript
+		$(document).ready(function() {
+			$("form.carreras-estudiadas-periodo").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Existen campos sin información", "Por favor, verifique que todos los campos obligatorios del formulario tengan información.");
+				},
+				submitHandler: function(form) {
+					var alumno_plan_estudio_id = $(form).find("select.carreras").val();
+					var periodo_id = $(form).find("select.periodos").val();
+					var url = crearURL(alumno_plan_estudio_id, periodo_id);
+					location.href = url
+				}
+			})
+
+			$("form.carreras-estudiadas-periodo select.carreras").val(#{@plan_consultado[:inscripcion].id});
+			$("form.carreras-estudiadas-periodo select.periodos").val(#{@periodo_seleccionado.id});
+
+			function crearURL(alumno_plan_estudio_id, periodo_id) {
+				var url = "#{current_url @usuario.id}/carrera/" + alumno_plan_estudio_id + "/periodo/" + periodo_id
+				return url
+			}
+		})
+
+	= form_tag "#", :class => "carreras-estudiadas-periodo", :method => "get" do 
+		%fieldset
+			%legend Selección del plan de estudios y período
+			%ul
+				%li.ui-helper-clearfix
+					%div.contenedorElemento.separador
+						%label Plan de estudio
+						%select.required.carreras{:name => "carreras"}
+							%option{:value => ""} 
+								\ :: Seleccione un plan de estudios ::
+								- @planes_estudiados[:planes_estudiados].each do |plan|
+									%option{:value => plan[:alumno_plan_estudio_id]}= plan[:plan_estudio].nombre
+										
+					%div.contenedorElemento.separador
+						%label Período
+						%select.required.periodos{:name => "periodos"}
+							%option{:value => ""}
+								\ :: Seleccione un período ::
+								- @periodos.each do |periodo|
+									%option{:value => periodo.id}= periodo.nombre
+
+					%div.contenedorElemento.separador
+						%input.btn.btn-primary{:type => "submit", :value => "Consultar", :style => "margin-top: 19px;", :name => "commit"}
+						
+					%div.contenedorElemento.separador
+						%a.not-print.btn.btn-info.impresion{:href => "#", :style => "margin-top: 19px;"}
+							%i.icon-white.icon-print
+							Imprimir

@@ -1,0 +1,116 @@
+#libro-asistencia
+	:css
+		#libro-asistencia th, #libro-asistencia td { vertical-align: middle !important; }
+
+		td > span {
+			display: block;
+			margin: 0 auto 2px auto;
+			width: 5px;
+			height: 5px;
+		}
+
+		span.asistida { background-color: green !important; border: 1px solid green !important; }
+		span.ausentada { background-color: red !important; border: 1px solid red !important; }
+		span.justificada { background-color: blue !important; border: 1px solid blue !important; }
+
+		table.table thead th.realizada { background-color: #4A9FFF !important; }
+		td.realizada { background-color: #DFECFF !important; }
+		th.suspendida { background-color:  #ffcccc !important; } 
+		td.suspendida { background-color:  #ffcccc !important; }
+		table.table thead th.planificada { background-color: #DCDCDC !important; color: black !important; }
+
+		col.numero { width: 40px; }
+		col.alumno { width: 200px; }
+		col.rut { width: 90px; }
+
+		#libro-asistencia input[type="number"] {
+			width: 35px;
+			height: 23px;
+			margin-bottom: 0;
+			padding: 1px;
+		}
+
+	:javascript
+		$(document).ready(function() {
+			$("form.asistencias").validate({
+				invalidHandler: function(form, validator) {
+					notify_info("Existe información errónea", "Por favor, ingrese una cantidad de horas válida.");
+				},
+				submitHandler: function(form) {
+					notify_loader("Registrando asistencia ...", "Espere un momento mientras la asistencia es registrada.");
+					$("input[type='number']").attr("name", "asistencias[][horas_asistidas]");
+					form.submit();
+				}
+			})
+		})
+
+	.page-header
+		%h1 Registro en el libro de asistencias
+	= render "docentes/docentes/partials/seleccion_seccion_abierta"
+
+	- if not @seccion.nil? and not @libro[:alumnos].empty?
+		= render "docentes/docentes/partials/informacion_tabulada_docente"
+		= form_tag "#{docente_registrar_libro_asistencia_path}", :class => "asistencias", :method => "post" do
+			%input{:type => "hidden", :name => "seccion_id", :value => "#{@seccion.id}"}
+			%fieldset
+				.control-group
+					%table.table.table-condensed
+						%colgroup
+							%col.numero
+							%col.rut
+							%col.alumno				
+							- @libro[:clases].each do |item|
+								%col.clase
+
+						%thead
+							%tr
+								%th.txCenter #
+								%th.txLeft Rut
+								%th.txLeft Alumno					
+								- @libro[:clases].each do |item|
+									%th{:class => "#{get_name Clase, 'ESTADOS', item.estado}"}= item.numero
+
+						%tbody
+							- @libro[:alumnos].each_with_index do |item, index|
+								- primera_clase_planificada = true
+								%tr
+									%td.txCenter= index + 1
+									%td.txLeft= item[:datos].rut
+									%td.txLeft= item[:datos].nombre
+									- item[:asistencias].each do |item2, index|
+										%td.txCenter{:class => "#{get_name Clase, 'ESTADOS', item2[:clase].estado}"}
+											-# Mostramos asistencia de clases realizadas
+											-# Los alumnos que han abandonado, no tiene todos lo registros
+											- if item2[:clase].estado == Clase::REALIZADA and not item2[:asistencia].nil?
+												- item2[:asistencia].horas_asistidas.times do
+													%span.asistida
+												
+												- item2[:asistencia].horas_ausentadas.times do
+													%span.ausentada
+
+												- item2[:asistencia].horas_justificadas.times do
+													%span.justificada
+
+											- elsif primera_clase_planificada and item2[:clase].estado == Clase::PLANIFICADA
+												%input{:type => "number", 
+													:min => 0, 
+													:max => "#{item2[:clase].horas}", 
+													:value => "#{item2[:clase].horas}", 
+													:name => "asistencia#{item[:inscripcion].id}",
+													:class => "required digits"}
+												%input{:type => "hidden", 
+													:value => "#{item[:inscripcion].id}", 
+													:name => "asistencias[][alumno_inscrito_seccion_id]"}
+												%input{:type => "hidden", 
+													:value => "#{item2[:clase].id}", 
+													:name => "asistencias[][clase_id]"}
+												%input{:type => "hidden", 
+													:value => "#{item2[:clase].horas}", 
+													:name => "asistencias[][horas_clase]"}
+												- primera_clase_planificada = false
+
+				.form-actions
+					%button.btn.btn-primary{:type => "submit"}
+						%i.icon-white.icon-edit
+						Registrar asistencias
+		

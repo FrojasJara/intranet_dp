@@ -1,0 +1,27 @@
+.cuerpo.medio-4
+	.control-group
+		%label.control-label Número Transferencia/Depósito
+		.controls
+			%input.d1.cambiar-nombre.required.numero-deposito.input-medium{:type => "text",
+				:name => "numero_deposito_#{centro_costo}", 
+				:data => {"nombre-real" => "pagos_comprometidos[][abono][numero_documento]"},
+				:disabled => "disabled"}
+	.control-group
+		%label.control-label Fecha (aaaa/mm/dd)
+		.controls
+			%input.d1.cambiar-nombre.required.fecha-deposito.input-medium{:type => "date", :name => "fecha_deposito_#{centro_costo}", :data => {"nombre-real" => "pagos_comprometidos[][fecha_pago_realizado]"}, :disabled => "disabled"}
+			%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][fecha]", :disabled => "disabled"}
+			%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][fecha_documento]", :disabled => "disabled"}
+	.control-group
+		%label.control-label Banco
+		.controls
+			%select.d1.cambiar-nombre.banco.required{:name => "banco_deposito_#{centro_costo}", 
+				:disabled => "disabled", 
+				:style => "width: 125px;",
+				:data => {"nombre-real" => "pagos_comprometidos[][abono][banco_id]"}}
+				- @bancos.each do |banco|
+					%option{:value => "#{banco.id}"}= banco.nombre
+	%br
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][centro_costo]", :value => "#{centro_costo}", :disabled => "disabled"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}
+	%input.d1{:type => "hidden", :name => "pagos_comprometidos[][abono][estado]", :disabled => "disabled", :value => "#{PagoComprometido::PAGADO}"}

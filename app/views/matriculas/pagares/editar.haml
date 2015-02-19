@@ -1,0 +1,328 @@
+.page-header
+    %h1 Editar Plan de Pago
+
+= notificaciones
+
+- if @existe_pagare and @puede_anularse
+    = notificaciones
+    = render :partial => "matriculas/pagares/partials/informacion_tabulada_pagare", :locals => { :no_mostrar => :anular }
+    = render :partial => "partials/notificaciones/warning", :locals => {:mensaje => @mensaje}
+
+    = form_tag @current_url, :method => "post", :style => "text-align: center;", :class => "anular-pagare" do
+        .contenedor-medio
+            %table.table.estrecha.table-condensed.pagare
+                %caption Pagaré actual Nº #{@pagare[:pagare].numero}
+                %colgroup
+                    %col.cuota
+                    %col.monto
+                    %col.saldo
+                    %col.estado
+                    %col.c-costo
+                    %col.f-vencimiento
+                    %col.total
+                %thead
+                    %tr
+                        %th.txCenter Cuota
+                        %th.txRight Monto
+                        %th.txRight Saldo
+                        %th.txLeft Estado
+                        %th.txCenter C. costo
+                        %th.txCenter F. vencimiento
+                        %th.txRight Total
+                %tbody
+                    - @pagare[:cuotas].each do |item|
+                        - cuotas = item[:pagos]
+                        - cantidad_pagos = cuotas.size
+                        - total = item[:total]
+                        - cuotas.each_with_index do |cuota, i|
+                            - borde = (i == cantidad_pagos - 1) ? "1px solid #DDD" : "none"
+                            %tr{:style => "border-bottom: #{borde}"}
+                                %td.txCenter= cuota.numero_cuota
+                                %td.txRight= dinero cuota.monto
+                                %td.txRight= dinero cuota.saldo
+                                %td.txLeft= get_name PagoComprometido, "ESTADOS", cuota.estado
+                                %td.txCenter= get_name PagoComprometido, "CENTROS_COSTOS", cuota.centro_costo
+                                %td.txCenter= fecha_humana2 cuota.fecha_vencimiento
+                                - if i == 0
+                                    %td.txRight{:style => "font-weight: bold; vertical-align: middle;", :rowspan => cantidad_pagos}= dinero total
+
+            .nuevo-pagare.span6
+                %table#edicion.table.table-condensed
+                    %caption{:style => "text-align: left !important;"}
+                        %label Pagare
+                        %input.required.digits.positivo{:type => "text", :style => "width: 60px;", :name => "pagare[numero]", :maxlength => 10, readonly: 'readonly', value: @pagare[:pagare].numero}
+                                                
+                        %label Cuotas
+                        %select.cp.cuotas{:style => "width: 50px; margin-bottom: 0; line-height: 14px;"}
+                            %option{:value => 1} 1
+                            %option{:value => 2} 2
+                            %option{:value => 3} 3
+                            %option{:value => 4} 4
+                            %option{:value => 5} 5
+                            %option{:value => 6} 6
+                            %option{:value => 7} 7
+                            %option{:value => 8} 8
+                            %option{:value => 9} 9
+                            %option{:value => 10, selected: true} 10
+                            %option{:value => 11} 11
+                            %option{:value => 12} 12
+
+                        %label F. inicio
+                        %input.cp.fecha-valida-cuota.required.fecha-inicio{:type => "text", :style => "width: 80px;"}
+                        %label Monto
+                        %input.required{:name => "pagare[monto]", :style => "width: 80px; margin: 0; height: 28px"}
+                        %a.btn.btn-primary.crear-pagare{:href => "#", :style => "padding: 3px 8px;"} Crear
+
+                        %input.n1{:type => "hidden", :name => "monto-total", :value => @pagare[:pagare].monto}
+                        
+                        %input{:type => "hidden", :name => "pagare[plan_pago_id]", :value => @pagare[:pagare].plan_pago_id}
+                        %input{:type => "hidden", :name => "pagare[ejecutivo_matriculas_id]", :value => @pagare[:pagare].ejecutivo_matriculas_id}
+                        %input{:type => "hidden", :name => "pagare[alumno_plan_estudio_id]", :value => @pagare[:pagare].alumno_plan_estudio_id}
+                        %input{:type => "hidden", :name => "pagare[institucion_sede_id]", :value => @pagare[:pagare].institucion_sede_id}
+                    %colgroup
+                        %col.cuota{:style => "width: 60px;"}
+                        %col.monto{:style => "width: 120px;"}
+                        %col.c-costo{:style => "width: 130px;"}
+                        %col.f-vencimiento{:style => "width: 110px;"}
+                    %thead
+                        %tr
+                            %th.txCenter Cuota
+                            %th.txRight Monto
+                            %th.txCenter C. costo
+                            %th.txCenter F. vencimiento
+                            %th.txCenter Abonar
+                                
+                    %tbody
+                        %tr.template{:style => "display: none;"}
+                            %td.txCenter
+                                %input.cuota.required.cambiar-nombre{:type => "text", :style => "width: 25px;", :disabled => "disabled", :data => {"nombre-real" => "cuotas[][numero_cuota]"}, :name => "numero_cuota_"}
+                            %td.txRight
+                                %input.monto.required.cambiar-nombre{:type => "text", :style => "width: 90px;", :disabled => "disabled", :maxlength => "6", :data => {"nombre-real" => "cuotas[][monto]"}, :name => "monto_"}
+                                %input.saldo{:type => "hidden", :name => "cuotas[][saldo]", :disabled => "disabled"}
+                                %input{:type => "hidden", :name => "cuotas[][tipo_cuota]", :disabled => "disabled", :value => PagoComprometido::PAGARE}
+                                %input{:type => "hidden", :name => "cuotas[][estado]", :disabled => "disabled", :value => PagoComprometido::COMPROMETIDO}
+                                %input{:type => "hidden", :name => "cuotas[][institucion_sede_id]", :disabled => "disabled", :value => @pagare[:pagare].institucion_sede_id}
+                                %input{:type => "hidden", :name => "cuotas[][plan_pago_id]", :disabled => "disabled", :value => @pagare[:pagare].plan_pago_id}
+                                %input{:type => "hidden", :name => "cuotas[][ejecutivo_matriculas_id]", :disabled => "disabled", :value => @ejecutivo_matriculas.id}
+                            %td.txCenter
+                                %select.centro-costo{:type => "text", :style => "width: 94px; margin-bottom: 0; height: 25px;", :disabled => "disabled", :name => "cuotas[][centro_costo]"}
+                                    - @centros_costos.each do |centro|
+                                        %option{:value => "#{PagoComprometido.const_get(centro)}"}= get_name PagoComprometido, "CENTROS_COSTOS", PagoComprometido.const_get(centro)
+                            %td.txCenter
+                                %input.required.fecha-vencimiento.fecha-valida-cuota.cambiar-nombre{:type => "text", :style => "width: 90px;", :disabled => "disabled", :data => {"nombre-real" => "cuotas[][fecha_vencimiento]"}, :name => "fecha_vencimiento_"}
+                            %td.txCenter
+                                %input.abono-check{type: 'checkbox', name: 'cuotas[][abonar]'}
+
+                .documento_venta.well{style: 'display: none'}
+                    %input#dv_b{type: 'radio', name: 'documento_venta[tipo]', value: DocumentoVenta::BOLETA, checked: 'checked'}
+                    %label{for: 'dv_b'} Boleta
+        
+                    %input#dv_f{type: 'radio', name: 'documento_venta[tipo]', value: DocumentoVenta::FACTURA}
+                    %label{for: 'dv_f'} Factura
+
+                    %label{for: 'dv_n', style: 'margin-left: 20px'}
+                        %strong Nº
+                    %input#dv_n{name: 'documento_venta[numero]', style: "width: 80px; margin: 0; height: 28px"}
+
+                    %label{for: 'dv_t', style: 'margin-left: 20px'} 
+                        %strong Total
+                    %input#dv_t{name: 'documento_venta[total]', value: 0, style: "width: 80px; margin: 0; height: 28px", readonly: true}
+                    %br
+                    %label{for: '#dv_mp'}
+                        %strong Medio Pago
+                    %select#dv_mp.input-medium{name: 'documento_venta[medio_pago_id]'}
+                        - @medios_pago.each do |mp|
+                            %option{value: mp.id}= mp.nombre.gsub("Pagaré/", "")
+                %br
+                
+                %table.table.table-condensed
+                    %thead
+                        %tr
+                            %th{colspan: 6} Matrícula
+                    %tbody
+                        %tr
+                            %th Val. Mat.
+                            %td
+                                %input.required{:type => "text", :style => "width: 80px;", name: 'matricula[matricula]', value: 0}
+                            %th Val. Ara.
+                            %td
+                                %input.required{:type => "text", :style => "width: 80px;", name: 'matricula[arancel]', value: 0}
+                            %th Val. Nor.
+                            %td
+                                %input.required{:type => "text", :style => "width: 80px;", name: 'matricula[normativa]', value: 0}
+                = render :partial => "partials/notificaciones/warning", :locals => {:mensaje => 'Revise que el valor de Matrícula, Arancel y Normativa correspondan al valor <strong>SIN DESCUENTO DE ARANCEL</strong>'}
+
+        %button.btn.btn-warning.loading-button{:type => "submit", :data => {"loading-text" => "... guardando ..."}}
+            %i.icon-white.icon-pencil
+            Modificar plan de pagos
+        %input.n1.formulario-integro.required{:type => "hidden", :name => "formulario_integro"}
+
+:css
+    table.table { margin-bottom: 0; }
+    div.contenedor-medio { overflow: hidden; margin-bottom: 20px; }
+    col.cuota { width: 50px; }
+    col.monto { width: 80px; }
+    col.saldo { width: 80px; }
+    col.f-vencimiento { width: 100px; }
+    table.pagare td { border: none !important; }
+    table.pagare { float: left; }
+    div.nuevo-pagare { 
+        float: left; 
+        margin-left: 20px;
+        border-left: 2px solid #EEE;
+        padding-left: 20px;
+    }
+    label { display: inline; }
+    caption { height: 25px; }
+    div.nuevo-pagare tbody input[type="text"] { text-align: right !important; }
+
+:javascript
+    var monto_total_documento_venta = 0;
+
+    function calcular_cuotas(monto, q_cuotas, interes) {
+        var cuotas = new Array();           
+        var i;
+        var obj_cuotas = new Object();
+        obj_cuotas.cuotas = new Array();
+        obj_cuotas.monto = parseInt(monto*(1+interes));
+        var resto = obj_cuotas.monto;
+        var cuota = parseInt(obj_cuotas.monto/q_cuotas);
+
+        for(i = 1; i <= q_cuotas; ++i ) { obj_cuotas.cuotas.push(cuota); resto -= cuota; }
+        if(resto > 0) obj_cuotas.cuotas[i-2] = cuota + resto;
+
+        return obj_cuotas;
+    }
+    function setea_numeros_cuotas()
+    {
+        var contador = 1;
+        $.each( $("input.cuota:enabled"), function(i, v) {
+            if( $(v).first().parent().parent().find(".abono-check:checked").length == 0 )
+            {
+                $(v).val( contador );
+                $(v).addClass("required");
+                contador += 1;
+            }
+            else
+            {
+                $(v).val( "" );
+                $(v).removeClass("required");
+            }
+        });
+    }
+    $(document).ready(function() {
+        $(".fecha-inicio").datepicker();
+
+        $(".abono-check").on("change", function(){
+        
+            if( $(this).is (':checked') )
+                monto_total_documento_venta += parseInt( $(this).parent().parent().find(".monto").val() );
+            else
+                monto_total_documento_venta -= parseInt( $(this).parent().parent().find(".monto").val() );
+            
+            if( monto_total_documento_venta > 0)
+                $(".documento_venta").show();
+            else
+                $(".documento_venta").hide();
+
+            $("#dv_t").val( monto_total_documento_venta );
+
+            setea_numeros_cuotas();
+        });
+        $("form.anular-pagare").validate({
+            rules : {
+                "name=pagare[monto]" : {
+                    equalToSum : "input:visible.monto"
+                }
+            },
+            submitHandler: function(form) {
+                if( confirm("¿Está seguro que desea modificar el plan de pagos?") ) {
+                    $(form).find(":input.cambiar-nombre").each(function(i, v) { v.name = $(v).attr("data-nombre-real"); });
+                    $(form).find(":input.n1").attr("disabled", "disabled");
+                    $(form).find(":input.loading-button").button("loading");
+                    notify_loader("Edición de plan de pagos", "Aguarde un momento mientras se almacenan los cambios ...");                      
+                    form.submit();
+                }
+            },
+            invalidHandler: function(form, validator) {
+                notify_info("Edición de plan de pagos", "Por favor, ingrese la información requerida.");
+            }
+        });
+
+        var $contenedor_pagare = $("div.nuevo-pagare");
+        var $tabla_pagare = $contenedor_pagare.find("> table#edicion");
+
+        /* | cuotas, fecha inicio |
+         */
+        var $cp = $contenedor_pagare.find(":input.cp");
+
+        $("a.crear-pagare").click(function(e) {
+            e.preventDefault();
+
+            try {
+                monto_total_documento_venta = 0;
+                $("#dv_t").val( monto_total_documento_venta );
+
+                var cuotas = $contenedor_pagare.find("select.cuotas").val();
+                var fecha_inicio = $contenedor_pagare.find("input.fecha-inicio").val();
+
+                if( ! cuotas || ! fecha_inicio ) throw "Por favor, ingrese información en los campos requeridos";
+
+                var objDate = Date.parse(fecha_inicio, "dd/MM/yyyy");
+                var dia = objDate.getDate();
+                var obj_cuotas = calcular_cuotas($("input[name='pagare[monto]']").val(), cuotas, 0);
+
+                // Se borra la tabla anterior
+                $tabla_pagare.find("tbody tr").not("tr.template").remove();
+                
+                for(var j = 0; j < obj_cuotas.cuotas.length; ++j) {
+                    var $fila = $tabla_pagare.find("tr.template").clone(true, true).removeClass("template");
+                    $fila.find(":input").removeAttr("disabled");
+                    $fila.find(":input.cambiar-nombre").each(function(i, v) { v.name += j });
+
+                    $fila.find("input.cuota").val(j + 1);
+                    $fila.find("input.monto, input.saldo").val(obj_cuotas.cuotas[j]);
+                    $fila.find("select.centro-costo").val(#{PagoComprometido::ARANCEL});
+                    $fila.find("input.fecha-vencimiento").val(objDate.toString("dd/MM/yyyy"));
+                    
+                    objDate.moveToMonth(objDate.getMonth() + 1);
+                    try {
+                        objDate.set({ day: dia });
+                    } catch(e) {
+                        // Para frebrero 30
+                        try {
+                            objDate.set({ day: dia - 1 });
+                        } catch(e) {
+                            // Para febrero 29
+                            try {
+                                objDate.set({ day: dia - 2 });
+                            } catch(e) {
+                                try {
+                                    // Al fin ! Febrero 28
+                                    objDate.set({ day: dia - 3 });
+                                } catch(e) {
+                                    // Error desconocido. Que se inicie el proceso nuevamente
+                                    location.href = window.location.href
+                                }
+                            }
+                        }
+                    }
+                        $fila.appendTo($tabla_pagare.find("tbody")).show();
+                }
+
+                formulario_integro();
+            } catch(e) {
+                notify_info("Anulación de pagarés", e);
+                $cp.addClass("error");
+                setTimeout(function() { $cp.removeClass("error") }, 5000);
+            }
+        });
+
+        $tabla_pagare.on("change", "input.monto", function() {
+            $(this).siblings("input.saldo").val(this.value);
+        });
+
+        function formulario_integro() { $("input:hidden.formulario-integro").val("OK"); }
+        function formulario_no_integro() { $("input:hidden.formulario-integro").removeAttr("value"); }
+    })
+

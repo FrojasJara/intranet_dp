@@ -1,0 +1,8 @@
+= simple_form_for @item, :url => @item.new? ? administrador_institucion_sedes_path : administrador_institucion_sede_path(@item)  do |f|
+
+    = f.input :esta_abierta, as: :boolean
+    = f.input :institucion_id, collection: Institucion.all.map {|x| [x.nombre, x.id]}
+    = f.input :sede_id, collection: Sede.all.map {|x| [x.nombre, x.id]}
+
+    %br
+    = f.submit 'Guardar', :class => 'btn btn-primary'

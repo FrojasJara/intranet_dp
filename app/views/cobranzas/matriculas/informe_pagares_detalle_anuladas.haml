@@ -1,0 +1,57 @@
+- titulo = "Libro pagaré - Detalle anuladas ( #{@p_f_i}"
+- unless @p_f_t.blank?
+	- titulo += " - #{@p_f_t} )" 
+- else
+	- titulo += " )" 
+
+%h3=titulo
+%input{type: 'hidden', id: "TituloExport", value: titulo}
+	
+%br
+%table#lista.table.table-condensed
+	%thead
+		%tr
+			%th Nº
+			%th Pagare
+			%th Número Cuota
+			%th Fecha Creación
+			%th Fecha Vencimiento
+			%th Valor Cuota
+			%th Saldo Cuota
+			%th Fecha Anulación
+			%th Rut Alumno
+			%th Nombres Alumno
+			%th Apellidos Alumno
+			%th Carrera
+			%th Domicilio
+			%th Comuna
+	%tbody
+		- if @pagos.blank? or @pagos.count.eql? 0
+			%tr
+				%td{colspan: 14} No hay registros
+		- else
+			- @pagos.each_with_index do |item, index|
+				- pagare = item.pagare
+				- alumno_plan_estudio = pagare.alumno_plan_estudio
+				- institucion_sede_plan = alumno_plan_estudio.institucion_sede_plan
+				- plan_estudio = institucion_sede_plan.plan_estudio
+				- alumno = alumno_plan_estudio.alumno
+				- usuario_alumno = alumno.datos_personales
+			
+				%tr
+					%td= index + 1
+					%td= pagare.numero
+					%td= item.numero_cuota
+					%td= pagare.created_at.to_date.year.to_s+"-"+item.created_at.to_date.month.to_s+"-"+item.created_at.to_date.day.to_s
+					%td= item.fecha_vencimiento
+					%td= item.monto
+					%td= item.saldo 
+					%td= item.fecha_anulacion.to_date.year.to_s+"-"+item.fecha_anulacion.to_date.month.to_s+"-"+item.fecha_anulacion.to_date.day.to_s unless item.fecha_anulacion.blank?
+					%td= usuario_alumno.rut
+					%td= usuario_alumno.nombres
+					%td= usuario_alumno.apellidos
+					%td= plan_estudio.nombre
+					%td= usuario_alumno.domicilio_completo
+					%td= usuario_alumno.comuna.nombre
+= datatable_src
+= datatable "lista"

@@ -1,0 +1,22 @@
+%h1 Alumnos
+
+%table.table
+    %thead
+        %tr
+            %th Rut
+            %th Nombre
+            %th Documentos Presentados
+            %th Año ingreso
+            %th Est. académico
+            %th Est. financiero
+            %th Ingresado en
+    %tbody
+        - @items.each do |i|
+            %tr
+                %td= i.datos_personales.rut
+                %td= history i, i.datos_personales.nombre
+                %td= get_name_matrix(Alumno, :DOCUMENTOS, i.documentos_presentados) unless i.documentos_presentados.nil?
+                %td= i.anio_ingreso
+                %td= get_name(Alumno, :ESTADOS_ACADEMICOS, i.estado_academico)
+                %td= get_name(Alumno, :ESTADOS_FINANCIEROS, i.estado_financiero)
+                %td= l(i.created_at, format: :short)

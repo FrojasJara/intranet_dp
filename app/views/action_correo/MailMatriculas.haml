@@ -1,0 +1,92 @@
+%html
+    %head
+        %title
+    %body
+        %p 
+            = @user.nombres.upcase+" "+@user.apellidos.upcase
+            %br
+            = @user.rut.upcase
+            %br
+            %br
+            Junto con saludarlo(a) recuerdo a usted que 
+            %strong el proceso de matrícula para alumnos superiores se efectuará a partir del 23 de febrero al 6 de marzo de 2015.
+        %p 
+            El valor de la Matrícula es de 
+            %strong $ 45.000, 
+            el arancel será de acuerdo al nivel a contratar:
+        %table
+            %thead
+                %tr
+                    %th.txCenter{style: 'font-size:12px;'} Carreras con salida intermedia
+                    %th.txCenter{style: 'font-size:12px;'} Arancel 1º a 4º nivel
+                    %th.txCenter{style: 'font-size:12px;'} 10 cuotas 
+                    %th.txCenter{style: 'font-size:12px;'} Arancel 5º a 8º nivel
+                    %th.txCenter{style: 'font-size:12px;'} 10 cuotas
+            %tbody
+                %tr
+                    %td.txCenter{style: 'font-size:12px;'} CONTADOR AUDITOR
+                    %td.txCenter{style: 'font-size:12px;'} 600.000
+                    %td.txCenter{style: 'font-size:12px;'} 60.000
+                    %td.txCenter{style: 'font-size:12px;'} 740.000
+                    %td.txCenter{style: 'font-size:12px;'} 74.000
+                %tr
+                    %td.txCenter{style: 'font-size:12px;'} ING. ADM. DE EMPRESAS
+                    %td.txCenter{style: 'font-size:12px;'} 600.000
+                    %td.txCenter{style: 'font-size:12px;'} 60.000
+                    %td.txCenter{style: 'font-size:12px;'} 740.000
+                    %td.txCenter{style: 'font-size:12px;'} 74.000
+                %tr
+                    %td.txCenter{style: 'font-size:12px;'} ING. EN PREV. DE RIESGOS
+                    %td.txCenter{style: 'font-size:12px;'} 600.000
+                    %td.txCenter{style: 'font-size:12px;'} 60.000
+                    %td.txCenter{style: 'font-size:12px;'} 740.000
+                    %td.txCenter{style: 'font-size:12px;'} 74.000
+                %tr
+                    %td.txCenter{style: 'font-size:12px;'} SALIDA INTERMEDIA TECNICO
+                    %td.txCenter{style: 'font-size:12px;'} 480.000
+                    %td.txCenter{style: 'font-size:12px;'} -
+                    %td.txCenter{style: 'font-size:12px;'} -
+                    %td.txCenter{style: 'font-size:12px;'} -
+        %br
+        %table
+            %thead
+                %tr
+                    %th.txCenter{style: 'font-size:12px;'} Carreras profesionales
+                    %th.txCenter{style: 'font-size:12px;'} Arancel
+                    %th.txCenter{style: 'font-size:12px;'} 10 cuotas 
+            %tbody
+                %tr
+                    %td.txCenter{style: 'font-size:12px;'} SERVICIO SOCIAL
+                    %td.txCenter{style: 'font-size:12px;'} 740.000
+                    %td.txCenter{style: 'font-size:12px;'} 74.000
+
+        %p{style: 'text-decoration:underline;'} Los alumnos con 20% de descuento cancelan 8 cuotas y 5 cuotas los alumnos con beneficio 50% de descuento.
+
+        %strong Requisitos para matricularse para el Período Académico 2014:
+        %ul
+            %li Tener al día el pago de los aranceles o documentado.
+            %li Presentar Pase de Matrícula otorgado por la Unidad de Educación a Distancia.
+        %br
+
+        %strong Requisitos para renovación de beneficios:
+        %ul
+            %li Tener aprobado la totalidad del año anterior.
+            %li Haber cumplido en las fechas correspondientes en el pago de sus cuotas.
+        %br
+
+        %p
+            %strong{style: 'float:left;width:100%;text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO ADM. Y MATRICULAS
+                %br
+                - if @usuario.sede_id.to_i == Sede::CONCEPCION
+                    ='Fono '+@usuario.telefono_fijo_completo+" - distancia.concepcion@dportales.cl"
+                - elsif @usuario.sede_id.to_i == Sede::CHILLAN
+                    ='Fono '+@usuario.telefono_fijo_completo+" - distancia.chillan@dportales.cl"
+                - elsif @usuario.sede_id.to_i == Sede::NUNOA
+                    ='Fono '+@usuario.telefono_fijo_completo+" - distancia.nunoa@dportales.cl"
+                - elsif @usuario.sede_id.to_i == Sede::BOSQUE
+                    ='Fono '+@usuario.telefono_fijo_completo+" - distancia.santiago@dportales.cl"
+                - elsif @usuario.sede_id.to_i == Sede::VIÑA
+                    ='Fono '+@usuario.telefono_fijo_completo+" - distancia.vina@dportales.cl"

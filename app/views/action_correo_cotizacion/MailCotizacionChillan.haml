@@ -1,0 +1,48 @@
+%html
+    %head
+        %title
+            %h1 Admisión
+    %body
+        %p
+            Estimado
+            = @user.nombre.upcase+" "+@user.apellido.upcase
+            ,en respuesta a tu interés por la carrera 
+            = @user.institucion_sede_plan.plan_estudio.nombre
+            , adjuntamos información que puede ayudar a tomar tu decisión.
+
+%div{style: 'margin-left: 40px'}
+    %table
+        %tbody        
+            %tr
+                %td 
+                    %img{:src => @user.institucion_sede_plan.plan_estudio.url_malla}
+    %table
+        %tbody
+            - arancel_contado = (isp = @user.institucion_sede_plan.aranceles.first(contado: true)).nil? ? 0 : isp.precio
+            - arancel_normal =  (isp = @user.institucion_sede_plan.aranceles.first(contado: false)).nil? ? 0 : isp.precio
+            %tr
+                %td 
+                    %strong  Arancel anual:
+                    = number_to_currency arancel_normal
+                    (Hasta 10 Mensualidades).
+            %tr
+                %td
+                    %strong Descuentos de un 20% a un 50% en el valor de arancel.
+
+
+            %br
+                %strong{style: 'float:left; width:100%; text-align:center;'} 
+                    %br
+                    Compara contenidos y valores... Seremos tu mejor opción!!!
+                    %br
+                    Matricula gratis hasta el 30 de diciembre, no te pierdas esta gran oportunidad
+     
+
+        %p
+            %strong{style: 'float:left; width:100%; text-align:center;'}
+                = @usuario.nombres+" "+@usuario.apellidos
+                %br
+                DEPARTAMENTO DE ADMISIÓN Y MATRICULAS
+                %br
+                Fono 600 600 70 70 - admision.chillan@dportales.cl
+

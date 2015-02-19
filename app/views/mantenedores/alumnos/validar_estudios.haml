@@ -1,0 +1,183 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li.active
+            %a{:href => "#"}  
+                Asignaturas
+%div.well    
+    %form{:id => 'frmFiltrarCarrera', :method => "post" , :action => validar_estudios_path }
+
+        %input.input-large.search-query{:name => "buscar[rut]", :type => "text", :placeholder => "Ej.: 123456789-0"}
+        %button.btn.btn-primary Buscar Alumno  
+
+%div.well
+    - unless @datos_personales.blank?
+        %ul.thumbnails
+            %li.span7
+                %p= @datos_personales.nombre
+
+                %p= @carrera[:nombre]
+                %p El tipo de ingreso del alumno es: 
+                %p
+                    %strong= @nombre_tipo_ingreso
+                    
+            %li.span2
+                %a.thumbnail{:href => "#"} 
+                    %img{:src => "http://placehold.it/160x120"}
+
+        - if @tipo_ingreso == Alumno::NORMAL
+            %form.form-horizontal{:id => "form_validar_estudios", :method => "post" , :action => registrar_validar_estudios_path }
+                %input{:type => "hidden", :value => "#{@tipo_ingreso}", :name => "tipo_ingreso"}
+                %input{:type => "hidden", :value => "#{@alumno.id}", :name => "alumno_id"}
+                %input{:type => "hidden", :value => "#{@carrera[:inscripcion].id}", :name => "alumno_plan_estudio_id"}
+
+
+                %div.informacion-origen
+                    %label Institución de Origen
+                    %input.single-line{:name => "institucion_origen[nombre]", :type => "text", :style => "width: 250px;"}
+                %div.informacion-origen
+                    %label Sede
+                    %input{:name => "institucion_origen[sede]", :type => "text"}
+                
+                %div.informacion-origen
+                    %label Carrera
+                    %input{:name => "institucion_origen[carrera]", :type => "text"}
+
+                %div.informacion-origen
+                    %label Asignatura a validar  
+                    = select("asignatura_validar", "asignatura_id", @asignaturas.collect{|a| [a.nombre, a.id]}, {:prompt => ":: Elija Una Asignatura ::"})
+                %div.informacion-origen
+                    %label Profesional Responsable (Profesor)
+                    = select("docentes", "docente_id", Docente.collect {|i| [ i.datos_personales.nombre, i.id ] }, {:include_blank => ':: Seleccione un docente ::' }, {:class => 'span3'}) 
+
+                %input{:type => "hidden", :name => "asignatura_validar[alumno_id]", :value => @alumno.id , :disabled => "disabled"}
+
+                %button.btn.btn-info{:id => "btn_validar_asignatura"} 
+                    %i.icon-ok
+                    Validar Asignatura
+                %button.btn.btn-primary{:id => "btn_guardar_validacion"} 
+                    %i.icon-save
+                    Guardar Cambios
+
+            
+%div.template-asignatura-origen{:style => "display:none;"}    
+    %button.btn.btn-primary.btn_agregar_asignatura 
+        %i.icon-plus
+        Agregar asignatura
+
+    %button.btn.btn-error.btn_eliminar_asignatura 
+        %i.icon-plus
+        Elimimar Asignatura
+    %div.informacion-origen
+        %label 
+            %strong{} Nota de Validación
+
+        %input.span1{:type => "text", :name => "asignaturas_destino[][nota_validacion]", :style => "height:25px; margin-left: 30px;" , :readonly => "readonly"}
+    
+    %table.table.asignaturas-origen
+        %thead
+            %tr
+                %th Asignatura
+                %th Año-Semestre
+                %th Nota
+                %th Eliminar
+        %tbody
+            %tr.template{:style => "display: none;"}
+                %td
+                    %input.xlarge{:name => "asignaturas_origen[][nombre]", :type => "text" , :disabled => "disabled"}
+                %td 
+                    %input{:name => "asignaturas_origen[][fecha]", :type => "text", :disabled => "disabled"}
+                %td
+                    %input.span1{:name => "asignaturas_origen[][nota]", :type => "number", :disabled => "disabled", :min => 1, :max => 7, :value => 1, :style => "height:25px;"}
+                %td
+                    %i.icon-trash
+                    %a.eliminar{:href => "#"} Eliminar
+
+:javascript
+    $("#btn_guardar_validacion").on("click", function(e){
+        $("#form_validar_estudios").submit();
+    });
+
+    //:style => "display: none;"
+    $("#btn_validar_asignatura").on("click", function(e){
+        e.preventDefault();
+        var nombre_asignatura = $("select[name='asignatura_validar[asignatura_id]'] option:selected").text();
+        var $contenedor_origen = $(".template-asignatura-origen").clone(true, true);
+
+        var $nombre_asignatura = "<hr /><label><strong>" + nombre_asignatura  + "</strong></label>";
+        
+        var asignatura_id = $("select[name='asignatura_validar[asignatura_id]']").val();
+        var $asignatura = "<input type='hidden' name='asignatura_destino[][asignatura_id]' value='"+ asignatura_id + "' />";        
+        
+        $contenedor_origen.append($asignatura);
+
+        $contenedor_origen.prepend($nombre_asignatura);    
+
+        $contenedor_origen.find(":input").removeAttr("disabled");
+
+        $contenedor_origen.find("table").find("tbody tr").hide().remove();
+
+        $contenedor_origen.removeClass("template-asignatura-origen");
+        $contenedor_origen.find("tr.template").removeClass("template");
+
+        $contenedor_origen.appendTo($("#form_validar_estudios")).show();
+
+    });
+    
+    $(".btn_agregar_asignatura").on("click", function(e){
+        e.preventDefault();
+
+        var asignatura_id = $(this).parent().find("input[name='asignatura_destino[][asignatura_id]']").val();
+        var $asignatura = "<input type='hidden' name='asignaturas_origen[][asignatura_id]' value='"+ asignatura_id + "' />";
+       
+        var $fila_asignatura = $(".template").clone(true, true);
+
+        $fila_asignatura.removeClass("template");
+        $fila_asignatura.find(":input").removeAttr("disabled"); 
+        $fila_asignatura.append($asignatura);      
+        $fila_asignatura.appendTo($(this).parent().find("table tbody")).show();
+
+    });
+
+    // Eliminar asignatura de origen
+    $(".asignaturas-origen").on("click", "a.eliminar", function(e){
+        e.preventDefault();
+        if($(this).parent().parent().siblings().length > 0){
+            $(this).parents("tr").remove();
+        }
+    });
+
+    $(".btn_eliminar_asignatura").on("click", function(e){
+        e.preventDefault();
+            $(this).parent().remove();
+    
+    });
+
+    $("input[name='asignaturas_origen[][nota]']").focusout(function(){
+
+        var suma = 0;
+        var promedio = 0;
+        var n = 0;
+        n = $(this).parent().parent().parent().children().length;
+
+        var notas = $(this).parent().parent().parent().children().find("input[name='asignaturas_origen[][nota]']").each(function(i){
+                var val = $(this).val();
+                suma += parseFloat(val);
+            });
+        promedio = (suma / n);
+        $(this).parent().parent().parent().parent().parent().find("input[name='asignaturas_destino[][nota_validacion]']").val(promedio);
+        
+    });
+    /*
+        $("input[name='asignaturas_origen[][fecha]']").datepicker({
+            maxDate:    -1,
+            changeYear: true,
+            yearRange:  "-100:+0"
+        })
+    */
+
+:css
+    .template{}
+    #asignaturas-origen{:display:none;}
+    #detalle-asignatura{margin-top: 20px;}
+    .btn_agregar_asignatura{margin-bottom: 20px; margin-top: 20px;}
+    .informacion-origen{display: inline-block; margin-bottom: 20px;}

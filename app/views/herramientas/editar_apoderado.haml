@@ -1,0 +1,111 @@
+:css
+	label{
+		color:#006DCC;
+		font-weight:bold;
+	}
+
+#mainTitle.col7
+
+	%h3{:style =>"color:#006DCC"}= "Editar Apoderado "+@usuario.rut
+
+	= notificaciones
+
+	= form_for :usuario, url: actualizar_apoderado_herramientas_path(@usuario.id), html: {class: 'form-horizontal well'} do |f|
+		%div.control-group
+			%label.control-label{:for =>"input-correo"}Correo:
+			.controls
+				%input{:type => "email",:id => "input-correo",:name => "usuario[email]",:value => @usuario.email}
+		.control-group
+			%label.control-label{:for =>"input-nombre1"}Primer Nombre:
+			.controls
+				%input{:type => "text",:id => "input-nombre1",:name => "usuario[primer_nombre]",:value => @usuario.primer_nombre}
+		.control-group
+			%label.control-label{:for =>"input-nombre2"}Segundo Nombre:
+			.controls
+				%input{:type => "text",:id => "input-nombre2",:name => "usuario[segundo_nombre]",:value => @usuario.segundo_nombre}
+		.control-group
+			%label.control-label{:for =>"input-apellido1"}Apellido Paterno:
+			.controls
+				%input{:type => "text",:id => "input-apellido1",:name => "usuario[apellido_paterno]",:value => @usuario.apellido_paterno}
+		.control-group
+			%label.control-label{:for =>"input-apellido2"}Apellido Materno:
+			.controls
+				%input{:type => "text",:id => "input-apellido2",:name => "usuario[apellido_materno]",:value => @usuario.apellido_materno}
+		.control-group
+			%label.control-label{:for =>"input-fecha"}Fecha de Nacimiento:
+			.controls
+				%input{:type => "date",:id => "input-fecha",:name => "usuario[fecha_nacimiento]",:value => @usuario.fecha_nacimiento}
+		.control-group
+			%label.control-label{:for =>"select-civil"}Estado Civil:
+			.controls
+				%select{:id=>"select-civil",:name=>"usuario[estado_civil]"}
+					- for_select(Usuario, :ESTADOS_CIVILES).each do |i|
+						%option{value: i.last, selected: @usuario.estado_civil.eql?(i.last)}= i.first
+		.control-group
+			%label.control-label{:for =>"select-sexo"}Sexo:
+			.controls
+				%select{:id=>"select-sexo",:name=>"usuario[sexo]"}
+					- for_select(Usuario, :SEXOS).each do |i|
+						%option{value: i.last, selected: @usuario.sexo.eql?(i.last)}= i.first	
+		.control-group
+			%label.control-label{:for =>"input-domicilio"}Domicilio:
+			.controls
+				%input{:type => "text",:id => "input-domicilio",:name => "usuario[domicilio]",:value => @usuario.domicilio}
+		.control-group
+			%label.control-label{:for =>"input-poblacion"}Villa/Población:
+			.controls
+				%input{:type => "text",:id => "input-poblacion",:name => "usuario[villa_poblacion]",:value => @usuario.villa_poblacion}
+		.control-group
+			%label.control-label{:for =>"input-area"}Código Area:
+			.controls
+				%input{:type => "number",:min=>0,:id => "input-area",:name => "usuario[codigo_area_telefono]",:value => @usuario.codigo_area_telefono}
+		.control-group
+			%label.control-label{:for =>"input-telefono"}Teléfono Fijo:
+			.controls
+				%input{:type => "text",:id => "input-telefono",:name => "usuario[telefono_fijo]",:value => @usuario.telefono_fijo}
+		.control-group
+			%label.control-label{:for =>"input-telefono2"}Teléfono Móvil:
+			.controls
+				%input{:type => "text",:id => "input-telefono2",:name => "usuario[telefono_movil]",:value => @usuario.telefono_movil}
+		.control-group
+			%label.control-label{:for =>"select-pais"}Pais:
+			.controls
+				%select{:id=>"select-pais",:name=>"usuario[pais_id]"}
+					-@paises.each do |pais|
+						%option{value: pais.id, selected: pais.id.eql?(@usuario.pais_id)}= pais.nombre
+		-if @usuario.pais_id.eql?(1)
+			.control-group
+				%label.control-label{:for =>"select-region"}Region:
+				.controls
+					%select{:id=>"select-region",:name=>"usuario[region_id]"}
+						-@regiones.each do |region|
+							%option{value: region.id, selected: region.id.eql?(@usuario.region_id)}= region.nombre
+			.control-group
+				%label.control-label{:for =>"select-comuna"}Comuna:
+				.controls
+					%select{:id=>"select-comuna",:name=>"usuario[comuna_id]"}
+						-@comunas.each do |comuna|
+							-if @usuario.region_id.eql?(comuna.region_id)
+								%option{value: comuna.id, selected: comuna.id.eql?(@usuario.comuna_id)}= comuna.nombre
+
+		%button.btn.btn-primary{:style=>"margin-left:100px;margin-top:20px",:type=>"submit"}>Actualizar Datos
+		%button.btn{:style=>"margin-left:10px;margin-top:20px",:type=>"button",:onclick=>"window.location='/herramientas/buscar_alumno'"} Cancelar
+
+:javascript
+	$("#select-region").change(function() {
+		var valor = $(this).val();
+		var $comunas = $("#select-comuna");
+		if (valor) {
+			$.getJSON(
+				"#{ajax_obtener_comunas_por_region_path 1}".replace("1", valor),
+				function(data) {
+					var nuevos = "<option value=''>:: Seleccione una comuna ::</option>";
+					$(data).each(function(i, v) { nuevos += "<option value='" + v.id + "'>" + v.nombre + "</option>"; });
+					$comunas.html(nuevos).removeAttr("disabled");
+				}
+			)
+		} 
+		else{
+			$comunas.html("<option value=''>:: Seleccione una comuna ::</option>").attr("disabled", true);
+		}
+	})

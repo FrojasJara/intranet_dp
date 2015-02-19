@@ -1,0 +1,95 @@
+#descuentos
+	.page-header
+		%h2 Descuentos
+	.control-group
+		%label.control-label (*) Beca, beneficio o descuento
+		.controls
+			%select.span4.r1.required{:name => "plan_pago[descuento_id]", :disabled => "disabled"}
+				%option{:value => "", :selected => "selected"} :: Seleccione un descuento ::
+				- @descuentos.each do |tipo, descuentos|
+					%optgroup{:label => "#{get_name Descuento, 'TIPOS', tipo}"}
+						- descuentos.each do |descuento|
+							%option{:value => "#{descuento.id}", :data => {:porcentaje => "#{descuento.porcentaje}"}}= descuento.nombre+" "+descuento.porcentaje.to_s+"%"
+	.control-group{:style => "vertical-align: middle; margin-top: 5px;"}
+		.controls
+			%label.checkbox
+				%input.pago-contado.pg{:type => "checkbox"} Arancel pago contado
+	%br
+	.control-group
+		%label.control-label Descuento aplicado
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.p1.descuento-aplicado.input-xlarge{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	.control-group
+		%label.control-label Arancel total
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.p1.arancel-total.input-xlarge{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	%input.p1.descuento-aplicado{:type => "hidden", :name => "plan_pago[descuento_aplicado]"}
+	%input.p1.arancel-total{:type => "hidden", :name => "plan_pago[arancel_total]"}
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor_descuento = $("#descuentos");
+		var $contenedor_plan = $("#plan-estudio");
+		var contenido_inicial_descuento = $contenedor_descuento.html();
+
+		$contenedor_descuento.on("change", "select[name='plan_pago[descuento_id]']", function() {
+			var valor = $(this).val();
+			var arancel = parseInt( $contenedor_descuento.find("input.arancel").val() );
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+			
+			/*
+			*	|descuento aplicado, arancel total|
+			*/
+			var $p1 = $contenedor_descuento.find(":input.p1");
+
+			if( valor ) {
+				var porcentaje =  parseInt($(this).find("option:selected").attr("data-porcentaje"));
+				var $arancel_total = $contenedor_descuento.find("input.arancel-total");
+				var $descuento_aplicado = $contenedor_descuento.find("input.descuento-aplicado");
+				var descuento_aplicado = (arancel*porcentaje)/100;
+
+				$descuento_aplicado.val(descuento_aplicado);
+				var arancel_total = arancel - descuento_aplicado;
+				$arancel_total.val(arancel_total);
+
+				habilitar_plan_pago_arancel(arancel_total);
+				habilitar_plan_pago_matricula( $contenedor_plan.find("input:hidden.matricula").val() );
+				
+				mascaraDinero();
+			} else {
+				$p1.val("0");
+			}
+		})
+
+		$contenedor_descuento.on("change", ":checkbox.pago-contado", function() {
+			var checkeado = this.checked;
+			var $descuento = $contenedor_descuento.find("select[name='plan_pago[descuento_id]']");
+			$descuento.val("").attr("disabled", checkeado);
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_matricula();
+
+			var $arancel_total = $contenedor_descuento.find("input.arancel-total");
+			var $descuento_aplicado = $contenedor_descuento.find("input.descuento-aplicado");
+			
+			if( checkeado ) {
+				var arancel_contado = parseInt($contenedor_descuento.find("input.arancel-contado").val());
+				var arancel = parseInt($contenedor_descuento.find("input.arancel").val());
+				var descuento_aplicado = arancel - arancel_contado;
+				
+				$arancel_total.val(arancel_contado);
+				$descuento_aplicado.val(descuento_aplicado);
+
+				habilitar_plan_pago_arancel(arancel_contado);
+				habilitar_plan_pago_matricula( $contenedor_plan.find("input:hidden.matricula").val() );
+			} else {
+				$arancel_total.val(0);
+				$descuento_aplicado.val(0);
+			}
+
+		})
+
+	})
+

@@ -1,0 +1,89 @@
+= render "matriculas/matriculas/admision/partials/assets_css"
+= breadcrumb %w(Matrículas Pagos Certificados Generar)
+
+= notificaciones
+
+= render partial: 'matriculas/pagos/partials/detalle_alumno'
+
+%table.table.table-condensed
+	%caption Certificados
+	%thead
+		%tr
+			%th.txLeft Nº
+			%th.txLeft
+			%th.txLeft Número
+			%th.txLeft Fecha
+			%th.txLeft Tipo documento
+			%th.txLeft Nº Documento
+			%th.txLeft Tipo Certificado
+			%th.txLeft Presentado en
+			%th.txLeft Para tramite
+	%tbody
+		- @certificados.each_with_index do |i, index|
+			%tr
+				%td.txRight= index+1
+				%td
+					= link_to matriculas_certificados_ver_path(params[:rut], i.id), disable_with: 'Imprimiendo...', method: :post, :class => 'btn btn-success' do
+						%i.icon-print.icon-white
+						Imprimir
+					= link_to matriculas_certificados_editar_path(params[:rut], i.id), disable_with: 'Cargando..', :class => 'btn btn-info' do
+						%i.icon-pencil.icon-white
+						Editar
+					= link_to matriculas_certificados_eliminar_path(params[:rut], i.id),  :confirm => '¿Estás seguro de querer anular el certificado?', :class => 'btn btn-danger' do
+						%i.icon-trash.icon-white
+						Anular
+					
+				%td.txRight= i.numero
+				%td= l i.created_at, format: :fecha
+				%td= get_name DocumentoVenta, :TIPOS, i.abono.documento_venta.tipo unless i.abono.blank?
+				%td.txRight= i.abono.documento_venta.numero unless i.abono.blank?
+				%td= value i.tipo_abono, :nombre
+				%td= i.lugar
+				%td= i.observacion
+
+.bloque
+	%h3 Generar Certificado
+	%br
+
+	%div.radio
+		%input{id: "radio1", type: "radio", name: "group1", value: 1} 
+		%label{for: "radio1"} Certificado Pagado
+	%div.radio
+		%input{id: "radio2", type: "radio", name: "group1", value: 2} 
+		%label{for: "radio2"} Certificado Gratuito
+%br
+
+
+#bloque1.bloque.invisible
+	= render :partial => 'matriculas/pagos/partials/form_certificado', :locals => {:completo => false}
+
+#bloque2.bloque.invisible
+	= render :partial => 'matriculas/pagos/partials/form_certificado_gratuito', :locals => {:completo => false}
+
+:css
+	.button_to { margin: 0 !important; }
+	.invisible{visibility: hidden;display: none;}
+
+:javascript
+	
+	$(function(){
+		$('#radio1').click(function(){
+			if($(this).is(':checked')){
+				$('#bloque2').addClass('invisible');
+				$('#bloque1').removeClass('invisible');
+			}
+			else{
+				$('#bloque1').addClass('invisible');
+			}
+		});
+
+		$('#radio2').click(function(){
+			if($(this).is(':checked')){
+				$('#bloque1').addClass('invisible');
+				$('#bloque2').removeClass('invisible');
+			}
+			else{
+				$('#bloque2').addClass('invisible');
+			}
+		});
+	});

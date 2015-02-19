@@ -1,0 +1,15 @@
+.modal.hide{:id => "modal#{item[:matricula].id}", :style => "width: auto !important; margin-left: -215px !important;"}
+	.modal-header
+		%button.close{:type => "button", :data => {:dismiss => "modal"}} x
+		%h3 Modificar Nro. de pagaré
+	= form_tag "#{matriculas_actualizar_numero_pagare_path item[:plan_pago].id}", :method => "post" do
+		.modal-body								
+			.items-container
+				.item
+					%label Actual Nro. de pagaré
+					%input.input-medium.numero{:type => "text", :disabled => "disabled", :value => "#{item[:plan_pago].numero_pagare}"}
+				.item
+					%label Nuevo Nro. de pagaré
+					%input.input-medium.required.numero{:type => "text", :maxlength => "100", :name => "numero_pagare"}
+		.modal-footer
+			%button.btn.btn-primary{:type => "submit"} Guardar

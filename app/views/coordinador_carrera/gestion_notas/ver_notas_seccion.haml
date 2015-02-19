@@ -1,0 +1,153 @@
+.sectionHeader
+	%h1  Notas Sección
+
+-#%div.well.no-imprimir
+	- # El filtro de secciones se encuentra en coordianacion de carrera 
+	- #url_metodo = coordinador_carrera_ver_notas_seccion_path
+	- #= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => url_metodo, :texto_boton => "Ver", :filtro => @filtro}
+	
+= notificaciones
+
+- unless  !@alumnos.blank?
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	:css 
+		.select-tabla{margin-bottom:4px !important;}
+		
+		@media print{
+			form.informacion-tabulada div.contenedorelemento span{
+				font-size: 7pt!important;
+			}
+		}
+
+
+	%div.imprimir
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de Asignatura
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Carrera
+							%span.carrera= @plan_estudio_seleccionado.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Asignatura
+							%span.asignatura= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Sección
+							%span.seccion= @seccion.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Periodo
+							%span.seccion= @periodo.nombre
+	%form#volver-secciones.acciones{action: coordinador_carrera_secciones_path, method: "post"}
+		%input{name: 'authenticity_token', type: 'hidden', value: 'token_value'}
+		%input{type: "hidden", name: "periodo_id", value: @periodo.id}
+		%input{type: "hidden", name: "sede_id", value: @seccion.institucion_sede.sede_id }
+		%input{type: "hidden", name: "plan_estudio_id", value: @asignatura.plan_estudio_id }
+		%button.btn.btn-primary.no-imprimir.cargar#envia{type: "submit"}
+			Volver a Secciones
+	%hr
+	%form#registrar_notas{action: coordinador_carrera_registrar_notas_seccion_path, method: "post"}
+		%input{type: "hidden", name: "seccion_id", value: @seccion.id}
+		%input{type: "hidden", name: "periodo_id", value: @periodo.id}
+
+		.acciones
+			%button.btn.btn-large.btn-primary.no-imprimir.calcular.cargar{type: "submit"}
+				%i.icon.icon-white.icon-ok
+				Guardar Notas
+			%a.btn.btn-large.btn-info.no-imprimir.calcular#calcular-np.cargar{href: coordinador_carrera_calcular_np_seccion_path(@seccion.id,@periodo.id)}
+				%i.icon.icon-white.icon.icon-refresh
+				NP
+			%a.btn.btn-large.btn-success.no-imprimir.calcular#calcular-nf.cargar{href: coordinador_carrera_calcular_nf_seccion_path(@seccion.id,@periodo.id)}
+				%i.icon.icon-white.icon.icon-refresh
+				NF
+			%a.btn.btn-large.btn-success.no-imprimir.calcular#calcular-nf.cargar{href:coordinador_carrera_estadistica_nota_seccion_path(@seccion.id)}
+				%i.icon.icon-white.icon.icon-refresh
+				Estadisticas parciales
+			%a.btn.btn-large.btn-success.no-imprimir#calcular-nf.cargar{href:coordinador_carrera_estadistica_notas_finales_path(@seccion.id)}
+				%i.icon.icon-white.icon.icon-refresh
+				Estadisticas finales	
+			%a.btn.btn-large.btn-primary.no-imprimir.impresion
+				%i.icon.icon-white.icon.icon-print
+				Imprimir
+		%hr
+		%table.table.table-striped#alumnos
+			%thead
+				%tr
+					%th.TxtLft.rut Rut
+					%th.TxtLft.nombre Nombre
+					- @seccion.planificacion_calificaciones.each do |p|
+						%th.TxtLft
+							.ponderacion= p.fecha_comprometida
+							%br
+							.ponderacion= p.ponderacion_porcentual
+					%th.TxtLft.BgNP N.P
+					%th.TxtLft.BgNE N.E
+					%th.TxtLft.BgNREP N.REP
+					%th.TxtLft.BgNF N.F
+			%tbody
+				- @alumnos.each do |i|
+					%tr
+						%td.listado.nombre= i.alumno.datos_personales.rut
+						%td.listado.nombre= "#{i.alumno.datos_personales.nombre}"
+						- @seccion.planificacion_calificaciones.each do |c|
+							- nota =  CalificacionParcial::nota_alumno_planificada(i.id, c.id)
+							
+							%td
+								- if nota.blank?
+									%input.TxtNota.required.no-imprimir-bordes{type: "text", disabled: true, name: "notas[#{i.id}][#{c.id}]", value: ""}
+								- else
+									%input.TxtNota.required.no-imprimir-bordes{type: "text", disabled: true, name: "notas_actualizadas[#{nota.id}]", value: "#{nota.blank? ? "" : nota.calificacion}"}
+								%input.habilitar_campo.no-imprimir{type: "checkbox"}
+
+						%td.BgNP
+							.BgNP= i.np_seccion 
+						%td.BgNE
+							- if i.rinde_examen?
+								%input.TxtNota.required.no-imprimir-bordes{type: "text", disabled: true, name:"notas[#{i.id}][nota_examen]", value: i.nota_examen }
+								%input.habilitar_campo.no-imprimir{type: "checkbox"}
+							- #else 
+							-#= i.nota_examen
+						%td.BgNREP
+							- if i.rinde_examen_repeticion?
+								- if i.nota_examen_repeticion == 0.0
+									%input.TxtNota.required.no-imprimir-bordes{type: "text", disabled: true, name:"notas[#{i.id}][nota_examen_repeticion]", value: "NCR"  }
+									%input.habilitar_campo.no-imprimir{type: "checkbox"}
+								- else
+									%input.TxtNota.required.no-imprimir-bordes{type: "text", disabled: true, name:"notas[#{i.id}][nota_examen_repeticion]", value: i.nota_examen_repeticion  }
+									%input.habilitar_campo.no-imprimir{type: "checkbox"}
+							- #else
+							-#= i.nota_examen_repeticion
+						%td.BgNF
+							- unless i.nota_final.nil?
+								- if i.nota_final == 0
+									.BgNF NCR
+								- else
+									.BgNF= i.nota_final
+
+:css
+	.bg-success{background-color: #A9F5A9 !important;}
+
+	@media print{
+		.no-imprimir-bordes{border: 0px!important;}
+	}
+
+= datatable_src
+= datatable("alumnos") 
+:javascript
+		$(document).ready(function(){
+
+			$("#registrar_notas").validate({
+				invalidHandler: function(form, validator) {
+					alertify.error("Por favor, compruebe que ha ingresado correctamente la información.");
+					setTimeout($.unblockUI, 300);
+				},
+				submitHandler: function(form) {
+					form.submit();
+				}
+			});
+		});
+
+				

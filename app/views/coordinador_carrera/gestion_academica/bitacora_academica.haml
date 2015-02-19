@@ -1,0 +1,114 @@
+.page-header
+    %h1 Bitácora Académica
+= notificaciones
+
+- unless @alumno_plan_estudio_seleccionado.blank?
+    %form.informacion-tabulada
+        %fieldset
+            %legend Información del alumno
+            - if @usuario.nil?
+                %h3 El alumno no existe
+            - else
+                %ul
+                    %li.ui-helper-clearfix
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Rut:
+                            %span= @usuario.rut
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Nombre:
+                            %span= @usuario.nombre
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Fonos:
+                            %span
+                                = @usuario.telefono_fijo_completo
+                                = "|" unless @usuario.telefono_movil.blank?
+                                = @usuario.telefono_movil
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Domicilio:
+                            %span= @usuario.domicilio_completo
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Comuna:
+                            %span= @usuario.comuna.nombre unless @usuario.comuna.nil?
+                        %div.contenedorElemento.separador
+                            %label.etiqueta Email:
+                            %span= mail_to @usuario.email
+                        
+                        %br
+                        - unless @us_apoderado.blank?
+                            %legend Información del apoderado
+                            %div.contenedorElemento.separador
+                                %label.etiqueta 
+                                    %strong Apoderado
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Rut:
+                                %span= @us_apoderado.rut
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Nombre:
+                                %span= @us_apoderado.nombre
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Fonos:
+                                %span
+                                    = @us_apoderado.telefono_fijo_completo
+                                    = "|" unless @us_apoderado.telefono_movil.blank?
+                                    = @us_apoderado.telefono_movil
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Domicilio:
+                                %span= @us_apoderado.domicilio_completo
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Comuna:
+                                %span= @us_apoderado.comuna.nombre unless @us_apoderado.comuna.nil?
+                            %div.contenedorElemento.separador
+                                %label.etiqueta Email:
+                                %span= mail_to @us_apoderado.email
+    .well
+
+        = simple_form_for :bitacora_academica do |f|
+            %input{type: "hidden", name: "al_pl_es", value: @alumno_plan_estudio_seleccionado.id}
+            .row
+                .span3
+                    = f.input :fecha
+                .span4
+                    = f.input :tipo, collection: for_select(BitacoraAcademica, :TIPOS), prompt: 'Seleccione'
+            = f.input :observacion, label: 'Observación', input_html: {class: 'span6', rows: 8}, as: :text
+
+            %button.btn.btn-primary
+                %i.icon-hdd.icon-white
+                Guardar
+    %table.table.table-condensed
+        %thead
+            %tr
+                %th.TxtLft Nº
+                %th.TxtLft Período
+                %th.TxtLft Carrera
+                %th.TxtLft{style: "width: 70px"} Fecha
+                %th.TxtLft Tipo
+                %th.TxtLft Observación
+                %th.TxtLft Usuario
+        %tbody
+            - @bitacoras.each_with_index do |bitacora, index|
+                %tr
+                    %td= index+1
+                    %td= bitacora.periodo.nombre
+                    %td= bitacora.alumno_plan_estudio.plan_estudio.nombre
+                    %td= bitacora.fecha
+                    %td= get_name BitacoraAcademica, :TIPOS, bitacora.tipo
+                    %td= bitacora.observacion
+                    %td= bitacora.usuario.nombre
+:javascript
+    $(function(){
+        $("#bitacora_academica_fecha").datepicker();
+
+        $("form.bitacora_academica").submit(function(){
+            if( $("#bitacora_academica_fecha").val().length < 10 || !fecha_valida( $("#bitacora_academica_fecha").val() ) )
+            {
+                notify_error("Datos incorrectos", "Por favor verifique que la fecha sea correcta");
+                return false;
+            }
+            if( $("#bitacora_academica_observacion").val().length < 1)
+            {
+                notify_error("Datos incorrectos", "Por favor ingrese una observación");
+                return false;
+            }
+            return true;
+        })
+    })

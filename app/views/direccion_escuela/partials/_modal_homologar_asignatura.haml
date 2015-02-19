@@ -1,0 +1,28 @@
+%div.modal.hide.fade#modal_homologar_asignatura{tabindex:"-1",role: "dialog", "aria-labelledby"=>"myModalLabel", "aria-hidden"=>"true"}
+	%div.modal-header
+		%button.close{:type => "button", "data-dismiss" => "modal", "aria-hidden" => true}×
+		%h3{id: "myModalLabel"} Homologar Asignatura
+	%div.modal-body
+		%form.form-horizontal#crear_seccion{action: "", :method => "post"}
+			%input{:type => "hidden", :name => "seccion[periodo_id]", :value => periodo_en_curso[:id]}
+			%div.control-group
+				%label.control-label Institución
+				%div.controls
+					%select.required{:name => "seccion[institucion_sede_id]"}
+						%option{value: ""} .: Debe Elegir una Sede :.
+			%div.control-group
+				%label.control-label Jornada
+				%div.controls
+					%select.required{:name => "seccion[jornada]"}
+			%div.control-group
+				%label.control-label Cupos
+				%div.controls
+					%input.required{:type => "number", :name => "seccion[cupos]", :min => 40, :value => 40}
+			%div.control-group
+				%label.control-label Número
+				%div.controls
+					%input.required{:type => "number", :name => "seccion[numero]", :min => 1, :value => 1}
+
+	%div.modal-footer
+		%button.btn{"data-dismiss" => "modal", "aria-hidden" => true} Cancelar
+		%button.btn.btn-primary#registrar_nueva_seccion{} Guardar

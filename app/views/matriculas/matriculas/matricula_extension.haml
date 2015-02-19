@@ -1,0 +1,47 @@
+= render "matriculas/matriculas/admision/partials/assets"
+
+= form_tag "#{matriculas_registrar_extension_path}", :method => "post", :class => "admision admision-superior" do
+	.fixed-header
+		.page-header
+			%h1
+				Extensión Plan de Pago
+				%small alumnos superiores
+
+		%ul.admision-nuevo.nav.ui-helper-clearfix
+			%li
+				%a{:href => "#identificacion-alumno"}	1. Identificación del alumno
+			%li
+				%a{:href => "#datos-personales-apoderado"} 2. Datos del apoderado
+			%li
+				%a{:href => "#periodo"} 3. Cálculo del arancel
+			%li
+				%a{:href => "#planes-pago"} 4. Planes de pago
+			%li
+				%a{:href => "#documento-venta"} 5. Emisión de documentos
+
+		%button.btn.btn-primary.loading-button.cargar{:type => "submit", :data => {"loading-text" => "... matriculando ..."}}
+			%i.icon-white.icon-ok
+			Generar Extensión
+
+	.matricula-superior.contenedor-matricula
+		.introduccion{:style => "padding-left: 10px; padding-top: 150px;"}
+			%h3 Estimado ejecutivo de matrículas
+			%p
+				El proceso de extensión de plan de pago para alumnos superiores ha sido devidido en 5 secciones, para su comodidad:
+			%ol{:style => "list-style: decimal; padding-left: 15px;"}
+				%li Identificación del alumno
+				%li Datos personales del apoderado
+				%li Selección del periodo de la extensión
+				%li Cálculo del arancel
+				%li Conformación de los planes de pago
+				%li Selección del documento de venta
+
+		= notificaciones
+
+		= render "matriculas/matriculas/admision/extension/identificacion_alumno"
+		= render "matriculas/matriculas/admision/partials/datos_apoderado"
+		= render "matriculas/matriculas/admision/extension/descuentos_reconocimientos"
+		#planes-pago
+			= render :partial => "matriculas/matriculas/admision/partials/plan_pago", :locals => {:centro_costo => PagoComprometido::ARANCEL, :forma_cuotas => @formas_cuotas_alumno_superior}
+			= render :partial => "matriculas/matriculas/admision/partials/plan_pago", :locals => {:centro_costo => PagoComprometido::NORMATIVA, :forma_cuotas => @formas_cuotas_alumno_superior}
+		= render :partial => "matriculas/matriculas/admision/partials/documento_venta"

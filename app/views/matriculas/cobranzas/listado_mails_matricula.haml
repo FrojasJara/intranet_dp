@@ -1,0 +1,117 @@
+:css
+    .btn{
+        font-weight: bold;
+        margin-left: 10px;
+        width:100px;
+    }
+
+    .filaRed{
+        color: red !important;
+    }
+/ %h2 Precios Alumnos Superiores
+
+/ %table.table.table-condensed
+/     %thead
+/         %tr
+/             %th.txCenter Carrera
+/             %th.txCenter Arancel 1º a 4º nivel
+/             %th.txCenter 10 cuotas 
+/             %th.txCenter Arancel 5º a 8º nivel
+/             %th.txCenter 10 cuotas
+/     %tbody
+        
+                    
+%h3 
+    Listado 
+    = get_name Institucion,:TIPOS,@institucion_id
+    = get_name Sede,:SEDES,@sede_id
+    = " - "+get_name(InstitucionSedePlan,:MODALIDADES,@modalidad.to_i)
+    = " - "+@carrera_nombre+" - Matriculas "+@periodo.nombre
+%br
+%br
+.botones{:style => "float: right;"}
+    %a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+        %i.icon-white.icon-print
+        Imprimir
+.clearfix
+%br
+%form{method: 'post', action: matriculas_cobranzas_envio_mails_envio_mails_matricula_path}
+    %table#listado.table.table-condensed
+        %thead
+            %tr
+                %th.txCenter #
+                %th.txCenter 
+                    %input{type: 'checkbox', id: 'input_principal'}
+                %th.txCenter Rut
+                %th.txCenter Nombre 
+                %th.txCenter Apellido
+                %th.txCenter Dirección 
+                %th.txCenter Teléfono Fijo
+                %th.txCenter Teléfono Móvil 
+                %th.txCenter Email
+                %th.txCenter Fecha Matricula
+                %th.txCenter Tipo Matricula
+                %th.txCenter Jornada
+                %th.txCenter Ejecutivo Matricula
+        %tbody
+            - if @matriculas.blank?
+                %tr
+                    %td{colspan: 10} No hay registros
+            - else
+                - cont = 0
+                - @matriculas = @matriculas.sort_by{|matricula| matricula.alumno_plan_estudio.alumno.datos_personales.apellidos}
+
+                - @matriculas.each_with_index do |matricula,index|
+                    - usu    = matricula.alumno_plan_estudio.alumno.datos_personales
+                    - planes = matricula.planes_pago
+                    - eje    = matricula.ejecutivo_matriculas.datos_personales
+                    - ins    = matricula.alumno_plan_estudio.institucion_sede_plan
+
+                    %tr.filaRed
+                        %td.txCenter= index+1
+                        %td
+                            - unless usu.email.blank?
+                                - email_regex = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
+                                - if(usu.email =~ email_regex)
+                                    %input{type: 'checkbox', class: 'checkbock', name: 'matriculas[]', value: matricula.id, class: 'inputListado'}
+                        %td.txCenter= usu.rut unless usu.rut.blank?
+                        %td.txCenter= usu.nombres unless usu.nombres.blank?
+                        %td.txCenter= usu.apellidos unless usu.apellidos.blank?
+                        %td.txLeft= usu.domicilio_completo unless usu.domicilio_completo.blank?
+                        %td.txLeft= usu.telefono_fijo unless usu.telefono_fijo.blank?
+                        %td.txLeft= usu.telefono_movil unless usu.telefono_movil.blank?
+                        %td.txLeft= usu.email unless usu.email.blank?
+                        %td.txCenter= matricula.created_at.to_date unless matricula.created_at.blank?
+                        %td.txCenter
+                            - unless matricula.planes_pago.blank?
+                                - matricula.planes_pago.each_with_index do |plan,index|
+                                    - if matricula.planes_pago.length > 1
+                                        - unless plan.tipo.blank?
+                                            = "Plan #{index+1} : "+get_name(MatriculaPlan,:TIPOS,plan.tipo)
+                                        - else
+                                            = "Plan #{index+1} : -"
+                                        %br
+                                    - else
+                                        - unless plan.tipo.blank?
+                                            = get_name(MatriculaPlan,:TIPOS,plan.tipo)
+                                        - else
+                                            = "-"
+                        %td.txCenter= get_name InstitucionSedePlan,:JORNADAS,ins.jornada unless ins.jornada.blank?
+                        %td.txCenter= eje.nombre_corto unless eje.nombre_corto.blank?
+
+    %input{type: 'submit',class: 'btn btn-danger', value: 'Enviar Mails'}
+    %input{type: 'hidden',name: 'modalidad',value: @modalidad.to_i}
+        
+:javascript
+    $(document).ready(function() {
+        $('#input_principal').change(function(){
+            if($(this).is(":checked")) {
+                $(':input').attr({"checked" : true});
+            }
+            else {
+                $(':input').attr({"checked" : false});
+            }
+        });
+
+        $('.inputListado').parent().parent().removeClass('filaRed');
+    });

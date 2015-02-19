@@ -1,0 +1,99 @@
+.sectionHeader
+	%h1 Notas y Asistencia Sección 
+
+%div.well
+	= render :partial => "coordinador_carrera/partials/filtro_seccion", :locals => {:url_metodo => apoyo_docente_ver_asistencia_nota_seccion_path, :texto_boton => "Ver Asistencia", :filtro => @filtro, :plan_estudios => @plan_estudios, :asignaturas => @asignaturas, :secciones => @secciones}
+	
+
+= notificaciones
+
+- unless  @secciones_inscritas.size > 0
+	%div.alert.fade.in
+		%button.close{type: "button","data-dismiss" =>  "alert"} ×
+		%p No hay Alumnos en esta Sección.
+-else
+	
+	%a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+		%i.icon-white.icon-print
+		Imprimir Resumen
+		
+
+	%div.solo-imprimir{style: "display:block !important; border:none !important; border-radius: 0px !important; margin-bottom: 10px !important;margin-top:  20px !important;"}
+		%form.informacion-tabulada
+			%fieldset
+				%legend Información de la seccion
+				%ul.ui-helper-clearfix
+					%li.ui-helper-clearfix.cuatro-columnas
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Carrera:
+							%span= @asignatura.plan_estudio.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Nombre Asignatura:
+							%span= @asignatura.nombre
+						%div.contenedorElemento.separador
+							%label.etiqueta Codigo Asignatura:
+							%span= @asignatura.codigo
+						%div.contenedorElemento.separador
+							%label.etiqueta Semestre Asignatura:
+							%span= @asignatura.semestre
+						%div.contenedorElemento.separador
+							%label.etiqueta cantidad de alumnos:
+							%span= @secciones_inscritas.size
+						%div.contenedorElemento.separador
+							%label.etiqueta Jornada:
+							%span= get_name Seccion, :JORNADAS, @seccion.jornada
+					%li.ui-helper-clearfix.cuatro-columnas
+	
+
+	%table.table.table-striped#alumnos
+		%thead
+			%tr
+				%th.TxtLft{colspan: 3} Información Asignatura (A= % Asistencia /  I= % Inasistencia)
+				%th.TxtLft{colspan: "#{@total_planificaciones + 5}"} Evaluciones
+
+			%tr
+				%th.TxtLft Alumno
+				%th.TxtLft Rut
+				%th.TxtLft % A
+				%th.TxtLft % I
+				- 0..@total_planificaciones.times do |i|
+					%th.TxtLft= "E-#{i+1}"
+				%th.TxtLft NP
+				%th.TxtLft NE
+				%th.TxtLft NRep.
+				%th.TxtLft NF
+		%tbody
+			- @secciones_inscritas.each do |i|
+				%tr
+					- porcentaje_asistencia = i.asistencias.blank? ? 0 : (100.0 * (i.asistencias.map(&:horas_asistidas).reduce(:+).to_f / i.seccion.total_horas_seccion.to_f)).round 
+					- porcentaje_inasistencia = i.asistencias.blank? ? 0 : (100.0 * (i.asistencias.map(&:horas_ausentadas).reduce(:+).to_f / i.seccion.total_horas_seccion.to_f)).round
+					%td= i.alumno_plan_estudio.alumno.datos_personales.nombre
+					%td= i.alumno_plan_estudio.alumno.datos_personales.rut
+					%td= porcentaje_asistencia
+					%td
+						= porcentaje_inasistencia
+					-  if i.calificaciones_parciales.size <= @total_planificaciones
+						-  i.calificaciones_parciales.each do |i|
+							%td= i.calificacion
+						- tmp = @total_planificaciones - i.calificaciones_parciales.size
+						- 0..tmp.times do
+							%td --
+
+					%td.BgNP= i.nota_presentacion
+					%td.BgNE= i.nota_examen
+					%td.BgNRep= i.nota_examen_repeticion
+					%td.BgNF= i.nota_final
+
+
+= datatable_src
+= datatable("alumnos") 
+:javascript
+		$(document).ready(function(){
+			$(".marcar_asistencia").change(function() {
+				$(this).prev().attr("disabled", ! this.checked);
+				$(this).prev().prev().attr("disabled", ! this.checked);
+			});
+		});
+
+						
+

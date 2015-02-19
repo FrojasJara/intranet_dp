@@ -1,0 +1,466 @@
+#periodo.bloque
+	.page-header
+		%h2 Periodo de matricula
+	.control-group
+		%label.control-label (*) Período Matricula
+		.controls
+			%select.required{name: "periodo"}
+				%option{:value => ""} :: Seleccione un periodo ::
+				%option{value: "#{@periodo_en_curso[:id]}"}= @periodo_en_curso[:nombre]
+				%option{value: "#{@periodo_matriculable[:id]}"}= @periodo_matriculable[:nombre]
+#descuentos.bloque
+	.page-header
+		%h2 Cálculo del arancel
+
+	.page-header
+		%h3 Matrícula
+	.control-group{:style => "margin-right: 30px;"}
+		%label.control-label (*) Tipo
+		.controls
+			%select.w1.required.vn.tipo-matricula{:name => "plan_pago[tipo]", :disabled => "disabled"}
+				%option.ros{:value => ""} :: Seleccione un tipo de matrícula ::
+				%optgroup{:label => "Planes profesionales presenciales"}
+					- @matriculas_profesionales.each do |matricula|
+						%option{:class => "ros m_#{InstitucionSedePlan::PRESENCIAL}_#{PlanEstudio::PROFESIONAL}", 
+							:value => "#{MatriculaPlan.const_get(matricula)}"}
+							= get_name MatriculaPlan, "TIPOS", MatriculaPlan.const_get(matricula)
+				%optgroup{:label => "Planes técnicos presenciales"}	
+					- @matriculas_tecnicas.each do |matricula|
+						%option{:class => "ros m_#{InstitucionSedePlan::PRESENCIAL}_#{PlanEstudio::TECNICO}", 
+							:value => "#{MatriculaPlan.const_get(matricula)}"}
+							= get_name MatriculaPlan, "TIPOS", MatriculaPlan.const_get(matricula)
+				%optgroup{:label => "Planes profesionales a distancia"}	
+					- @matriculas_distancia.each do |matricula|
+						%option{:class => "ros m_#{InstitucionSedePlan::DISTANCIA}_#{PlanEstudio::PROFESIONAL}", 
+							:value => "#{MatriculaPlan.const_get(matricula)}"}
+							= get_name MatriculaPlan, "TIPOS", MatriculaPlan.const_get(matricula)
+
+	.control-group{:style => "margin-right: 30px;"}
+		%label.control-label (*) Nivel
+		.controls
+			%input.positivo.required.input-small{:type => "text", :name => "plan_pago[nivel]", :style => "text-align: right", :maxlength => 1}
+
+	.cobro-asignaturas.template{:style => "display: none;"}
+		.page-header
+			%h3 Cobros especiales de asignaturas
+		.control-group
+			%label.control-label (*) Asignaturas propuestas
+			.controls
+				%input.digits.required.input-small.v0.ro.cea{:type => "text", :value => "0", :name => "plan_pago[asignaturas_propuestas]", :style => "text-align: right", :maxlength => 1, :disabled => "disabled"}
+		.control-group
+			%label.control-label Cobro semestral de asignaturas
+			.controls.input-prepend{:style => "width: 305px;"}
+				%span.add-on $
+				%input.cobro-asignaturas.p1.input-small.v0{:type => "text", :value => "0", :style => "text-align: right", :disabled => "disable", :alt => "dinero"}
+
+		%br
+		.control-group{:style => "margin-top: 17px; display: block;"}
+			%label.checkbox
+				%input.incluye-normativa{:type => "checkbox"}
+				Se incluirán normativas en este proceso
+		%br
+		.control-group
+			%label.control-label (*) Normativas propuestas
+			.controls
+				%input.digits.required.input-small.nor1.normativas-propuestas.v0.ro.cea{:disabled => "disabled", :type => "text", :value => "0", :name => "plan_pago[normativas_propuestas]", :style => "text-align: right", :maxlength => 1}
+		.control-group
+			%label.control-label Cobro de normativas
+			.controls.input-prepend{:style => "width: 305px;"}
+				%span.add-on $
+				%input.cobro-normativas.p1.input-small.nor1.v0{:type => "text", :value => "0", :style => "text-align: right", :disabled => "disable", :alt => "dinero"}
+
+
+	.page-header
+		%h3 Descuentos y reconocimiento
+	.control-group{:style => "display: block;"}
+		.controls
+			%label.checkbox
+				%input.pago-contado{:type => "checkbox"} Arancel pago contado
+	.control-group
+		%label.control-label (*) Beca, beneficio o descuento
+		.controls
+			%select.span3.w1.required.vn.descuento{:name => "plan_pago[descuento_id]", :disabled => "disabled", :style => "width: 292px;"}
+				%option.ros{:value => "", :selected => "selected"} :: Seleccione un descuento ::
+				- @descuentos.each do |tipo, descuentos|
+					%optgroup{:label => "#{get_name Descuento, 'TIPOS', tipo}"}
+						- descuentos.each do |descuento|
+							%option.ros{:value => "#{descuento.id}", :data => {:porcentaje => "#{descuento.porcentaje}"}, :readonly => "readonly"}= descuento.nombre+" "+descuento.porcentaje.to_s+"%"
+	.control-group
+		%label.control-label Descuento aplicado
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.p1.descuento-aplicado.input-xlarge.v0{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	%br
+	.control-group
+		%label.control-label (*) Monto reconocido
+		.controls.input-prepend{:style => "width: 305px;"}
+			%span.add-on $
+			%input.digits.p1.required.input-xlarge.v0.ro{:type => "text", :value => "0", :name => "plan_pago[monto_reconocido]", :style => "text-align: right"}
+
+	.control-group
+		%label.control-label (*) Descripción del monto reconocido
+		.controls{:style => "width: 305px;"}
+			%textarea.required.vn.ro{:style => "width: 100%; resize: none;", :name => "plan_pago[descripcion_monto_reconocido]"}
+	%br
+	%button.btn.w1.btn-success.calcular-descuentos{:type => "submit", :disabled => "disabled"}
+		%i.icon-white.icon-list-alt
+		Calcular
+	.control-group{:style => "vertical-align: bottom !important;"}
+		%label.control-label Arancel total
+		.controls.input-prepend{:style => "width: 130px;"}
+			%span.add-on $
+			%input.p1.arancel-total.input-small.v0{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	.control-group{:style => "vertical-align: bottom !important;"}
+		%label.control-label +
+	.control-group{:style => "vertical-align: bottom !important;"}
+		%label.control-label Repactación
+		.controls.input-prepend{:style => "width: 130px;"}
+			%span.add-on $
+			%input.p1.arancel-repactado.input-small.v0{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	.control-group{:style => "vertical-align: bottom !important;"}
+		%label.control-label =
+	.control-group{:style => "vertical-align: bottom !important;"}
+		%label.control-label Arancel Final
+		.controls.input-prepend{:style => "width: 130px;"}
+			%span.add-on $
+			%input.p1.arancel-final.input-small.v0{:type => "text", :value => "0", :alt => "dinero", :disabled => "disabled"}
+	%a.modificar-contenido{:href => "#", :style => "display: none;"}
+		%i.icon-refresh
+		Modificar información
+
+	%input.descuento-aplicado.p1.v0{:type => "hidden", :name => "plan_pago[descuento_aplicado]", :value => 0}
+	%input.arancel-final.p1.v0{:type => "hidden", :name => "plan_pago[arancel_total]", :value => 0}
+	%input.cobro-normativas.p1.nor1.v0{:type => "hidden", :name => "plan_pago[normativa]", :value => 0}
+	%input.integridad-descuentos.n1.required{:type => "hidden", :name => "integridad-descuentos"}
+	%input{:type => "hidden", :name => "plan_pago[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+	%input{:type => "hidden", :name => "matricula_plan[ejecutivo_matriculas_id]", :value => @ejecutivo_matriculas.id}
+
+:css
+	#descuentos .control-group { vertical-align: top !important; }
+	#descuentos button { margin-top: -29px; margin-right: 25px; }
+	#descuentos a.modificar-contenido { display: inline-block; margin-top: -25px; vertical-align: middle; }
+	div.cobro-asignaturas { margin: 15px 0; }
+
+:javascript
+	$(document).ready(function() {
+		var $contenedor_descuento = $("#descuentos");
+		var contenido_original_descuento = $contenedor_descuento.html();
+		var $contenedor_alumno = $("#identificacion-alumno");
+
+		$contenedor_descuento.on("click", "button.calcular-descuentos", function(e) {
+			e.preventDefault();
+			limpiar_plan_pago_matricula();
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_normativa();
+
+			/*
+			*	|descuento aplicado, arancel total| (:visibles)
+			* 	|descuento aplicado, arancel total| (:hiddens)
+			*/
+			var $p1 = $contenedor_descuento.find(":input.p1");
+
+			/* 	
+			*	|asignaturas_propuestas, normativas_propuestas|
+			*	|monto_reconocido, descripcion_monto_reconocido|
+			*/
+			var $ro = $contenedor_descuento.find(":input.ro");
+
+			/* 	
+			*	|tipo_matricula, tipo_beneficio|
+			*/
+			var $ros = $contenedor_descuento.find("option.ros");
+
+			/* |Cobro de asignaturas, normativas, y checkbox normativa|
+			*/
+			var $dman = $contenedor_descuento.find(":input.dman");
+
+			// checkbox para incluir o no normativas
+			var $incluye_normativa = $contenedor_descuento.find(":checkbox.incluye-normativa");
+
+			try {
+				// Profesionales
+				var arancel_2_sem_profesional 			= parseInt( $contenedor_descuento.find("input.arancel-dos-semestres-profesional").val() );
+				var arancel_2_sem_profesional_contado 	= parseInt( $contenedor_descuento.find("input.arancel-dos-semestres-profesional-contado").val() );
+				var arancel_salida_intermedia 			= parseInt( $contenedor_descuento.find("input.arancel-salida-intermedia").val() );
+				var arancel_salida_intermedia_contado 	= parseInt( $contenedor_descuento.find("input.arancel-salida-intermedia-contado").val() );
+				
+				// Tecnicas
+				var arancel_2_sem_tecnico 				= parseInt( $contenedor_descuento.find("input.arancel-dos-semestres-tecnico").val() );
+				var arancel_2_sem_tecnico_contado 		= parseInt( $contenedor_descuento.find("input.arancel-dos-semestres-tecnico-contado").val() );
+				var arancel_prac_trab_titulo 			= parseInt( $contenedor_descuento.find("input.arancel-practica-trabajo-titulo").val() );
+				var arancel_prac_trab_titulo_contado 	= parseInt( $contenedor_descuento.find("input.arancel-practica-trabajo-titulo-contado").val() );
+
+				// Distancia
+				var arancel_distancia_1_4 				= parseInt( $contenedor_descuento.find("input.arancel-distancia-1-4").val() );
+				var arancel_distancia_5_8 				= parseInt( $contenedor_descuento.find("input.arancel-distancia-5-8").val() );
+
+				var $contenedor_cobros_especiales 		= $contenedor_descuento.find("div.cobro-asignaturas").not("div.template");
+				var tipo_matricula 						= $contenedor_descuento.find("select[name='plan_pago[tipo]']").val();
+				if( ! tipo_matricula ) 					throw "Por favor, seleccione un tipo de matrícula.";	
+				
+				var matricula_cobro_especial 			= ($.inArray(parseInt(tipo_matricula), #{MatriculaPlan::MATRICULAS_AFECTAS_COBROS_ESPECIALES.to_s}) != -1)
+				var matricula_afecta_pago_contado 		= ($.inArray(parseInt(tipo_matricula), #{MatriculaPlan::MATRICULAS_AFECTAS_PAGO_CONTADO.to_s}) != -1)
+				var exenta_matricula 					= ($.inArray(parseInt(tipo_matricula), #{MatriculaPlan::EXENTAS_MATRICULA.to_s}) != -1);
+				var exenta_arancel 						= ($.inArray(parseInt(tipo_matricula), #{MatriculaPlan::EXENTAS_ARANCEL.to_s}) != -1);
+				var descuento_aplicable 				= ! exenta_arancel;
+
+				var $cobro_asignaturas 	= matricula_cobro_especial ? $contenedor_cobros_especiales.find("input.cobro-asignaturas") : null;				
+				var incluye_normativa 	= matricula_cobro_especial ? $contenedor_cobros_especiales.find(":checkbox.incluye-normativa")[0].checked: null;
+				var $cobro_normativas 	= matricula_cobro_especial ? $contenedor_descuento.find("input.cobro-normativas") : null;
+				var normativas 			= matricula_cobro_especial ? parseInt( $contenedor_cobros_especiales.find("input.normativas-propuestas").val() ): null;
+				var asignaturas 		= matricula_cobro_especial ? $contenedor_cobros_especiales.find("input[name='plan_pago[asignaturas_propuestas]']").val(): null;
+
+				var $arancel 						= $contenedor_descuento.find("input[name='plan_pago[arancel]']");	
+				var $arancel_total 					= $contenedor_descuento.find("input.arancel-total");
+				var $arancel_repactado					= $contenedor_descuento.find("input.arancel-repactado");
+				var $arancel_final 					= $contenedor_descuento.find("input.arancel-final");
+				var $descuento_aplicado 			= $contenedor_descuento.find("input.descuento-aplicado");
+				var $pago_contado 					= $contenedor_descuento.find(":checkbox.pago-contado");
+				var pago_contado 					= $pago_contado[0].checked;								
+				var $descuento 						= $contenedor_descuento.find("select[name='plan_pago[descuento_id]'] option:selected");
+				var monto_reconocido 				= $contenedor_descuento.find("input[name='plan_pago[monto_reconocido]']").val();
+				var $descripcion_monto_reconocido 	= $contenedor_descuento.find("textarea[name='plan_pago[descripcion_monto_reconocido]']");
+
+				var $matricula = $contenedor_alumno.find("input.matricula");
+				var $repactacion = $contenedor_alumno.find("input.repactacion");
+				
+				var matricula = $contenedor_descuento.find("input.matricula").val();
+				var repactacion	= parseInt($contenedor_descuento.find("input.repactacion").val());
+				
+				if( matricula_cobro_especial && ( isNaN(asignaturas) || asignaturas < 1 )) throw "Por favor, ingrese una cantidad adecuada de asignaturas propuestas.";
+				if( matricula_cobro_especial && incluye_normativa && ( isNaN(normativas) || normativas < 1) ) 	throw "Por favor, ingrese una cantidad adecuada de normativas propuestas."
+				if( ! pago_contado && descuento_aplicable && ! $descuento.val() ) throw "Por favor, seleccione un descuento, beca o beneficio.";
+				if( isNaN(monto_reconocido) || parseInt(monto_reconocido) < 0 ) throw "Por favor, ingrese un monto reconocido adecuado.";
+
+				switch( parseInt(tipo_matricula) ) {
+
+					/*	MATRICULAS PROFESIONALES PRESENCIALES	*/
+					case #{MatriculaPlan::PROFESIONAL_UN_SEMESTRE}:
+						// Cobro de asignaturas
+						arancel = arancel_2_sem_profesional;
+						if( asignaturas <= #{@max_cantidad_cobro_asignaturas_regular} ) {
+							/*	ATENTO A ESTE CAMBIO EN PRODUCCION	*/
+							arancel_resultante = parseInt(0.25 * arancel);
+						// Cobro semestre completo
+						} else {
+							arancel_resultante = parseInt(0.5 * arancel);
+						}
+						break;
+
+					case #{MatriculaPlan::PROFESIONAL_DOS_SEMESTRES}:
+						arancel 			= arancel_2_sem_profesional;
+						arancel_resultante 	= arancel_2_sem_profesional;
+						arancel_contado 	= arancel_2_sem_profesional_contado;						
+						break;
+
+					case #{MatriculaPlan::SALIDA_INTERMEDIA}:
+						arancel 			= arancel_salida_intermedia
+						arancel_resultante 	= arancel_salida_intermedia;		
+						arancel_contado 	= arancel_salida_intermedia_contado;									
+						break;
+
+					case #{MatriculaPlan::TERMINAL}:
+						// Cobro de asignaturas
+						arancel = arancel_2_sem_profesional;
+						if( asignaturas <= #{@max_cantidad_cobro_asignaturas_terminal} ) {
+							arancel_resultante = parseInt(#{@cobro_asignaturas_terminal_factor} * arancel);
+						// Cobro semestre completo
+						} else {
+							arancel_resultante = parseInt(0.5 * arancel);
+						}
+						break;
+
+					/*	MATRICULAS TECNICAS PRESENCIALES	*/
+					case #{MatriculaPlan::TECNICA_UN_SEMESTRE}:
+						// Cobro de asignaturas
+						arancel = arancel_2_sem_tecnico;
+						if( asignaturas <= #{@max_cantidad_cobro_asignaturas_regular} ) {
+							/*	ATENTO A ESTE CAMBIO EN PRODUCCION	*/
+							arancel_resultante = parseInt(0.25 * arancel);
+						// Cobro semestre completo
+						} else {
+							arancel_resultante = parseInt(0.5 * arancel);
+						}
+						break;
+
+					case #{MatriculaPlan::TECNICA_DOS_SEMESTRES}:
+						arancel 			= arancel_2_sem_tecnico;
+						arancel_resultante 	= arancel_2_sem_tecnico;
+						arancel_contado 	= arancel_2_sem_tecnico_contado;
+						break;
+
+					case #{MatriculaPlan::PRACTICA_TRABAJO_DE_TITULO}:
+						arancel 			= arancel_prac_trab_titulo
+						arancel_resultante 	= arancel_prac_trab_titulo;
+						arancel_contado 	= arancel_prac_trab_titulo_contado;
+						break;
+
+					/*	MATRICULAS DE DISTANCIA */
+					case #{MatriculaPlan::DISTANCIA_1_A_4_NIVEL}:
+						arancel 			= arancel_distancia_1_4
+						arancel_resultante 	= arancel_distancia_1_4;
+						break;
+
+					case #{MatriculaPlan::DISTANCIA_5_A_8_NIVEL}:
+						arancel 			= arancel_distancia_5_8
+						arancel_resultante 	= arancel_distancia_5_8;
+						break
+
+					case #{MatriculaPlan::DISTANCIA_SALIDA_INTERMEDIA_COMPLETA}:
+						arancel 			= arancel_distancia_1_4;
+						arancel_resultante 	= parseInt(#{@distancia_cobro_semestre_factor} * arancel);
+						break;
+
+					case #{MatriculaPlan::DISTANCIA_TERMINAL_COMPLETA}:
+						arancel 			= arancel_distancia_5_8;
+						arancel_resultante 	= parseInt(#{@distancia_cobro_semestre_factor} * arancel);
+						break;
+				}
+
+				// Excension de pagos
+				if ( exenta_arancel ) arancel_resultante = arancel = 0;
+				if ( exenta_matricula ) matricula = 0;
+				$matricula.val(matricula)
+
+				$arancel.val(arancel_resultante);	
+
+				// Verificacion si es pago contado
+				var descuento_aplicado = 0;
+				var arancel_total = arancel_resultante;
+				if ( ! pago_contado ) {
+					if ( descuento_aplicable ) {
+						porcentaje =  parseInt($descuento.attr("data-porcentaje"));
+						descuento_aplicado = parseInt((arancel_resultante*porcentaje)/100);
+						arancel_total = arancel_resultante - descuento_aplicado;
+					} else
+						// Se deshabilita la beca, beneficio o descuento
+						$descuento.parents("select").attr("disabled", "disabled").val("");
+				} else {
+					descuento_aplicado = arancel - arancel_contado;
+					arancel_total = arancel_contado;
+
+					// Se deshabilita la beca, beneficio o descuento
+					$descuento.parents("select").attr("disabled", "disabled").val("");
+				}
+
+				if(arancel_total - monto_reconocido < 0) throw "Por favor, ingrese un monto reconocido adecuado.";
+
+				$descripcion_monto_reconocido.attr("disabled", (monto_reconocido == 0)).css("border-color", "silver");
+				arancel_total -= monto_reconocido;
+
+				// Verificación del monto por concepto de normativas
+				if( matricula_cobro_especial ) {
+					var cobro_normativas = 0;
+					if( incluye_normativa ) {
+						if( normativas > #{@max_cantidad_normativas} ) throw "No se pueden proponer mas de #{@max_cantidad_normativas} normativas";
+						cobro_normativas =  parseInt(#{@cobro_normativas_factor} * normativas * arancel);
+						$cobro_normativas.val(cobro_normativas);
+					}
+					$cobro_asignaturas.val(arancel_resultante);
+				}				
+
+				$descuento_aplicado.val(descuento_aplicado);				
+				$arancel_total.val(arancel_total);
+
+				//REPACTACIONES
+
+				var arancel_repactado = repactacion;
+				var arancel_final = arancel_total + arancel_repactado;
+
+				$arancel_repactado.val(arancel_repactado);
+				$arancel_final.val(arancel_final);
+
+				//FIN REPACTACIONES
+
+				$ro.attr("readonly", "readonly");
+				$ros.not("option:selected").attr("disabled", "disabled");
+				$incluye_normativa.attr("disabled", "disabled");
+				$pago_contado.attr("disabled", "disabled");
+
+				$contenedor_descuento.find("a.modificar-contenido").show();
+
+				habilitar_plan_pago_matricula( matricula );
+				habilitar_plan_pago_arancel( arancel_final );
+				habilitar_plan_pago_normativa( cobro_normativas );
+				formulario_integro();
+				mascaraDinero();
+
+			} catch(e) {
+				alertify.error(e);
+				formulario_no_integro();
+				$p1.val("0");
+				return;
+			}
+
+		})
+
+		$contenedor_descuento.on("click", "a.modificar-contenido", function(e) {
+			e.preventDefault();
+
+			/* 	Remover "value"
+			*
+			*	|tipo_matricula, descripcion_monto_reconocido, tipo_beneficio|
+			*/
+			$contenedor_descuento.find(":input.vn").val("");
+
+			/* 	Dejar "value" en 0
+			*
+			*	|asignaturas_propuestas, cobro_semestral_asignaturas, normativas_propuestas|
+			*	|cobro_normativas, descuento_aplicado, monto_reconocido, arancel_total|
+			* 	|arancel, normativa, descuento_aplicado, arancel_total| (:hiddens)
+			*/
+			$contenedor_descuento.find(":input.v0").val(0);
+
+			/* 	Quitar "readonly"
+			*
+			*	|tipo_matricula, asignaturas_propuestas, normativas_propuestas|
+			*	|tipo_beneficio, monto_reconocido, descripcion_monto_reconocido|
+			*/
+			$contenedor_descuento.find(":input.ro").removeAttr("readonly");
+
+			/* 	
+			*	|tipo_matricula, tipo_beneficio|
+			*/
+			$contenedor_descuento.find("option.ros, select.descuento").removeAttr("disabled");
+			$contenedor_descuento.find("select.tipo-matricula option").not(".selectable").attr("disabled", "disabled");
+			$contenedor_descuento.find("input:checkbox").removeAttr("disabled").removeAttr("checked");
+			$contenedor_descuento.find("div.cobro-asignaturas").not("div.template").remove();
+
+			limpiar_plan_pago_matricula();
+			limpiar_plan_pago_arancel();
+			limpiar_plan_pago_normativa();
+			formulario_no_integro();
+		})
+
+		$contenedor_descuento.on("change", ":input.pago-contado", function() {
+			var checkeado = this.checked;
+			var $descuento = $contenedor_descuento.find("select[name='plan_pago[descuento_id]']");
+			$descuento.attr("disabled", checkeado);
+			
+			if( checkeado ) $descuento.val("");
+		})
+		// 
+		$contenedor_descuento.on("change", "select[name='plan_pago[tipo]']", function() {
+			var valor = $(this).val();
+			$contenedor_descuento.find("select[name='plan_pago[descuento_id]']").val("").removeAttr("disabled");
+			var $pago_contado = $contenedor_descuento.find(":checkbox.pago-contado");
+			$pago_contado.attr("disabled", ($.inArray(parseInt(valor), #{MatriculaPlan::MATRICULAS_AFECTAS_PAGO_CONTADO.to_s}) == -1));
+			$pago_contado.removeAttr("checked");	
+			$contenedor_descuento.find("div.cobro-asignaturas").not("div.template").remove();
+
+			if( $.inArray(parseInt(valor), #{MatriculaPlan::MATRICULAS_AFECTAS_COBROS_ESPECIALES.to_s}) != -1 ) {
+				// Mostrar o no mostrar el cobro especial de asignaturas
+				var $template = $contenedor_descuento.find("div.cobro-asignaturas.template").clone(true, true);
+				/* |Asignaturas propuestas, normativas propuestas|
+				 */
+				$template.removeClass("template").find(":input.cea").removeAttr("disabled");
+				$contenedor_descuento.find("> div.control-group:first").after($template.show());
+			}
+
+		})
+
+		function formulario_integro() { $contenedor_descuento.find("input.integridad-descuentos").val("OK"); }
+		function formulario_no_integro() { $contenedor_descuento.find("input.integridad-descuentos").removeAttr("value"); }
+
+	})
+

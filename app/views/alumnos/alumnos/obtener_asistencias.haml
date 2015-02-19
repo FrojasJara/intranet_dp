@@ -1,0 +1,152 @@
+#obtener-asistencia
+    :css
+        col.codigo { width: 65px; }
+        col.asignatura {}
+        col.seccion { width: 65px; }
+        col.estado { width: 65px; }
+        col.asistencia { width: 80px; }
+        col.inasistencia { width: 80px; }
+        col.justificadas { width: 80px; }
+        table.table table.table th { background-color: #DE4945 !important; }
+        .modal-body ol { list-style: decimal; padding-left: 15px; }
+        tr.totales { border-top: 2px solid black; border-bottom: 2px solid black; }
+        tr.totales td { font-weight: bold; }
+        .modal { 
+            overflow-y: auto !important;
+            width: 600px;
+        }
+        div.modal-backdrop {
+            background-color: black !important;
+        }
+        .close {
+            opacity: 0.5 !important;
+        }
+
+        col.clase { width: 50px; }
+        col.estado-clase { width: 71px; }
+        col.horas-asistidas { width: 40px; }
+        col.horas-ausentadas { width: 40px; }
+        col.horas-justificadas { width: 40px; }
+        col.estado-asistencia { width: 71px; }
+
+        td > i { display: none !important; }
+        tr.realizada td { background-color: #CFC !important; border-bottom: 1px solid #33cc33 !important; }
+        tr.suspendida td { background-color: #ffcccc !important; border-bottom: 1px solid #DE4945 !important; }
+        td.asistida i.icon-ok { display: inline-block !important; }
+        td.ausentada i.icon-remove { display: inline-block !important; }
+        td.justificada i.icon-asterisk { display: inline-block !important; }
+
+        #asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::APROBADA} { background-color: #D6FFCA; }
+        #asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::REPROBADA} { background-color: #FFEBEA; }
+        #asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::ABANDONADA} { color: #A2A2A2; }
+        #asignaturas tr.#{get_name AlumnoInscritoSeccion, "ESTADOS", AlumnoInscritoSeccion::INSCRITA} td {  }
+
+    .page-header
+        %h1
+            Asistencias registradas en el 
+            = @periodo_seleccionado.nombre
+    = render "alumnos/alumnos/partials/seleccion_plan_periodo"
+    = render "alumnos/alumnos/partials/informacion_tabulada_alumno"
+    
+    - if @existen_datos        
+        %table.table.table-condensed#asignaturas
+            %colgroup
+                %col.codigo
+                %col.asignatura
+                %col.seccion
+                %col.estado
+                %col.asistencia
+                %col.inasistencia
+                %col.justificadas
+                %col.opciones
+            %thead
+                %tr
+                    %th.txCenter Código
+                    %th.txLeft Asignatura
+                    %th.txCenter Sección
+                    %th.txLeft Estado
+                    %th.txCenter Asis.
+                    %th.txCenter Inasis.
+                    %th.txCenter Justif.
+                    %th.txLeft.not-print
+            %tbody  
+                - @asistencias.each do |item|
+                    - estado = get_name AlumnoInscritoSeccion, "ESTADOS", item[:inscripcion].estado
+                    %tr{:class => estado}
+                        %td.txCenter= item[:asignatura].codigo
+                        %td.txLeft.nombre
+                            %i.icon-ok
+                            %i.icon-remove
+                            %i.icon-ban-circle   
+                            = item[:asignatura].nombre
+                        %td.txCenter= item[:seccion].numero
+                        %td.txLeft= estado
+                        %td.txCenter
+                            = item[:inscripcion].h_asistidas
+                            %strong= "(#{item[:inscripcion].porcentaje_horas_asistidas}%)"
+                        %td.txCenter
+                            = item[:inscripcion].horas_ausentadas
+                            %strong= "(#{item[:inscripcion].porcentaje_horas_ausentadas}%)"
+                        %td.txCenter
+                            = item[:inscripcion].horas_justificadas
+                            %strong= "(#{item[:inscripcion].porcentaje_horas_justificadas}%)"
+                        %td.txLeft.not-print
+                            %a{:href => "#modal#{item[:asignatura].id}", :data => {:toggle => "modal"}}
+                                %i.icon-list-alt
+                                Detalle
+                            .modal.hide{:id => "modal#{item[:asignatura].id}"}
+                                .modal-header
+                                    %button.close{:type => "button", :data => {:dismiss => "modal"}}
+                                        ×
+                                    %h3
+                                        Asistencia en 
+                                        %i= item[:asignatura].nombre
+                                .modal-body
+                                    %table.table.table-condensed
+                                        %colgroup
+                                            %col.clase
+                                            %col.estado-clase
+                                            %col.horas-asistidas
+                                            %col.horas-ausentadas
+                                            %col.horas-justificadas
+                                            %col.estado-asistencia
+                                        %thead
+                                            %tr
+                                                %th.txCenter # (HRS)
+                                                %th.txCenter Est. Cla.
+                                                %th.txCenter Asis.
+                                                %th.txCenter Inas.
+                                                %th.txCenter Just.
+                                                %th.txCenter Est. Asi.
+                                        %tbody
+                                            - item[:asistencias].each do |item2|
+                                                - estado_clase = get_name Clase, "ESTADOS", item2[:clase].estado
+                                                %tr{:class => "#{estado_clase}"}
+                                                    %td.txCenter= "#{item2[:clase].numero} (#{item2[:clase].horas})"
+                                                    %td.txCenter= estado_clase
+                                                    -# Solamente se ven las asistencias registradas
+                                                    %td.txCenter= (not item2[:registro].nil?) ? item2[:registro].horas_asistidas : nil
+                                                    %td.txCenter= (not item2[:registro].nil?) ? item2[:registro].horas_ausentadas : nil
+                                                    %td.txCenter= (not item2[:registro].nil?) ? item2[:registro].horas_justificadas : nil
+                                                    - estado_asistencia = (not item2[:registro].nil?) ? (get_name Asistencia, "ESTADOS", item2[:registro].estado) : nil
+                                                    %td{:class => "txCenter #{estado_asistencia}"}
+                                                        %i.icon-ok
+                                                        %i.icon-remove
+                                                        %i.icon-asterisk
+                                                        = estado_asistencia
+                                            %tr.totales
+                                                %td.txCenter= "#{item[:seccion].clases_realizadas} de #{item[:seccion].clases_planificadas}"
+                                                %td.txCenter
+                                                %td.txCenter
+                                                    = item[:inscripcion].horas_asistidas
+                                                    %strong= "(#{item[:inscripcion].porcentaje_horas_asistidas}%)"
+                                                %td.txCenter
+                                                    = item[:inscripcion].horas_ausentadas
+                                                    %strong= "(#{item[:inscripcion].porcentaje_horas_ausentadas}%)"
+                                                %td.txCenter
+                                                    = item[:inscripcion].horas_justificadas
+                                                    %strong= "(#{item[:inscripcion].porcentaje_horas_justificadas}%)"
+                                                %td.txCenter    
+
+    - else
+        = notificaciones 

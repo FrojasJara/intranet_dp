@@ -1,0 +1,131 @@
+.page-header
+    .titulo{style: 'float: left; display: inline'}
+        %h1{style: 'margin-bottom: 0'}
+            Resumen Clasificado Ingreso Caja Diaria
+        %h2{style: 'margin-bottom: 0'}
+            = @institucion.nombre+" "
+            = @sede.nombre+" "
+            - if @modalidad.to_i == InstitucionSedePlan::PRESENCIAL
+                Presencial
+            - else
+                Distancia
+            = @f_i
+            = "- #{@f_t}" unless @f_t.blank?
+    .botones{:style => "float: right;"}
+        %a.imprimir-resumen.not-print.btn.btn-info.impresion{:href => "#"}
+            %i.icon-white.icon-print
+            Imprimir Resumen
+    .clearfix
+
+%table.table.table-condensed
+    %thead
+        %tr
+            %th Carrera
+            %th Efectivo
+            %th Cheque al día
+            %th Cheque a fecha
+            %th Redbank
+            %th Deposito
+            %th Sub Total 1
+            %th Cuotas
+            %th Matriculas
+            %th Titulos
+            %th Certificados
+            %th Intereses
+            %th Sub Total 2
+    %tfoot
+        %tr
+            %th Totales
+            %th.txRight= number_to_currency @datos.map{|x| x[:efectivo].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:cheque_dia].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:cheque_fecha].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:tarjetas].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:depositos].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:total]}.inject(:+)
+
+            %th.txRight= number_to_currency @datos.map{|x| x[:cuotas].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:matriculas].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:titulos].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:certificados].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:intereses].to_i}.inject(:+)
+            %th.txRight= number_to_currency @datos.map{|x| x[:total2].to_i}.inject(:+)
+    %tbody
+        - @datos.each do |i|
+            %tr
+                %td= i[:carrera]
+                %td.txRight= number_to_currency i[:efectivo].to_i
+                %td.txRight= number_to_currency i[:cheque_dia].to_i
+                %td.txRight= number_to_currency i[:cheque_fecha].to_i
+                %td.txRight= number_to_currency i[:tarjetas].to_i
+                %td.txRight= number_to_currency i[:depositos].to_i
+                %td.txRight= number_to_currency i[:total]
+                %td.txRight= number_to_currency i[:cuotas].to_i
+                %td.txRight= number_to_currency i[:matriculas].to_i
+                %td.txRight= number_to_currency i[:titulos].to_i
+                %td.txRight= number_to_currency i[:certificados].to_i
+                %td.txRight= number_to_currency i[:intereses].to_i
+                %td.txRight= number_to_currency i[:total2]
+        /
+        / - @items.each do |i|
+        /   = i.inspect
+%br
+%table#lista.not-print.table.table-condensed
+    %thead
+        %tr
+            %th Boleta
+            %th Tipo
+            %th Rut
+            %th Nombre
+            %th Carrera
+            %th.sorting_1 Fh. Pago
+            %th Tipo Pago
+            %th Forma Pago
+            %th Serie Ch./Dep
+            %th Número Cuota
+            %th Monto
+            %th Interés
+            %th Saldo
+            %th Fh. Transación
+            %th Pagaré
+            %th Fh. Vencimiento
+            %th Ejecutivo
+            %th.txCenter Sede Plan
+    %tbody
+        - @abonos.each do |item|
+            - abono = item[:abono]
+            %tr
+                %td= item[:numero]
+                %td B.E.
+                %td= abono.alumno_plan_estudio.blank? ? abono.documento_venta.rut : abono.alumno_plan_estudio.alumno.datos_personales.rut
+                %td= abono.alumno_plan_estudio.blank? ? abono.documento_venta.nombre_completo : abono.alumno_plan_estudio.alumno.datos_personales.nombres+" "+abono.alumno_plan_estudio.alumno.datos_personales.apellidos
+                %td= abono.alumno_plan_estudio.blank? ? abono.documento_venta.carrera : abono.alumno_plan_estudio.institucion_sede_plan.plan_estudio.nombre_completo
+                %td= l abono.documento_venta.fecha_emision, format: :fecha
+                %td= item[:tipo_abono].blank? ? get_name(PagoComprometido, :CENTROS_COSTOS, abono.pago_comprometido.centro_costo) : item[:tipo_abono].titleize
+                %td= @medios_pagos_array.select{|mp| mp[:id] == abono.medio_pago_id}.first[:nombre]
+                %td= abono.numero_documento
+                %td= abono.pago_comprometido.blank? ? "-" : abono.pago_comprometido.numero_cuota
+                %td= abono.monto
+                %td= abono.interes
+                %td= abono.pago_comprometido.blank? ? "-" : abono.pago_comprometido.saldo 
+                %td= l abono.created_at
+                %td= value abono.pago_comprometido.pagare, :numero unless abono.pago_comprometido.blank?
+                %td= value abono.pago_comprometido, :fecha_vencimiento unless abono.pago_comprometido.blank?
+                %td= abono.ejecutivo_matriculas.datos_personales.iniciales
+                %td.txCenter
+                    - unless item[:documento_venta].alumno_plan_estudio.blank?
+                        = get_name(Sede, :SEDES, item[:documento_venta].alumno_plan_estudio.institucion_sede_plan.institucion_sede.sede_id)
+                    - else
+                        = get_name(Sede, :SEDES, item[:documento_venta].institucion_sede.sede_id)
+= datatable_src
+= datatable 'lista', {nosort: true}   
+
+:javascript
+    $(function(){
+        $(".imprimir-todo").click(function(){
+            $("#lista").addClass("not-print");
+            
+        })
+        $(".imprimir-resumen").click(function(){
+            $("#lista").removeClass("not-print");
+        })
+    })

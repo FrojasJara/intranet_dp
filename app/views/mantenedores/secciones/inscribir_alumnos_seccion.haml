@@ -1,0 +1,169 @@
+.sectionHeader
+    %ul.breadcrumb
+        %li
+            %a{:href => "#"}  
+                Asignaturas
+                %span.divider /
+        %li
+            %a{:href => "#"}  
+                asignatura
+                %span.divider /
+        %li
+            %a{:href => "#"}  
+                seccion
+                %span.divider /
+
+        %li.active
+            %a{:href => "#"}  
+                Inscribir Alumnos 
+
+%div.span10{:style => "margin-top:20px"}
+    %table.table.table-striped.table-bordered{:id => 'asignaturaSecciones'}
+        %thead
+            %tr
+                %th Nombre
+                %th Periodo
+                %th Numero
+                %th Cupos
+                %th Propuestos
+                %th Inscritos
+                %th Estado
+    - if false   
+        %tbody
+            - @items.each do |i|
+                %tr
+                    %td= i.id
+                    %td 
+                        = i.periodo.nombre
+                    %td
+                        = i.numero 
+                    %td
+                        = i.cupos
+                    %td
+                        = i.propuestos
+                    %td
+                        = i.inscritos 
+                    %td.dropdown
+                        %a.dropdown-toggle{:href => '', :data => {:toggle => "dropdown"}} 
+                            = get_name Seccion, :ESTADOS, i.estado
+                            %b.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a{:href => "abrir_secciones_path(i[:idAsignatura])"}
+                                    %i.icon-user
+                                    Inscribir Alumnos
+                            %li
+                                %a{:href => "detalle_asignatura_secciones_path(i[:idAsignatura])"}
+                                    %i.icon-resize-full
+                                    Fusionar
+                            %li.divider
+                            %li
+                                %a{:href => "editar_seccion_path(i[:idAsignatura])"}
+                                    %i.icon-pencil
+                                    Editar                             
+/= datatables
+= render(:partial => "partials/datatables/datatable", :locals => {:nombreTabla => "asignaturaSecciones" })
+:css
+    table.table thead th{color:#333 !important;}
+    td .dropdown-menu { left: 58px !important; top: 34px !important; }
+    td.dropdown.open .dropdown-toggle { background-color: transparent !important; color: #005580 !important; }
+
+
+- if false
+    .sectionHeader
+        %h1= "Alumnos de la seccion #{@seccion.asignatura.nombre} seccion # #{@seccion.numero} "
+
+    :javascript
+        $(document).ready(function(){ 
+            $('#listaAlumnos').typeahead({
+                source : #{@items}
+            });
+            $("#listaAlumnos").Rut();
+
+            $("#buscarAlumno").live("click",function(){
+                var rut = $("#listaAlumnos").val();
+
+                if( rut == ""){
+
+                    $('#errorAlumnoRutMsg').show();
+                
+                }else{
+                        
+                    $.post(
+
+                        "#{obtener_planes_por_institucion_sede_path}",
+                        {
+                            "rut" : rut
+                        },
+                        function(data) {
+                        /*Response*/
+                         }       
+                        );
+
+                    $('#detallesAlumno').modal();
+                }
+            });
+
+            $('#detallesAlumno').on('shown', function () {
+                console.log($("#listaAlumnos").val());
+            });
+
+            $('#detallesAlumno').on('hidden', function () {
+                $("#listaAlumnos").val("");
+            });
+
+        });  
+    %form  
+        %fieldset
+            %legend Agregar alumnos a la sección
+            %br
+            %input.input-xlarge{:type => "text", "data-provide" => "typeahead", :id => "listaAlumnos"}
+            %div.alert.alert-error{:id => "errorAlumnoRutMsg", :style => "display:none;"}
+                %button.close{"data-dismiss" =>  "alert", "data-target" => "#errorAlumnoRutMsg"} x
+                %p Debe completar el campo rut!
+
+    %p
+        %button.btn.btn-primary.btn-large{:id => "buscarAlumno"} Buscar Alumno
+
+            
+        -#= link_to 'Agregar Sección', new_mantenedores_seccione_path, :class => 'btn'
+    %br 
+    %br
+    %form{:method => "post"}
+        %button.btn.btn-success Inscribir alumnos
+        %br
+        %table.table
+            %thead
+                %tr
+                    %th ID
+                    %th Rut
+                    %th Nombre
+                    %th Carrera
+                    %th Acciones
+            %tbody
+                - @alumnos.each do |i|
+                    %tr
+                        %td= i.id
+                        %td= i.rut
+                        %td= i.nombre
+                        %td= "carrera" #i.alumno.alumno_plan_estudio.plan_estudio.nombre 
+                        %td
+                            %input{:type => "checkbox", :name => "alumnos[id][]", :value => i.id }
+        
+
+        %div.modal.hide.fade{:id => "detallesAlumno" , :style => "display:none;" }
+            %div.modal-header
+                %button.close{"data-dismiss" => "modal", "data-target" => "#detallesAlumno"} x
+                %h3 Detalles Alumno
+            %div.modal-body
+                %p 
+                    %strong Nombre
+                %p
+                    %strong Edad
+                %p
+                    %strong Carrera
+                %p
+                    %strong Periodo
+            %div.modal-footer
+                %button.btn.btn-danger{"data-dismiss" => "modal", "data-target" => "#detallesAlumno"} Cancelar
+                %a.btn.btn-primary{:id => "btnGuardarInscrpcion", :href => "#" } Inscribir en asignatura
